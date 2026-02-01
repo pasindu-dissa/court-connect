@@ -39,7 +39,7 @@ class AppTheme {
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primary,
         secondary: AppColors.accent,
-        surface: Color(0xFF1E1E1E), // Darker Surface
+        surface: Color.fromARGB(255, 54, 54, 54), // Darker Surface
         onSurface: Colors.white,
       ),
       appBarTheme: const AppBarTheme(
