@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           child: const CircleAvatar(
                             radius: 26,
-                            backgroundImage: NetworkImage("https://i.pravatar.cc/300"),
+                            backgroundImage: NetworkImage("https://images.unsplash.com/photo-1588516903720-8ceb67f9ef84?q=80&w=300&auto=format&fit=crop"),
                           ),
                         ),
                         const SizedBox(width: 14),
