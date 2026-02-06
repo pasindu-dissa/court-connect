@@ -15,6 +15,11 @@ app.use(express.json()); // Allows server to read JSON data
 
 // 3. Routes
 app.use('/api/users', require('./routes/userRoutes'));
+<<<<<<< Updated upstream
+=======
+// Add this where you require routes
+app.use('/api/matchmaking', require('./routes/matchmakingRoutes'));
+>>>>>>> Stashed changes
 
 // 4. Base Route
 app.get('/', (req, res) => {
