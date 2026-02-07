@@ -16,6 +16,8 @@ const express = require('express');
     // 3. Routes
     app.use('/api/users', require('./routes/userRoutes'));
     app.use('/api/matchmaking', require('./routes/matchmakingRoutes'));
+    app.use("/api/scores", require("./routes/scoreRoutes"));
+
 
     // 4. Base Route
     app.get('/', (req, res) => {

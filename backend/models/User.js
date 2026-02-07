@@ -39,6 +39,21 @@ const userSchema = mongoose.Schema(
       matchesPlayed: { type: Number, default: 0 },
       wins: { type: Number, default: 0 },
       points: { type: Number, default: 0 } // For the Leaderboard
+    },
+
+    // ---------------- GAMIFICATION ----------------
+    badges: {
+      type: [String],
+      default: []
+    },
+
+    lastPlayedDate: {
+      type: Date
+    },
+
+    streak: {
+      type: Number,
+      default: 0
     }
   },
   {
