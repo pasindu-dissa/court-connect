@@ -36,7 +36,7 @@ class ProfileModal extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 35,
-                    backgroundImage: const NetworkImage("https://i.pravatar.cc/300"),
+                    backgroundImage: const NetworkImage("https://images.unsplash.com/photo-1588516903720-8ceb67f9ef84?q=80&w=300&auto=format&fit=crop"),
                   ),
                   Positioned(
                     bottom: 0,
