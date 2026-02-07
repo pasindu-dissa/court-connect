@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import 'screens/home_screen.dart';
-// Import the new Booking Screen
 import '../../booking/ui/screens/booking_screen.dart';
+import '../../matchmaking/ui/screens/matchmaking_screen.dart'; // Import this
 
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
@@ -16,15 +16,14 @@ class _MainWrapperState extends State<MainWrapper> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const BookingScreen(), // <--- Replaced placeholder with Real Screen
-    const Center(child: Text("Connect Screen")),
+    const BookingScreen(),
+    const MatchmakingScreen(), // <--- LINKED HERE (Index 2)
     const Center(child: Text("Leaderboard Screen")),
     const Center(child: Text("Profile Screen")),
   ];
 
-// ... (Rest of the file remains exactly the same as the previous step) ...
-// Copy the rest of the file from the previous "Navigation Bar" response.
-// Do not change the logic below this line.
+  // ... (Keep the rest of the build() and _buildNavItem() code exactly as it was) ...
+  // The bottomNavigationBar code does not need to change.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,7 +72,14 @@ class _MainWrapperState extends State<MainWrapper> {
             Icon(icon, color: isSelected ? AppColors.primary : Colors.white.withOpacity(0.8), size: 26),
             if (isSelected) ...[
               const SizedBox(width: 8),
-              Text(label, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14)),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+              ),
             ]
           ],
         ),
