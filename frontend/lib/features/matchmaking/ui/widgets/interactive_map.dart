@@ -119,7 +119,7 @@ class _InteractiveMapState extends State<InteractiveMap> with SingleTickerProvid
 
         // 3. "Scanning Area" Text
         Positioned(
-          top: 20,
+          top: 100,
           left: 0,
           right: 0,
           child: Center(
@@ -138,7 +138,7 @@ class _InteractiveMapState extends State<InteractiveMap> with SingleTickerProvid
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    "Scanning area for ${widget.isTeam ? 'Teams' : 'Players'}...",
+                    "Scanning area for matches...",
                     style: const TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ],
