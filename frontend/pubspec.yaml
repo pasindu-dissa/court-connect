@@ -40,6 +40,9 @@ dependencies:
   # For formatting dates nicely
   intl: ^0.18.1
 
+  # Google maps
+  google_maps_flutter: ^2.5.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
