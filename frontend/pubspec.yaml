@@ -43,6 +43,14 @@ dependencies:
   # Google maps
   google_maps_flutter: ^2.5.0
 
+  # Networking
+  http: ^1.1.0
+
+  # Firebase Authentication
+  firebase_core: ^2.32.0 
+  firebase_auth: ^4.20.0
+  google_sign_in: ^6.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

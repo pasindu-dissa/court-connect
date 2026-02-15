@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart'; // Add this
 import 'core/theme/app_theme.dart';
-import 'features/auth/ui/screens/welcome_screen.dart';
+import 'features/auth/ui/screens/login_screen.dart'; // Start with Login
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Initialize Firebase
+  
   runApp(const CourtConnectApp());
 }
 
@@ -19,8 +23,8 @@ class CourtConnectApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
-          themeMode: currentMode, // This listens to the toggle
-          home: const WelcomeScreen(),
+          themeMode: currentMode,
+          home: const LoginScreen(), // Start at Login
         );
       },
     );
