@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const userSchema = mongoose.Schema(
   {
@@ -15,6 +15,13 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    age: { type: Number },
+
+    district: { type: String },
+
+    city: { type: String },
+    // 'location' field already exists, we will map "City, District" to it.
+    
     profileImage: {
       type: String,
       default: "",
@@ -28,37 +35,41 @@ const userSchema = mongoose.Schema(
     skills: [
       {
         sport: { type: String, required: true },
-        level: { type: String, enum: ['Beginner', 'Intermediate', 'Pro'], default: 'Beginner' }
-      }
+        level: {
+          type: String,
+          enum: ["Beginner", "Intermediate", "Pro"],
+          default: "Beginner",
+        },
+      },
     ],
     // Example: ["Mon-Morning", "Sat-Evening"]
-    availability: [String], 
-    
+    availability: [String],
+
     // Stats for Leaderboard
     stats: {
       matchesPlayed: { type: Number, default: 0 },
       wins: { type: Number, default: 0 },
-      points: { type: Number, default: 0 } // For the Leaderboard
+      points: { type: Number, default: 0 }, // For the Leaderboard
     },
 
     // ---------------- GAMIFICATION ----------------
     badges: {
       type: [String],
-      default: []
+      default: [],
     },
 
     lastPlayedDate: {
-      type: Date
+      type: Date,
     },
 
     streak: {
       type: Number,
-      default: 0
-    }
+      default: 0,
+    },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt
-  }
+  },
 );
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);
