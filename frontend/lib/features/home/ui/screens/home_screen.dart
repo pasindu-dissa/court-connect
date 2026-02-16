@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:async';
 import '../../../../core/constants/app_colors.dart';
-import '../widgets/profile_modal.dart'; // Import Modal
-import 'notifications_screen.dart'; // Import Screen
+import '../../../../core/services/user_provider.dart';
+import '../widgets/profile_modal.dart';
+import 'notifications_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,20 +14,24 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // ... (Auto Scroll Logic remains exactly the same as before) ...
   final PageController _pageController = PageController(viewportFraction: 0.85);
   int _currentPage = 0;
   Timer? _timer;
+
   final List<String> _bannerImages = [
-    "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800&auto=format&fit=crop", 
-    "https://images.unsplash.com/photo-1626224583764-847890e058f5?q=80&w=800&auto=format&fit=crop", 
-    "https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=800&auto=format&fit=crop", 
+    "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800",
+    "https://images.unsplash.com/photo-1626224583764-847890e058f5?q=80&w=800",
+    "https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=800",
   ];
 
   @override
   void initState() {
     super.initState();
     _startAutoScroll();
+    // Ensure user data is loaded if not already
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserProvider>(context, listen: false).loadUser();
+    });
   }
 
   void _startAutoScroll() {
@@ -50,23 +56,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Access User Data
+    final userProvider = Provider.of<UserProvider>(context);
+    final user = userProvider.user;
+    
+    // Default values if loading or null
+    final String userName = user?['name'] ?? "Player";
+    final String userImage = user?['profileImage'] ?? "https://i.pravatar.cc/300"; // Fallback image
+
     return Scaffold(
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // 1. Updated Header with Interactions
+          // 1. Header
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(24, 60, 24, 20),
             sliver: SliverToBoxAdapter(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Left: Profile (Clickable)
                   GestureDetector(
                     onTap: () {
                       showModalBottomSheet(
                         context: context,
-                        backgroundColor: Colors.transparent, // Important for rounded corners
+                        backgroundColor: Colors.transparent,
                         isScrollControlled: true,
                         builder: (context) => const ProfileModal(),
                       );
@@ -79,9 +92,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             border: Border.all(color: Theme.of(context).cardColor, width: 2),
                             boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8)],
                           ),
-                          child: const CircleAvatar(
+                          child: CircleAvatar(
                             radius: 26,
-                            backgroundImage: NetworkImage("https://images.unsplash.com/photo-1588516903720-8ceb67f9ef84?q=80&w=300&auto=format&fit=crop"),
+                            backgroundImage: NetworkImage(userImage),
+                            onBackgroundImageError: (_, __) => const Icon(Icons.person), // Handle broken URLs
                           ),
                         ),
                         const SizedBox(width: 14),
@@ -89,21 +103,18 @@ class _HomeScreenState extends State<HomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text("Welcome back,", style: TextStyle(color: Colors.grey, fontSize: 13)),
-                            Text("Alex Johnson", style: TextStyle(color: Theme.of(context).textTheme.titleLarge?.color, fontWeight: FontWeight.bold, fontSize: 18)),
+                            userProvider.isLoading 
+                              ? const SizedBox(width: 100, height: 20, child: LinearProgressIndicator())
+                              : Text(userName, style: TextStyle(color: Theme.of(context).textTheme.titleLarge?.color, fontWeight: FontWeight.bold, fontSize: 18)),
                           ],
                         ),
                       ],
                     ),
                   ),
                   
-                  // Right: Notification (Clickable)
+                  // Notification Icon
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const NotificationsScreen()),
-                      );
-                    },
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())),
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
@@ -114,18 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Stack(
                         children: [
                           Icon(Icons.notifications_none_rounded, size: 26, color: Theme.of(context).iconTheme.color),
-                          Positioned(
-                            right: 0,
-                            top: 0,
-                            child: Container(
-                              width: 10, height: 10,
-                              decoration: const BoxDecoration(
-                                color: AppColors.error,
-                                shape: BoxShape.circle,
-                                border: Border.fromBorderSide(BorderSide(color: Colors.white, width: 2)),
-                              ),
-                            ),
-                          )
+                          Positioned(right: 0, top: 0, child: Container(width: 10, height: 10, decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle, border: Border.fromBorderSide(BorderSide(color: Colors.white, width: 2))))),
                         ],
                       ),
                     ),
@@ -135,34 +135,25 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // ... (Rest of the body remains identical to previous code: Banners, Grid, Courts) ...
-          // Just paste the Banners, Sports Grid, and Popular Courts sections here from the previous file.
-          // For brevity, I assume you kept the previous body code.
-          
+          // ... (Rest of body: Banners, Grid, Courts - Same as before)
+          // [Paste the Slider and Grid code from previous versions here to keep it complete]
+          // I will include just the Slider for brevity, assuming you keep the rest.
            SliverToBoxAdapter(
             child: SizedBox(
               height: 180,
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: _bannerImages.length,
-                onPageChanged: (int index) {
-                  setState(() => _currentPage = index);
-                },
+                onPageChanged: (int index) => setState(() => _currentPage = index),
                 itemBuilder: (context, index) {
                   return Container(
                     margin: const EdgeInsets.only(right: 16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
                       image: DecorationImage(image: NetworkImage(_bannerImages[index]), fit: BoxFit.cover),
-                      //boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.2), blurRadius: 15, offset: const Offset(0, 8))],
                     ),
                     child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        gradient: LinearGradient(
-                            begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                            colors: [Colors.transparent, Colors.black.withOpacity(0.7)]),
-                      ),
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(24), gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withOpacity(0.7)])),
                       padding: const EdgeInsets.all(20),
                       alignment: Alignment.bottomLeft,
                       child: const Text("Summer Tournament\nRegistration Open! 🏆", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
@@ -172,6 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+          
           const SliverToBoxAdapter(child: SizedBox(height: 30)),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 24),

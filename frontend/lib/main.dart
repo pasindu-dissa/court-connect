@@ -1,9 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart'; // Add this package
 import 'core/theme/app_theme.dart';
-import 'features/auth/ui/screens/welcome_screen.dart';
+import 'features/auth/ui/screens/login_screen.dart';
+import 'core/services/user_provider.dart';
+import 'features/home/ui/main_wrapper.dart'; // Import Wrapper
+import 'core/services/auth_service.dart';
 
-void main() {
-  runApp(const CourtConnectApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()..loadUser()),
+      ],
+      child: const CourtConnectApp(),
+    ),
+  );
 }
 
 class CourtConnectApp extends StatelessWidget {
@@ -19,8 +34,9 @@ class CourtConnectApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
-          themeMode: currentMode, // This listens to the toggle
-          home: const WelcomeScreen(),
+          themeMode: currentMode,
+          // Check if user is already logged in via Firebase
+          home: AuthService().currentUser != null ? const MainWrapper() : const LoginScreen(),
         );
       },
     );
