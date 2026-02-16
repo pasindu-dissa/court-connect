@@ -1,75 +1,40 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const userSchema = mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
+    firebaseUid: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    profileImage: { type: String, default: "" },
     age: { type: Number },
-
     district: { type: String },
-
     city: { type: String },
-    // 'location' field already exists, we will map "City, District" to it.
+    location: { type: String, default: "Colombo" },
     
-    profileImage: {
-      type: String,
-      default: "",
+    // --- ROLE MANAGEMENT ---
+    // Change this manually in MongoDB to 'court_owner' for specific users
+    role: { 
+      type: String, 
+      enum: ['player', 'court_owner', 'admin'], 
+      default: 'player' 
     },
-    // --- MATCHMAKING FIELDS ---
-    location: {
-      type: String, // e.g., "Colombo"
-      default: "Colombo",
-    },
-    // Example: [{ sport: "Tennis", level: "Pro" }, { sport: "Cricket", level: "Beginner" }]
+
+    // Player specific fields
     skills: [
       {
-        sport: { type: String, required: true },
-        level: {
-          type: String,
-          enum: ["Beginner", "Intermediate", "Pro"],
-          default: "Beginner",
-        },
-      },
+        sport: { type: String },
+        level: { type: String, enum: ['Beginner', 'Intermediate', 'Pro'], default: 'Beginner' }
+      }
     ],
-    // Example: ["Mon-Morning", "Sat-Evening"]
-    availability: [String],
-
-    // Stats for Leaderboard
+    availability: [String], 
     stats: {
       matchesPlayed: { type: Number, default: 0 },
       wins: { type: Number, default: 0 },
-      points: { type: Number, default: 0 }, // For the Leaderboard
-    },
-
-    // ---------------- GAMIFICATION ----------------
-    badges: {
-      type: [String],
-      default: [],
-    },
-
-    lastPlayedDate: {
-      type: Date,
-    },
-
-    streak: {
-      type: Number,
-      default: 0,
-    },
+      points: { type: Number, default: 0 }
+    }
   },
-  {
-    timestamps: true, // Automatically adds createdAt and updatedAt
-  },
+  { timestamps: true }
 );
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model('User', userSchema);
