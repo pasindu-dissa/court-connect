@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "333313122554",
+    "project_id": "courtconnect-382d1",
+    "storage_bucket": "courtconnect-382d1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:333313122554:android:17576a73be6c066fc56943",
+        "android_client_info": {
+          "package_name": "com.example.frontend"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "333313122554-8qa1n7rr3bfi56555n1vf1p59ei0oav7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDshyE6RPPzhPMUjKN1clOUTsyDjYeqjJo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "333313122554-8qa1n7rr3bfi56555n1vf1p59ei0oav7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

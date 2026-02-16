@@ -52,4 +52,12 @@ const registerUser = async (req, res) => {
     }
 }
 
-module.exports = { updateUserProfile, registerUser };
+// Add this logic to userController.js
+const getUserByEmail = async (req, res) => {
+  const { email } = req.query;
+  const user = await User.findOne({ email }).select('-password');
+  if (user) res.json(user);
+  else res.status(404).json({ message: 'User not found' });
+};
+
+module.exports = { updateUserProfile, registerUser, getUserByEmail };
