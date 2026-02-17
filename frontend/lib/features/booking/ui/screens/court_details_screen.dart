@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../data/mock_data.dart';
 
 class CourtDetailsScreen extends StatefulWidget {
-  final CourtModel court;
+  final dynamic court; 
   const CourtDetailsScreen({super.key, required this.court});
 
   @override
@@ -21,13 +21,59 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
     {"time": "09:00 AM", "status": 1}, {"time": "04:00 PM", "status": 0},
   ];
 
+  Future<void> _launchMaps() async {
+    double? lat;
+    double? lng;
+    String? url;
+
+    // Support both API Map data and old Mock Object
+    if (widget.court is Map) {
+      lat = (widget.court['latitude'] as num?)?.toDouble();
+      lng = (widget.court['longitude'] as num?)?.toDouble();
+      url = widget.court['googleMapsLink'];
+    } else {
+      // Mock Object fallback
+      lat = 6.9271;
+      lng = 79.8612;
+    }
+
+    // Prioritize Direct Link -> Then Coordinates -> Then Search Query
+    String googleUrl;
+    if (url != null && url.isNotEmpty) {
+      googleUrl = url;
+    } else if (lat != null && lng != null) {
+      googleUrl = "https://www.google.com/maps/search/?api=1&query=$lat,$lng";
+    } else {
+      // Fallback search by name
+      String name = widget.court is Map ? widget.court['name'] : widget.court.name;
+      googleUrl = "https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(name)}";
+    }
+    
+    try {
+      if (await canLaunchUrlString(googleUrl)) {
+        await launchUrlString(googleUrl, mode: LaunchMode.externalApplication);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Could not open maps")));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Theme references for cleaner code
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = Theme.of(context).cardColor;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
-    final secondaryTextColor = Theme.of(context).textTheme.bodySmall?.color;
+    
+    // Extract Data
+    String name = widget.court is Map ? widget.court['name'] : widget.court.name;
+    String image = widget.court is Map 
+        ? (widget.court['images'] != null && (widget.court['images'] as List).isNotEmpty ? widget.court['images'][0] : "") 
+        : widget.court.image;
+    String address = widget.court is Map ? widget.court['location'] : widget.court.address;
+    double price = widget.court is Map ? (widget.court['pricePerHour'] as num).toDouble() : (widget.court.price as num).toDouble();
+    double rating = widget.court is Map ? 4.5 : widget.court.rating; 
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -42,11 +88,11 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
                   background: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.network(widget.court.image, fit: BoxFit.cover, errorBuilder: (c,e,s) => Container(color: Colors.grey)),
+                      Image.network(image, fit: BoxFit.cover, errorBuilder: (c,e,s) => Container(color: Colors.grey)),
                       Container(color: Colors.black.withOpacity(0.3)),
                     ],
                   ),
-                  title: Text(widget.court.name, style: const TextStyle(fontSize: 16, color: Colors.white)),
+                  title: Text(name, style: const TextStyle(fontSize: 16, color: Colors.white)),
                   centerTitle: false,
                 ),
               ),
@@ -64,30 +110,45 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(widget.court.address, style: TextStyle(color: secondaryTextColor, fontSize: 13), maxLines: 2, overflow: TextOverflow.ellipsis),
+                                Text(address, style: TextStyle(color: Colors.grey, fontSize: 13), maxLines: 2, overflow: TextOverflow.ellipsis),
                                 const SizedBox(height: 4),
                                 Row(
                                   children: [
                                     const Icon(Icons.star, color: Colors.amber, size: 18),
                                     const SizedBox(width: 4),
-                                    Text("${widget.court.rating} (120+ Reviews)", style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+                                    Text("$rating (120+ Reviews)", style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
                                   ],
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
-                            child: Text("LKR ${widget.court.price}/h", style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
-                          ),
+                          // Directions Button
+                          IconButton(
+                            onPressed: _launchMaps,
+                            tooltip: "Get Directions",
+                            icon: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), shape: BoxShape.circle),
+                              child: const Icon(Icons.directions, color: Colors.blue),
+                            ),
+                          )
                         ],
                       ),
                       
+                      const SizedBox(height: 20),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                        child: Center(
+                          child: Text("LKR $price / hour", style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 18)),
+                        ),
+                      ),
+
                       const SizedBox(height: 30),
                       Text("Select Date", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: textColor)),
                       const SizedBox(height: 12),
+                      // ... (Date/Time pickers remain same)
                       SizedBox(
                         height: 70,
                         child: ListView.builder(
@@ -106,7 +167,7 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
                                   border: Border.all(color: isDark ? Colors.transparent : Colors.grey.shade200)
                                 ),
                                 child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                  Text(_getMonth(now.month), style: TextStyle(fontSize: 12, color: isSelected ? Colors.white70 : secondaryTextColor)),
+                                  Text(_getMonth(now.month), style: TextStyle(fontSize: 12, color: isSelected ? Colors.white70 : Colors.grey)),
                                   Text(now.day.toString(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isSelected ? Colors.white : textColor)),
                                 ]),
                               ),
@@ -142,26 +203,6 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
                             ),
                           );
                         }),
-                      ),
-                      const SizedBox(height: 30),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.white10 : Colors.blueGrey.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(children: [
-                              Icon(Icons.info_outline, size: 18, color: isDark ? Colors.white70 : Colors.blueGrey),
-                              const SizedBox(width: 8),
-                              Text("Cancellation Policy", style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
-                            ]),
-                            const SizedBox(height: 8),
-                            Text("• Free cancellation up to 4 hours before.\n• 50% refund if cancelled within 2 hours.\n• No refund for no-shows.", style: TextStyle(color: secondaryTextColor)),
-                          ],
-                        ),
                       ),
                       const SizedBox(height: 100),
                     ],

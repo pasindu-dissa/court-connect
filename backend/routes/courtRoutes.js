@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const courtController = require('../controllers/courtController');
+const { addCourt, getOwnerCourts, getAllCourts } = require('../controllers/courtController');
 
-router.post('/', courtController.createCourt);
-router.get('/', courtController.getCourts);
-router.get('/nearby', courtController.findNearbyCourts);
+router.post('/', addCourt);
+router.get('/', getAllCourts);
+router.get('/owner/:ownerId', getOwnerCourts);
 
 module.exports = router;

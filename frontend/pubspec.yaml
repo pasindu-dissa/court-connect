@@ -51,7 +51,11 @@ dependencies:
   firebase_auth: ^4.20.0
   google_sign_in: ^6.2.1
 
+  # State Management
   provider: ^6.0.0
+
+  # Utilities
+  url_launcher: ^6.2.1
 
 dev_dependencies:
   flutter_test:

@@ -1,42 +1,25 @@
 const mongoose = require('mongoose');
 
-const courtSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-
-  type: {
-    type: String,
-    enum: ['badminton', 'tennis', 'basketball', 'volleyball'],
-    required: true
+const courtSchema = mongoose.Schema(
+  {
+    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    name: { type: String, required: true },
+    location: { type: String, required: true }, // Display Address (e.g. "Colombo 7")
+    district: { type: String, required: true },
+    sport: { type: String, required: true },
+    pricePerHour: { type: Number, required: true },
+    description: { type: String },
+    images: [{ type: String }],
+    amenities: [{ type: String }],
+    contactNumber: { type: String },
+    isOpen: { type: Boolean, default: true },
+    
+    // --- EXACT LOCATION DATA ---
+    latitude: { type: Number, required: true },
+    longitude: { type: Number, required: true },
+    googleMapsLink: { type: String } // Optional direct link
   },
-
-  pricePerHour: { type: Number, required: true },
-
-  location: {
-    address: String,
-    city: String,
-    state: String,
-
-    coordinates: {
-      type: {
-        type: String,
-        enum: ['Point'],
-        default: 'Point'
-      },
-      coordinates: {
-        type: [Number], // [lng, lat]
-        required: true
-      }
-    }
-  },
-
-  status: {
-    type: String,
-    enum: ['available', 'maintenance'],
-    default: 'available'
-  }
-});
-
-courtSchema.index({ 'location.coordinates': '2dsphere' });
+  { timestamps: true }
+);
 
 module.exports = mongoose.model('Court', courtSchema);
-

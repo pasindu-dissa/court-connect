@@ -1,42 +1,57 @@
-const Court = require('../models/Court');
+const Court = require('../models/court');
 
-/**
- * Create court
- */
-exports.createCourt = async (req, res) => {
+// @desc    Add a new court
+// @route   POST /api/courts
+const addCourt = async (req, res) => {
   try {
-    const court = await Court.create(req.body);
-    res.status(201).json({ success: true, data: court });
+    // 1. Destructure all fields including new location data
+    const { 
+      ownerId, name, location, district, sport, 
+      pricePerHour, description, images, contactNumber,
+      latitude, longitude, googleMapsLink 
+    } = req.body;
+
+    const court = await Court.create({
+      ownerId,
+      name,
+      location,
+      district,
+      sport,
+      pricePerHour,
+      description,
+      images,
+      contactNumber,
+      latitude,
+      longitude,
+      googleMapsLink
+    });
+
+    res.status(201).json(court);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
-/**
- * Get all courts
- */
-exports.getCourts = async (req, res) => {
-  const courts = await Court.find();
-  res.json({ success: true, data: courts });
+// @desc    Get courts belonging to a specific owner
+// @route   GET /api/courts/owner/:ownerId
+const getOwnerCourts = async (req, res) => {
+  try {
+    const courts = await Court.find({ ownerId: req.params.ownerId });
+    res.json(courts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-/**
- * Find courts within distance (km)
- */
-exports.findNearbyCourts = async (req, res) => {
-  const { lng, lat, distance } = req.query;
-
-  const courts = await Court.find({
-    'location.coordinates': {
-      $nearSphere: {
-        $geometry: {
-          type: 'Point',
-          coordinates: [parseFloat(lng), parseFloat(lat)]
-        },
-        $maxDistance: distance * 1000
-      }
-    }
-  });
-
-  res.json({ success: true, data: courts });
+// @desc    Get all courts (For players)
+// @route   GET /api/courts
+const getAllCourts = async (req, res) => {
+  try {
+    const courts = await Court.find({ isOpen: true });
+    res.json(courts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
+
+module.exports = { addCourt, getOwnerCourts, getAllCourts };
