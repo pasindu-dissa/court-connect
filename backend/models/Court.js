@@ -39,3 +39,4 @@ const courtSchema = new mongoose.Schema({
 courtSchema.index({ 'location.coordinates': '2dsphere' });
 
 module.exports = mongoose.model('Court', courtSchema);
+
