@@ -1,20 +1,32 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
+    const dotenv = require('dotenv');
+    const cors = require('cors');
+    const connectDB = require('./config/db');
 
-const bookingRoutes = require('./routes/bookingRoutes');
-const courtRoutes = require('./routes/courtRoutes');
+    // 1. Load Config
+    dotenv.config();
+    connectDB();
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+    const app = express();
 
-app.use('/api/bookings', bookingRoutes);
-app.use('/api/courts', courtRoutes);
+    // 2. Middleware
+    app.use(cors()); // Allows Flutter to talk to this server
+    app.use(express.json()); // Allows server to read JSON data
 
-mongoose.connect('mongodb://127.0.0.1:27017/courtconnect')
-  .then(() => {
-    console.log('✅ MongoDB connected');
-    app.listen(3000, () => console.log('🚀 Server running'));
-  })
-  .catch(console.error);
+    // 3. Routes
+    app.use('/api/users', require('./routes/userRoutes'));
+    app.use('/api/matchmaking', require('./routes/matchmakingRoutes'));
+    app.use("/api/scores", require("./routes/scoreRoutes"));
+    app.use('/api/matches', require('./routes/matchRoutes'));
+    app.use('/api/courts', require('./routes/courtRoutes'));
+
+    // 4. Base Route
+    app.get('/', (req, res) => {
+      res.send('CourtConnect API is running...');
+    });
+
+    // 5. Start Server
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
