@@ -19,6 +19,7 @@ const express = require('express');
     app.use("/api/scores", require("./routes/scoreRoutes"));
     app.use('/api/matches', require('./routes/matchRoutes'));
     app.use('/api/courts', require('./routes/courtRoutes'));
+    app.use('/api/bookings', require('./routes/bookingRoutes'));
 
     // 4. Base Route
     app.get('/', (req, res) => {
