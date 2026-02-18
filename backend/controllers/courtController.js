@@ -4,11 +4,10 @@ const Court = require('../models/court');
 // @route   POST /api/courts
 const addCourt = async (req, res) => {
   try {
-    // 1. Destructure all fields including new location data
     const { 
-      ownerId, name, location, district, sport, 
+      ownerId, name, location, district, sports, // Changed to sports
       pricePerHour, description, images, contactNumber,
-      latitude, longitude, googleMapsLink 
+      latitude, longitude, plusCode, googleMapsLink 
     } = req.body;
 
     const court = await Court.create({
@@ -16,13 +15,14 @@ const addCourt = async (req, res) => {
       name,
       location,
       district,
-      sport,
+      sports, 
       pricePerHour,
       description,
       images,
       contactNumber,
       latitude,
       longitude,
+      plusCode,
       googleMapsLink
     });
 
@@ -33,7 +33,6 @@ const addCourt = async (req, res) => {
 };
 
 // @desc    Get courts belonging to a specific owner
-// @route   GET /api/courts/owner/:ownerId
 const getOwnerCourts = async (req, res) => {
   try {
     const courts = await Court.find({ ownerId: req.params.ownerId });
@@ -44,7 +43,6 @@ const getOwnerCourts = async (req, res) => {
 };
 
 // @desc    Get all courts (For players)
-// @route   GET /api/courts
 const getAllCourts = async (req, res) => {
   try {
     const courts = await Court.find({ isOpen: true });
