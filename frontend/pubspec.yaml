@@ -37,11 +37,13 @@ dependencies:
 
   # The Font Package
   google_fonts: ^6.1.0
+
   # For formatting dates nicely
   intl: ^0.18.1
 
   # Google maps
   google_maps_flutter: ^2.5.0
+  geolocator: ^10.1.0  # <--- Add this
 
   # Networking
   http: ^1.1.0

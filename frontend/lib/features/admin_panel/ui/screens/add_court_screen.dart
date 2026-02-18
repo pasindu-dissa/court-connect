@@ -26,16 +26,26 @@ class _AddCourtScreenState extends State<AddCourtScreen> {
   // Location Controllers
   final _latController = TextEditingController();
   final _lngController = TextEditingController();
+  final _plusCodeController = TextEditingController();
   final _mapsLinkController = TextEditingController();
 
-  String _selectedSport = "Badminton";
+  // State Variables
+  final List<String> _availableSports = ["Cricket", "Tennis", "Basketball", "Football", "Badminton", "Swimming"];
+  final List<String> _selectedSports = []; // Multi-select list
+  
   String? _selectedDistrict;
   String? _selectedCity;
+  String _locationInputType = "Coordinates"; // "Coordinates" or "Plus Code"
   bool _isLoading = false;
 
   void _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
     
+    if (_selectedSports.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please select at least one sport")));
+      return;
+    }
+
     final user = Provider.of<UserProvider>(context, listen: false).user;
     if (user == null || user['_id'] == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("User ID not found. Please relogin.")));
@@ -44,19 +54,24 @@ class _AddCourtScreenState extends State<AddCourtScreen> {
 
     setState(() => _isLoading = true);
 
+    // Prepare Location Data based on selection
+    double? lat = _locationInputType == "Coordinates" ? double.tryParse(_latController.text) : null;
+    double? lng = _locationInputType == "Coordinates" ? double.tryParse(_lngController.text) : null;
+    String? plusCode = _locationInputType == "Plus Code" ? _plusCodeController.text.trim() : null;
+
     final courtData = {
       "ownerId": user['_id'],
       "name": _nameController.text.trim(),
       "location": _selectedCity ?? _selectedDistrict,
       "district": _selectedDistrict,
-      "sport": _selectedSport,
+      "sports": _selectedSports, // Send Array
       "pricePerHour": double.tryParse(_priceController.text) ?? 0.0,
       "description": _descriptionController.text.trim(),
       "contactNumber": _contactController.text.trim(),
       "images": [_imageController.text.trim().isEmpty ? "https://images.unsplash.com/photo-1626224583764-847890e058f5" : _imageController.text.trim()],
-      // Location Data
-      "latitude": double.tryParse(_latController.text) ?? 6.9271, // Default Colombo
-      "longitude": double.tryParse(_lngController.text) ?? 79.8612,
+      "latitude": lat,
+      "longitude": lng,
+      "plusCode": plusCode,
       "googleMapsLink": _mapsLinkController.text.trim(),
     };
 
@@ -93,13 +108,41 @@ class _AddCourtScreenState extends State<AddCourtScreen> {
               ),
               const SizedBox(height: 16),
               
-              DropdownButtonFormField<String>(
-                value: _selectedSport,
-                decoration: _inputDeco("Sport", Icons.sports_tennis),
-                items: ["Badminton", "Tennis", "Basketball", "Futsal", "Cricket", "Swimming"]
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-                onChanged: (val) => setState(() => _selectedSport = val!),
+              // Multiple Sports Selector
+              const Text("Select Sports", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8.0,
+                runSpacing: 4.0,
+                children: _availableSports.map((sport) {
+                  final isSelected = _selectedSports.contains(sport);
+                  return FilterChip(
+                    label: Text(sport),
+                    selected: isSelected,
+                    onSelected: (bool selected) {
+                      setState(() {
+                        if (selected) {
+                          _selectedSports.add(sport);
+                        } else {
+                          _selectedSports.remove(sport);
+                        }
+                      });
+                    },
+                    selectedColor: AppColors.primary.withOpacity(0.2),
+                    checkmarkColor: AppColors.primary,
+                    labelStyle: TextStyle(
+                      color: isSelected ? AppColors.primary : Colors.black,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  );
+                }).toList(),
               ),
+              if (_selectedSports.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(top: 4),
+                  child: Text(" * Required", style: TextStyle(color: Colors.red, fontSize: 12)),
+                ),
+
               const SizedBox(height: 16),
 
               TextFormField(
@@ -113,6 +156,7 @@ class _AddCourtScreenState extends State<AddCourtScreen> {
               _buildSectionTitle("Location & Directions"),
               const SizedBox(height: 10),
 
+              // District & City
               DropdownButtonFormField<String>(
                 value: _selectedDistrict,
                 decoration: _inputDeco("District", Icons.map),
@@ -135,34 +179,67 @@ class _AddCourtScreenState extends State<AddCourtScreen> {
                 validator: (val) => val == null ? "Required" : null,
               ),
               
+              const SizedBox(height: 20),
+              
+              // Location Input Type Toggle
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    _buildToggleOption("Coordinates"),
+                    _buildToggleOption("Plus Code"),
+                  ],
+                ),
+              ),
               const SizedBox(height: 16),
-              // Coordinates Inputs
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _latController,
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
-                      decoration: _inputDeco("Latitude", Icons.gps_fixed),
-                      validator: (val) => val!.isEmpty ? "Required" : null,
+
+              // Conditional Input Fields
+              if (_locationInputType == "Coordinates") 
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _latController,
+                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        decoration: _inputDeco("Latitude", Icons.gps_fixed),
+                        validator: (val) => _locationInputType == "Coordinates" && val!.isEmpty ? "Required" : null,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _lngController,
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
-                      decoration: _inputDeco("Longitude", Icons.gps_fixed),
-                      validator: (val) => val!.isEmpty ? "Required" : null,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _lngController,
+                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        decoration: _inputDeco("Longitude", Icons.gps_fixed),
+                        validator: (val) => _locationInputType == "Coordinates" && val!.isEmpty ? "Required" : null,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                )
+              else 
+                TextFormField(
+                  controller: _plusCodeController,
+                  decoration: _inputDeco("Google Plus Code (e.g. 7FVX+24)", Icons.pin_drop),
+                  validator: (val) => _locationInputType == "Plus Code" && val!.isEmpty ? "Required" : null,
+                ),
+
               const SizedBox(height: 8),
-              const Text(
-                "Tip: Right-click on Google Maps > Copy coordinates to help players find you easily.",
-                style: TextStyle(color: Colors.grey, fontSize: 12),
-              ),
+              if (_locationInputType == "Coordinates")
+                const Text(
+                  "Tip: Right-click on Google Maps > Copy coordinates.",
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                )
+              else
+                const Text(
+                  "Tip: Find this code on the Google Maps location info card.",
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+
               const SizedBox(height: 16),
               TextFormField(
                 controller: _mapsLinkController,
@@ -201,6 +278,31 @@ class _AddCourtScreenState extends State<AddCourtScreen> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggleOption(String title) {
+    bool isSelected = _locationInputType == title;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _locationInputType = title),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: isSelected ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)] : null,
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: isSelected ? AppColors.primary : Colors.grey[600],
+            ),
           ),
         ),
       ),
