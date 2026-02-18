@@ -1,60 +1,16 @@
 const mongoose = require('mongoose');
 
-const bookingSchema = new mongoose.Schema({
-  court: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Court',
-    required: true
+const bookingSchema = mongoose.Schema(
+  {
+    courtId: { type: mongoose.Schema.Types.ObjectId, ref: 'Court', required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    date: { type: String, required: true }, // Format: "YYYY-MM-DD"
+    startTime: { type: String, required: true }, // e.g. "10:00 AM"
+    duration: { type: Number, default: 1 }, // Hours
+    totalPrice: { type: Number, required: true },
+    status: { type: String, enum: ['Confirmed', 'Cancelled'], default: 'Confirmed' }
   },
-
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-
-  players: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
-
-  sport: String,
-  date: Date,
-  startTime: String,
-  endTime: String,
-  duration: Number,
-  totalCost: Number,
-
-  status: {
-    type: String,
-    enum: ['confirmed', 'cancelled'],
-    default: 'confirmed'
-  },
-
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
-
-/**
- * Availability check
- */
-bookingSchema.statics.isAvailable = async function (
-  courtId,
-  date,
-  startTime,
-  endTime
-) {
-  const clash = await this.findOne({
-    court: courtId,
-    date: new Date(date),
-    status: 'confirmed',
-    startTime: { $lt: endTime },
-    endTime: { $gt: startTime }
-  });
-
-  return !clash;
-};
+  { timestamps: true }
+);
 
 module.exports = mongoose.model('Booking', bookingSchema);

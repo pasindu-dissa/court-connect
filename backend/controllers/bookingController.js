@@ -1,75 +1,44 @@
-const Booking = require('../models/Booking');
-const Court = require('../models/court');
+const Booking = require('../models/booking');
 
-exports.createBooking = async (req, res) => {
+// @desc    Create a new booking
+// @route   POST /api/bookings
+const createBooking = async (req, res) => {
   try {
-    const { court, date, startTime, endTime, sport } = req.body;
+    const { courtId, userId, date, startTime, totalPrice } = req.body;
 
-    const courtData = await Court.findById(court);
-    if (!courtData) {
-      return res.status(404).json({ success: false, message: 'Court not found' });
+    // Check if slot is already taken
+    const existing = await Booking.findOne({ courtId, date, startTime, status: 'Confirmed' });
+    if (existing) {
+      return res.status(400).json({ message: 'Slot already booked' });
     }
-
-    const available = await Booking.isAvailable(
-      court,
-      date,
-      startTime,
-      endTime
-    );
-
-    if (!available) {
-      return res.status(400).json({ success: false, message: 'Time slot unavailable' });
-    }
-
-    const duration =
-      (parseInt(endTime.split(':')[0]) * 60 + parseInt(endTime.split(':')[1])) -
-      (parseInt(startTime.split(':')[0]) * 60 + parseInt(startTime.split(':')[1]));
-
-    const totalCost = (courtData.pricePerHour / 60) * duration;
 
     const booking = await Booking.create({
-      court,
-      user: req.user.id,
-      players: [req.user.id],
-      sport,
+      courtId,
+      userId,
       date,
       startTime,
-      endTime,
-      duration,
-      totalCost
+      totalPrice
     });
 
-    res.status(201).json({ success: true, data: booking });
+    res.status(201).json(booking);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
-exports.joinBooking = async (req, res) => {
-  const booking = await Booking.findById(req.params.id);
+// @desc    Get bookings for a specific court and date
+// @route   GET /api/bookings/:courtId
+const getCourtBookings = async (req, res) => {
+  try {
+    const { date } = req.query; // ?date=YYYY-MM-DD
+    const query = { courtId: req.params.courtId, status: 'Confirmed' };
+    if (date) query.date = date;
 
-  if (!booking) {
-    return res.status(404).json({ success: false, message: 'Booking not found' });
+    const bookings = await Booking.find(query).select('startTime');
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  if (booking.players.includes(req.user.id)) {
-    return res.status(400).json({ success: false, message: 'Already joined' });
-  }
-
-  booking.players.push(req.user.id);
-  await booking.save();
-
-  res.json({
-    success: true,
-    players: booking.players.length,
-    costPerPerson: (booking.totalCost / booking.players.length).toFixed(2)
-  });
 };
 
-exports.getBookings = async (req, res) => {
-  const bookings = await Booking.find()
-    .populate('court', 'name location.city pricePerHour')
-    .populate('players', 'fullName');
-
-  res.json({ success: true, data: bookings });
-};
+module.exports = { createBooking, getCourtBookings };
