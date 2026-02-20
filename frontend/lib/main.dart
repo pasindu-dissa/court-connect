@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:provider/provider.dart'; // Add this package
+import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/ui/screens/login_screen.dart';
 import 'core/services/user_provider.dart';
-import 'features/home/ui/main_wrapper.dart'; // Import Wrapper
+import 'features/home/ui/main_wrapper.dart';
+import 'features/admin_panel/ui/screens/court_owner_dashboard.dart'; // Import Owner Dashboard
 import 'core/services/auth_service.dart';
 
 void main() async {
@@ -14,7 +15,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => UserProvider()..loadUser()),
+        ChangeNotifierProvider(create: (_) => UserProvider()), // Initialize provider
       ],
       child: const CourtConnectApp(),
     ),
@@ -35,10 +36,64 @@ class CourtConnectApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: currentMode,
-          // Check if user is already logged in via Firebase
-          home: AuthService().currentUser != null ? const MainWrapper() : const LoginScreen(),
+          home: const AuthWrapper(), // Use Wrapper instead of direct screen
         );
       },
     );
+  }
+}
+
+class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  bool _isLoading = true;
+  Widget? _startScreen;
+
+  @override
+  void initState() {
+    super.initState();
+    _determineStartScreen();
+  }
+
+  Future<void> _determineStartScreen() async {
+    final user = AuthService().currentUser;
+    
+    if (user == null) {
+      setState(() {
+        _startScreen = const LoginScreen();
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // User is logged in, fetch profile to check Role
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    await userProvider.loadUser(); // Fetch from MongoDB
+    
+    final userData = userProvider.user;
+
+    setState(() {
+      if (userData != null && userData['role'] == 'court_owner') {
+        _startScreen = const CourtOwnerDashboard();
+      } else {
+        _startScreen = const MainWrapper(); // Default to Player
+      }
+      _isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    return _startScreen!;
   }
 }
