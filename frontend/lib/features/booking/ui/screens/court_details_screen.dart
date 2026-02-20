@@ -4,11 +4,14 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/services/user_provider.dart';
 import '../../data/booking_service.dart';
+import '../../../matchmaking/data/matchmaking_service.dart';
 import 'directions_map_screen.dart';
 
 class CourtDetailsScreen extends StatefulWidget {
   final dynamic court; 
-  const CourtDetailsScreen({super.key, required this.court});
+  final Map<String, dynamic>? pendingMatchData;
+
+  const CourtDetailsScreen({super.key, required this.court, this.pendingMatchData});
 
   @override
   State<CourtDetailsScreen> createState() => _CourtDetailsScreenState();
@@ -16,9 +19,10 @@ class CourtDetailsScreen extends StatefulWidget {
 
 class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
   final BookingService _bookingService = BookingService();
+  final MatchmakingService _matchmakingService = MatchmakingService();
   
   DateTime _selectedDate = DateTime.now();
-  Set<String> _selectedTimeSlots = {}; // Changed to Set for multiple
+  Set<String> _selectedTimeSlots = {}; 
   bool _isSubmitting = false;
   List<String> _bookedSlots = [];
   bool _isLoadingSlots = false;
@@ -36,6 +40,18 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
     _fetchBookedSlots();
   }
 
+  IconData _getSportIcon(String sport) {
+    switch (sport.toLowerCase()) {
+      case 'tennis': return Icons.sports_baseball_outlined;
+      case 'basketball': return Icons.sports_basketball;
+      case 'football': return Icons.sports_soccer;
+      case 'cricket': return Icons.sports_cricket;
+      case 'swimming': return Icons.pool;
+      case 'badminton': return Icons.sports_tennis; 
+      default: return Icons.sports;
+    }
+  }
+
   Future<void> _fetchBookedSlots() async {
     setState(() => _isLoadingSlots = true);
     String dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
@@ -43,7 +59,7 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
     setState(() {
       _bookedSlots = bookings;
       _isLoadingSlots = false;
-      _selectedTimeSlots.clear(); // Reset selection on date change
+      _selectedTimeSlots.clear(); 
     });
   }
 
@@ -67,27 +83,35 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
     }
 
     setState(() => _isSubmitting = true);
-
     bool allSuccess = true;
     
-    // Create a booking for EACH selected slot
     for (String slot in _selectedTimeSlots) {
       final bookingData = {
         "courtId": widget.court['_id'],
         "userId": user['_id'],
         "date": DateFormat('yyyy-MM-dd').format(_selectedDate),
         "startTime": slot,
-        "totalPrice": widget.court['pricePerHour'], // Price per hour (slot)
+        "totalPrice": widget.court['pricePerHour'],
       };
-
       final success = await _bookingService.createBooking(bookingData);
       if (!success) allSuccess = false;
+    }
+
+    bool matchPublished = false;
+    if (allSuccess && widget.pendingMatchData != null) {
+      final matchData = Map<String, dynamic>.from(widget.pendingMatchData!);
+      matchData['hostId'] = user['_id'];
+      matchData['date'] = DateFormat('yyyy-MM-dd').format(_selectedDate);
+      final sortedSlots = _selectedTimeSlots.toList()..sort();
+      matchData['time'] = sortedSlots.join(", "); 
+      
+      matchPublished = await _matchmakingService.createMatch(matchData);
     }
 
     if (mounted) {
       setState(() => _isSubmitting = false);
       if (allSuccess) {
-        _showSuccessDialog();
+        _showSuccessDialog(matchPublished);
         _fetchBookedSlots();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Some slots failed to book. Please refresh.")));
@@ -96,7 +120,7 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
     }
   }
 
-  void _showSuccessDialog() {
+  void _showSuccessDialog(bool matchPublished) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -107,14 +131,21 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
           children: [
             const Icon(Icons.check_circle, color: Colors.green, size: 60),
             const SizedBox(height: 16),
-            const Text("Booking Confirmed!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(matchPublished ? "Match Published!" : "Booking Confirmed!", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text("${_selectedTimeSlots.length} slot(s) reserved on ${DateFormat('MMM dd').format(_selectedDate)}"),
+            Text(matchPublished 
+              ? "Your match is live and the court is booked for ${_selectedTimeSlots.length} slot(s)."
+              : "${_selectedTimeSlots.length} slot(s) reserved on ${DateFormat('MMM dd').format(_selectedDate)}",
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
+                Navigator.pop(context); 
+                Navigator.pop(context, true); 
+                if (widget.pendingMatchData != null) {
+                  Navigator.pop(context, true); 
+                }
               },
               child: const Text("Done"),
             )
@@ -133,6 +164,13 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
     String image = (widget.court['images'] as List?)?.isNotEmpty == true ? widget.court['images'][0] : "";
     double price = (widget.court['pricePerHour'] as num).toDouble();
     double totalPrice = price * _selectedTimeSlots.length;
+    final bool isHosting = widget.pendingMatchData != null;
+
+    // Resolve Sports array
+    List<dynamic> sportsList = widget.court['sports'] ?? [];
+    if (sportsList.isEmpty && widget.court['sport'] != null) {
+      sportsList = [widget.court['sport']];
+    }
 
     return Scaffold(
       body: Stack(
@@ -153,6 +191,20 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (isHosting)
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.blue.shade200)),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.info_outline, color: Colors.blue),
+                              SizedBox(width: 12),
+                              Expanded(child: Text("Select the date and time slots for your Match. Booking this court will automatically publish your match.", style: TextStyle(color: Colors.blue, fontSize: 13))),
+                            ],
+                          ),
+                        ),
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -167,18 +219,41 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
                             ),
                           ),
                           IconButton(
-                            onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => DirectionsMapScreen(court: widget.court)));
-                            },
-                            icon: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), shape: BoxShape.circle),
-                              child: const Icon(Icons.directions, color: Colors.blue),
-                            ),
+                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DirectionsMapScreen(court: widget.court))),
+                            icon: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), shape: BoxShape.circle), child: const Icon(Icons.directions, color: Colors.blue)),
                           )
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      
+                      const SizedBox(height: 24),
+
+                      // Sports Badges
+                      const Text("Available Sports", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: sportsList.map((s) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3))
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(_getSportIcon(s.toString()), size: 16, color: AppColors.primary),
+                                const SizedBox(width: 8),
+                                Text(s.toString(), style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary, fontSize: 13)),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+
+                      const SizedBox(height: 30),
                       Text("Select Date", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: textColor)),
                       const SizedBox(height: 12),
                       SizedBox(
@@ -193,11 +268,7 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
                               onTap: () { setState(() => _selectedDate = date); _fetchBookedSlots(); },
                               child: Container(
                                 width: 60, margin: const EdgeInsets.only(right: 12),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? AppColors.primary : cardColor,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: isDark ? Colors.transparent : Colors.grey.shade300)
-                                ),
+                                decoration: BoxDecoration(color: isSelected ? AppColors.primary : cardColor, borderRadius: BorderRadius.circular(16), border: Border.all(color: isDark ? Colors.transparent : Colors.grey.shade300)),
                                 child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                                   Text(DateFormat('MMM').format(date), style: TextStyle(fontSize: 12, color: isSelected ? Colors.white : Colors.grey)),
                                   Text(date.day.toString(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: isSelected ? Colors.white : textColor)),
@@ -223,22 +294,11 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
                                   duration: const Duration(milliseconds: 200),
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                                   decoration: BoxDecoration(
-                                    color: isBooked 
-                                      ? (isDark ? Colors.white10 : Colors.grey[200]) 
-                                      : (isSelected ? AppColors.primary : cardColor),
+                                    color: isBooked ? (isDark ? Colors.white10 : Colors.grey[200]) : (isSelected ? AppColors.primary : cardColor),
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(color: isSelected ? AppColors.primary : (isDark ? Colors.transparent : Colors.grey.shade300))
                                   ),
-                                  child: Text(
-                                    slot, 
-                                    style: TextStyle(
-                                      color: isBooked 
-                                        ? Colors.grey 
-                                        : (isSelected ? Colors.white : textColor),
-                                      decoration: isBooked ? TextDecoration.lineThrough : null,
-                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal
-                                    )
-                                  ),
+                                  child: Text(slot, style: TextStyle(color: isBooked ? Colors.grey : (isSelected ? Colors.white : textColor), decoration: isBooked ? TextDecoration.lineThrough : null, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
                                 ),
                               );
                             }).toList(),
@@ -272,7 +332,7 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
                       style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50), backgroundColor: AppColors.primary),
                       child: _isSubmitting 
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : Text("Book ${_selectedTimeSlots.length} Slot(s)", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                        : Text(isHosting ? "Book & Publish Match" : "Book ${_selectedTimeSlots.length} Slot(s)", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                     ),
                   ),
                 ],
