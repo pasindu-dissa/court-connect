@@ -5,8 +5,9 @@ import 'package:geolocator/geolocator.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/marker_generator.dart';
 import '../../data/booking_service.dart';
+import '../widgets/court_card.dart'; // IMPORT NEW WIDGET
 import 'court_details_screen.dart';
-import 'directions_map_screen.dart'; // Added Import
+import 'directions_map_screen.dart';
 import '../widgets/booking_filters_modal.dart';
 
 class BookingScreen extends StatefulWidget {
@@ -55,15 +56,13 @@ class _BookingScreenState extends State<BookingScreen> {
   Future<void> _updateMarkers() async {
     Set<Marker> newMarkers = {};
     
-    // Generate Colored Icons
-    final BitmapDescriptor availableIcon = await MarkerGenerator.createCustomMarkerBitmap("Court", color: const Color(0xFF00C853)); // Green
-    final BitmapDescriptor busyIcon = await MarkerGenerator.createCustomMarkerBitmap("Court", color: const Color(0xFFFF3D00)); // Red
+    final BitmapDescriptor availableIcon = await MarkerGenerator.createCustomMarkerBitmap("Court", color: const Color(0xFF00C853));
+    final BitmapDescriptor busyIcon = await MarkerGenerator.createCustomMarkerBitmap("Court", color: const Color(0xFFFF3D00));
 
     for (var court in _filteredCourts) {
       double lat = (court['latitude'] as num?)?.toDouble() ?? 6.9271;
       double lng = (court['longitude'] as num?)?.toDouble() ?? 79.8612;
       
-      // Logic: If court name length is even, mark busy (Mock logic for visual demo)
       bool isBusy = (court['name'].length % 2 == 0); 
 
       newMarkers.add(Marker(
@@ -94,7 +93,9 @@ class _BookingScreenState extends State<BookingScreen> {
   List<Map<String, dynamic>> get _filteredCourts {
     return _allCourts.where((court) {
       final matchesSearch = court['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesSport = _sportFilter == null || court['sport'] == _sportFilter;
+      final matchesSport = _sportFilter == null || 
+                           court['sport'] == _sportFilter || 
+                           (court['sports'] as List<dynamic>?)?.contains(_sportFilter) == true;
       return matchesSearch && matchesSport;
     }).toList();
   }
@@ -102,7 +103,7 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       resizeToAvoidBottomInset: false,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -161,7 +162,7 @@ class _BookingScreenState extends State<BookingScreen> {
                   child: _isSearchVisible ? TextField(
                     onChanged: (val) { setState(() => _searchQuery = val); if(_isMapView) _updateMarkers(); },
                     decoration: InputDecoration(
-                      hintText: "Search courts...", filled: true, fillColor: Colors.white,
+                      hintText: "Search courts...", filled: true, fillColor: Theme.of(context).cardColor,
                       prefixIcon: const Icon(Icons.search, color: AppColors.primary),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -172,15 +173,13 @@ class _BookingScreenState extends State<BookingScreen> {
             ),
           ),
 
-          // Legend Widget (Bottom Left)
           if (_isMapView && !_isLoading)
             Positioned(
-              bottom: 100,
-              left: 20,
+              bottom: 100, left: 20,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10)],
                 ),
@@ -203,10 +202,7 @@ class _BookingScreenState extends State<BookingScreen> {
   Widget _buildLegendItem(String text, Color color) {
     return Row(
       children: [
-        Container(
-          width: 12, height: 12,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
+        Container(width: 12, height: 12, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 8),
         Text(text, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
       ],
@@ -230,9 +226,9 @@ class _BookingScreenState extends State<BookingScreen> {
       itemCount: _filteredCourts.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        return GestureDetector(
+        return CourtCard(
+          court: _filteredCourts[index],
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CourtDetailsScreen(court: _filteredCourts[index]))),
-          child: _buildCourtCard(_filteredCourts[index]),
         );
       },
     );
@@ -245,18 +241,24 @@ class _BookingScreenState extends State<BookingScreen> {
       builder: (_) => Container(
         margin: const EdgeInsets.all(20),
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+        decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(24)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildCourtCard(court),
+            CourtCard(
+              court: court,
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => CourtDetailsScreen(court: court)));
+              },
+            ),
             const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      Navigator.pop(context); // Close preview
+                      Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (_) => DirectionsMapScreen(court: court)));
                     },
                     icon: const Icon(Icons.directions, color: Colors.blue),
@@ -283,26 +285,6 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
-  Widget _buildCourtCard(Map<String, dynamic> court) {
-    String image = (court['images'] as List?)?.isNotEmpty == true ? court['images'][0] : "https://via.placeholder.com/150";
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 15, offset: const Offset(0, 5))]),
-      child: Row(
-        children: [
-          ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.network(image, width: 90, height: 90, fit: BoxFit.cover, errorBuilder: (c, e, s) => Container(width: 90, height: 90, color: Colors.grey[300]))),
-          const SizedBox(width: 16),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(court['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            Text(court['location'], style: const TextStyle(color: Colors.grey, fontSize: 12), maxLines: 1),
-            const SizedBox(height: 8),
-            Text("LKR ${court['pricePerHour']}/hr", style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
-          ])),
-        ],
-      ),
-    );
-  }
-
   void _showFilterModal() {
     showModalBottomSheet(context: context, backgroundColor: Colors.transparent, builder: (_) => BookingFiltersModal(onApply: (sport) { setState(() => _sportFilter = sport); if(_isMapView) _updateMarkers(); }));
   }
@@ -313,10 +295,10 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   Widget _buildGlassButton({required IconData icon, required String label, required VoidCallback onTap, bool isActive = false}) {
-    return GestureDetector(onTap: onTap, child: Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), decoration: BoxDecoration(color: isActive ? AppColors.primary : Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(30), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10)]), child: Row(children: [Icon(icon, size: 20, color: isActive ? Colors.white : Colors.black), const SizedBox(width: 8), Text(label, style: TextStyle(fontWeight: FontWeight.bold, color: isActive ? Colors.white : Colors.black))])));
+    return GestureDetector(onTap: onTap, child: Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), decoration: BoxDecoration(color: isActive ? AppColors.primary : Theme.of(context).cardColor.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(30), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10)]), child: Row(children: [Icon(icon, size: 20, color: isActive ? Colors.white : Theme.of(context).iconTheme.color), const SizedBox(width: 8), Text(label, style: TextStyle(fontWeight: FontWeight.bold, color: isActive ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color))])));
   }
 
   Widget _buildGlassIconBtn({required IconData icon, required VoidCallback onTap, bool isActive = false}) {
-    return GestureDetector(onTap: onTap, child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: isActive ? AppColors.primary : Colors.white.withValues(alpha: 0.9), shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10)]), child: Icon(icon, size: 20, color: isActive ? Colors.white : Colors.black)));
+    return GestureDetector(onTap: onTap, child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: isActive ? AppColors.primary : Theme.of(context).cardColor.withValues(alpha: 0.9), shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10)]), child: Icon(icon, size: 20, color: isActive ? Colors.white : Theme.of(context).iconTheme.color)));
   }
 }
