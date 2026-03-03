@@ -1,4 +1,6 @@
+
 import 'package:flutter/material.dart';
+import 'package:frontend/features/profile/ui/screens/profile_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import 'screens/home_screen.dart';
 import '../../booking/ui/screens/booking_screen.dart';
@@ -19,7 +21,7 @@ class _MainWrapperState extends State<MainWrapper> {
     const BookingScreen(),
     const MatchmakingScreen(), // <--- LINKED HERE (Index 2)
     const Center(child: Text("Leaderboard Screen")),
-    const Center(child: Text("Profile Screen")),
+    const ProfileScreen()
   ];
 
   // ... (Keep the rest of the build() and _buildNavItem() code exactly as it was) ...
