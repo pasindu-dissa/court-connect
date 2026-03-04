@@ -37,11 +37,13 @@ dependencies:
 
   # The Font Package
   google_fonts: ^6.1.0
+
   # For formatting dates nicely
   intl: ^0.18.1
 
   # Google maps
   google_maps_flutter: ^2.5.0
+  geolocator: ^10.1.0  # <--- Add this
 
   # Networking
   http: ^1.1.0
@@ -51,7 +53,11 @@ dependencies:
   firebase_auth: ^4.20.0
   google_sign_in: ^6.2.1
 
+  # State Management
   provider: ^6.0.0
+
+  # Utilities
+  url_launcher: ^6.2.1
 
 dev_dependencies:
   flutter_test:

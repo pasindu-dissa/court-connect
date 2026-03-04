@@ -3,6 +3,10 @@
     <!-- ADD THIS LINE -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Add Location Permissions -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <application
         android:label="frontend"
         android:name="${applicationName}"

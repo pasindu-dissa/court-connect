@@ -89,7 +89,7 @@ class MatchCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    "Fee: LKR ${fee.toStringAsFixed(0)} / person",
+                    "Fee: LKR ${fee.toStringAsFixed(0)}/hr",
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],
