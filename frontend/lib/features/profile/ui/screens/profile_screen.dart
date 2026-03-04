@@ -10,20 +10,30 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _isDarkTheme = false;
-  final TextEditingController _nameController = TextEditingController(text: "Alex Johnson");
-  final TextEditingController _emailController = TextEditingController(text: "alex.johnson@example.com");
+  final TextEditingController _nameController = TextEditingController(
+    text: "Alex Johnson",
+  );
+  final TextEditingController _emailController = TextEditingController(
+    text: "alex.johnson@example.com",
+  );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F4F7),
       appBar: AppBar(
-        title: const Text("My Profile", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          "My Profile",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.textPrimary,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -40,12 +50,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 4),
                       boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5)),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
                       ],
                     ),
                     child: const CircleAvatar(
                       radius: 60,
-                      backgroundImage: NetworkImage("https://i.pravatar.cc/300"),
+                      backgroundImage: NetworkImage(
+                        "https://i.pravatar.cc/300",
+                      ),
                     ),
                   ),
                   Positioned(
@@ -57,13 +73,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: AppColors.primary,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 20),
+                      child: const Icon(
+                        Icons.camera_alt_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 32),
 
             // 2. Edit Details Section
@@ -82,39 +102,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                  ),
+                ],
               ),
               child: Column(
                 children: [
                   // Theme Toggle
                   SwitchListTile(
-                    activeColor: AppColors.primary,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                    title: const Text("Dark Mode", style: TextStyle(fontWeight: FontWeight.w600)),
+                    activeThumbColor: AppColors.primary,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 4,
+                    ),
+                    title: const Text(
+                      "Dark Mode",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
                     secondary: Container(
                       padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: Colors.purple.withOpacity(0.1), shape: BoxShape.circle),
-                      child: const Icon(Icons.dark_mode_rounded, color: Colors.purple),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.dark_mode_rounded,
+                        color: Colors.purple,
+                      ),
                     ),
                     value: _isDarkTheme,
                     onChanged: (val) {
                       setState(() => _isDarkTheme = val);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Theme switched! (Demo Only)")),
+                        const SnackBar(
+                          content: Text("Theme switched! (Demo Only)"),
+                        ),
                       );
                     },
                   ),
                   const Divider(height: 1, indent: 20, endIndent: 20),
                   // About App
                   ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 4,
+                    ),
                     leading: Container(
                       padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), shape: BoxShape.circle),
-                      child: const Icon(Icons.info_outline_rounded, color: Colors.blue),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.info_outline_rounded,
+                        color: Colors.blue,
+                      ),
                     ),
-                    title: const Text("About App", style: TextStyle(fontWeight: FontWeight.w600)),
-                    trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
+                    title: const Text(
+                      "About App",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
                     onTap: () {
                       showAboutDialog(
                         context: context,
@@ -136,7 +191,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: ElevatedButton(
                 onPressed: () {
                   // Handle Sign Out Logic
-                  Navigator.pop(context); 
+                  Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.error.withOpacity(0.1),
@@ -158,12 +213,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       alignment: Alignment.centerLeft,
       child: Text(
         title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimary,
+        ),
       ),
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, IconData icon) {
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller,
+    IconData icon,
+  ) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
