@@ -3,6 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import 'screens/home_screen.dart';
 import '../../booking/ui/screens/booking_screen.dart';
 import '../../matchmaking/ui/screens/matchmaking_screen.dart'; // Import this
+import '../../leaderboard/ui/screens/screen/leaderboard_screen.dart';
 
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
@@ -18,7 +19,7 @@ class _MainWrapperState extends State<MainWrapper> {
     const HomeScreen(),
     const BookingScreen(),
     const MatchmakingScreen(), // <--- LINKED HERE (Index 2)
-    const Center(child: Text("Leaderboard Screen")),
+    const LeaderboardScreen(),
     const Center(child: Text("Profile Screen")),
   ];
 
@@ -32,8 +33,17 @@ class _MainWrapperState extends State<MainWrapper> {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.primary,
-          borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, -5))],
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
         ),
         child: SafeArea(
           child: Padding(
@@ -61,7 +71,10 @@ class _MainWrapperState extends State<MainWrapper> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
-        padding: EdgeInsets.symmetric(horizontal: isSelected ? 20 : 12, vertical: 10),
+        padding: EdgeInsets.symmetric(
+          horizontal: isSelected ? 20 : 12,
+          vertical: 10,
+        ),
         decoration: BoxDecoration(
           color: isSelected ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(30),
@@ -69,7 +82,13 @@ class _MainWrapperState extends State<MainWrapper> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: isSelected ? AppColors.primary : Colors.white.withOpacity(0.8), size: 26),
+            Icon(
+              icon,
+              color: isSelected
+                  ? AppColors.primary
+                  : Colors.white.withOpacity(0.8),
+              size: 26,
+            ),
             if (isSelected) ...[
               const SizedBox(width: 8),
               Flexible(
@@ -77,10 +96,14 @@ class _MainWrapperState extends State<MainWrapper> {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               ),
-            ]
+            ],
           ],
         ),
       ),

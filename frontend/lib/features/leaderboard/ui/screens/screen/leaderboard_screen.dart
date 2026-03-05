@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'shared_data.dart'; // This connects your UI to the shared database!
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../../../../../core/constants/api_constants.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -11,11 +13,23 @@ class LeaderboardScreen extends StatefulWidget {
 class _LeaderboardScreenState extends State<LeaderboardScreen> {
   // The local dummy data list was removed from here.
 
+  Future<List<dynamic>> _fetchLeaderboard() async {
+    try {
+      final response = await http.get(Uri.parse(ApiConstants.leaderboard));
+      if (response.statusCode == 200) {
+        final dynamic data = json.decode(response.body);
+        return data is List
+            ? data
+            : (data is Map && data.containsKey('data') ? data['data'] : []);
+      }
+    } catch (e) {
+      debugPrint("Error fetching leaderboard: \$e");
+    }
+    return [];
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Read the latest data directly from the shared global list
-    final topPlayers = CourtDatabase.players;
-
     return Scaffold(
       backgroundColor: const Color(
         0xFFF5F6F8,
@@ -23,14 +37,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFF5F6F8),
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('Back ')));
-          },
-        ),
+        automaticallyImplyLeading:
+            false, // Hide back button since it's a bottom nav tab
         title: const Text(
           'Leaderboard',
           style: TextStyle(
@@ -169,19 +177,32 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 15),
-            ListView.builder(
-              shrinkWrap: true,
-              physics:
-                  const NeverScrollableScrollPhysics(), // Disables inner scroll so the whole page scrolls smoothly
-              itemCount: topPlayers.length,
-              itemBuilder: (context, index) {
-                final player = topPlayers[index];
-                // Pass 'score' instead of 'elo' to match our shared database structure
-                return _buildPlayerCard(
-                  index + 1,
-                  player['name'],
-                  player['score'],
-                  player['status'],
+            FutureBuilder<List<dynamic>>(
+              future: _fetchLeaderboard(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(
+                    child: Text("No players found on the leaderboard."),
+                  );
+                }
+
+                final topPlayers = snapshot.data!;
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: topPlayers.length,
+                  itemBuilder: (context, index) {
+                    final player = topPlayers[index];
+                    final name =
+                        player['teamName'] ?? player['name'] ?? 'Unknown';
+                    final score = player['points'] ?? player['score'] ?? 0;
+                    final status = player['status'] ?? 'hot';
+
+                    return _buildPlayerCard(index + 1, name, score, status);
+                  },
                 );
               },
             ),
