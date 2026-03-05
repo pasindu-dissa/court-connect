@@ -22,4 +22,21 @@ class HealthService {
   Future<bool> hasPermissions() async {
     return await _health.hasPermissions(_dataTypes) ?? false;
   }
+
+  Future<bool> requestAuthorization() async {
+    try {
+      // Request Android sensor permission first
+      await Permission.activityRecognition.request();
+      await Permission.sensors.request();
+
+      // Then request Health plugin permissions
+      _isAuthorized = await _health.requestAuthorization(_dataTypes);
+      return _isAuthorized;
+    } catch (e) {
+      print('Authorization error: $e');
+      _isAuthorized = false;
+      return false;
+    }
+  }
+
 }
