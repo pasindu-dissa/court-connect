@@ -166,7 +166,53 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       ),
     );
   }
-
+// --- Helper Widget: Challenge Cards ---
+  Widget _buildChallengeCard({required Color color, required IconData icon, required String title, required String subtitle, bool isCircleIcon = false}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 120,
+            decoration: BoxDecoration(color: color, borderRadius: const BorderRadius.vertical(top: Radius.circular(20))),
+            child: Center(
+              child: isCircleIcon
+                  ? CircleAvatar(radius: 35, backgroundColor: Colors.white, child: Icon(icon, size: 40, color: Colors.grey))
+                  : Icon(icon, size: 70, color: Colors.white),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                const SizedBox(height: 5),
+                Text(subtitle, style: const TextStyle(color: Colors.blueGrey, fontSize: 12)),
+                const SizedBox(height: 15),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF145348), // Dark green button
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                    onPressed: () {},
+                    child: const Text('View', style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
 
         },
