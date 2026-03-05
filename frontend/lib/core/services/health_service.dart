@@ -39,4 +39,19 @@ class HealthService {
     }
   }
 
+  // Fetch steps for today
+  Future<int> fetchSteps() async {
+    final now = DateTime.now();
+    final midnight = DateTime(now.year, now.month, now.day);
+    try {
+      final steps = await _health.getTotalStepsInInterval(midnight, now);
+      return steps ?? 0;
+    } catch (e) {
+      print('fetchSteps error: $e');
+      return 0;
+    }
+  }
+
+
+
 }
