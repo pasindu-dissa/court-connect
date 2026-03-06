@@ -116,5 +116,26 @@ class ProfileService {
     }
   }
 
+  
+  // DELETE /api/users/profile
+  
+  Future<void> deleteAccount() async {
+    try {
+      final headers = await _authHeaders();
+      final response = await http.delete(
+        Uri.parse(baseUrl),
+        headers: headers,
+      );
 
+      if (response.statusCode == 200) {
+        return;
+      } else if (response.statusCode == 401) {
+        throw Exception('UNAUTHORIZED');
+      } else {
+        throw Exception('Failed to delete account: ${response.body}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
