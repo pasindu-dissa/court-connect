@@ -68,7 +68,30 @@ class HealthService {
       return [];
     }
   }
-  
+
+  // Fetch calories burned today
+  Future<double> fetchCalories() async {
+    final now = DateTime.now();
+    final midnight = DateTime(now.year, now.month, now.day);
+    try {
+      final data = await _health.getHealthDataFromTypes(
+        startTime: midnight,
+        endTime: now,
+        types: [HealthDataType.ACTIVE_ENERGY_BURNED],
+      );
+      // Sum all calorie data points
+      double total = 0.0;
+      for (final point in data) {
+        if (point.value is NumericHealthValue) {
+          total += (point.value as NumericHealthValue).numericValue.toDouble();
+        }
+      }
+      return total;
+    } catch (e) {
+      print('fetchCalories error: $e');
+      return 0.0;
+    }
+  }
   
 
 }
