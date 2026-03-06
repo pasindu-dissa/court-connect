@@ -80,4 +80,41 @@ class ProfileService {
     }
   }
 
+  
+  // PUT /api/users/profile/image
+  
+  Future<String> uploadProfileImage(File imageFile) async {
+    try {
+      final token = await _getToken();
+      final request = http.MultipartRequest(
+        'PUT',
+        Uri.parse('$baseUrl/image'),
+      );
+
+      request.headers['Authorization'] = 'Bearer $token';
+
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'profileImage',
+          imageFile.path,
+        ),
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return json['profileImage'] as String;
+      } else if (response.statusCode == 401) {
+        throw Exception('UNAUTHORIZED');
+      } else {
+        throw Exception('Failed to upload image: ${response.body}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
 }
