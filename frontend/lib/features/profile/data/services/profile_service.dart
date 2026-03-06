@@ -55,4 +55,29 @@ class ProfileService {
       rethrow;
     }
   }
+ 
+  // PUT /api/users/profile
+  
+  Future<ProfileModel> updateProfile(ProfileModel profile) async {
+    try {
+      final headers = await _authHeaders();
+      final response = await http.put(
+        Uri.parse(baseUrl),
+        headers: headers,
+        body: jsonEncode(profile.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return ProfileModel.fromJson(json);
+      } else if (response.statusCode == 401) {
+        throw Exception('UNAUTHORIZED');
+      } else {
+        throw Exception('Failed to update profile: ${response.body}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 }
