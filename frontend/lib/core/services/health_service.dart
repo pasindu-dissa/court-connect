@@ -52,6 +52,23 @@ class HealthService {
     }
   }
 
-
+  // Fetch heart rate readings for the last 24 hours
+  Future<List<HealthDataPoint>> fetchHeartRate() async {
+    final now = DateTime.now();
+    final yesterday = now.subtract(const Duration(hours: 24));
+    try {
+      final data = await _health.getHealthDataFromTypes(
+        startTime: yesterday,
+        endTime: now,
+        types: [HealthDataType.HEART_RATE],
+      );
+      return data;
+    } catch (e) {
+      print('fetchHeartRate error: $e');
+      return [];
+    }
+  }
+  
+  
 
 }
