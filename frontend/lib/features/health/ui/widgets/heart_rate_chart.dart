@@ -8,6 +8,32 @@ class HeartRateChart extends StatelessWidget {
 
   const HeartRateChart({super.key, required this.data});
 
+  double get averageBpm {
+    if (data.isEmpty) return 0;
+    double total = data.fold(0.0, (sum, p) =>
+        sum + (p.value as NumericHealthValue).numericValue.toDouble());
+    return total / data.length;
+  }
+
+  double get maxBpm {
+    if (data.isEmpty) return 0;
+    return data
+        .map((p) => (p.value as NumericHealthValue).numericValue.toDouble())
+        .reduce((a, b) => a > b ? a : b);
+  }
+
+  double get restingBpm {
+    if (data.isEmpty) return 0;
+    final sorted = data
+        .map((p) => (p.value as NumericHealthValue).numericValue.toDouble())
+        .toList()
+      ..sort();
+    // Take lowest 10% as approximate resting rate
+    final count = (sorted.length * 0.1).ceil();
+    final lowest = sorted.take(count).toList();
+    return lowest.fold(0.0, (a, b) => a + b) / lowest.length;
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<double> values = data
@@ -23,6 +49,15 @@ class HeartRateChart extends StatelessWidget {
             painter: _HeartRatePainter(values: values),
             child: const SizedBox.expand(),
           ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _StatLabel(label: 'Average', value: '${averageBpm.toStringAsFixed(0)} bpm'),
+            _StatLabel(label: 'Max', value: '${maxBpm.toStringAsFixed(0)} bpm'),
+            _StatLabel(label: 'Resting', value: '${restingBpm.toStringAsFixed(0)} bpm'),
+          ],
         ),
       ],
     );
@@ -50,6 +85,7 @@ class _HeartRatePainter extends CustomPainter {
       final y = size.height * i / gridLines;
       canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
     }
+
     final linePaint = Paint()
       ..color = const Color(0xFF00BFA5)
       ..strokeWidth = 2.5
