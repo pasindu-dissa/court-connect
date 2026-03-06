@@ -61,6 +61,16 @@ class ActivityChart extends StatelessWidget {
             rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
         ),
+        barGroups: List.generate(data.length, (i) {
+            return BarChartGroupData(
+              x: i,
+              barRods: [
+                BarChartRodData(
+                  toY: data[i].value,
+                ),  
+              ], 
+            ),
+        },            
       ),
     );
   }
