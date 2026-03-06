@@ -60,17 +60,37 @@ class ActivityChart extends StatelessWidget {
             topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
             rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-        ),
-        barGroups: List.generate(data.length, (i) {
+          barGroups: List.generate(data.length, (i) {
             return BarChartGroupData(
               x: i,
               barRods: [
                 BarChartRodData(
                   toY: data[i].value,
-                ),  
-              ], 
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF00BFA5), Color(0xFF1DE9B6)],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                  ),
+                  width: 16,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(8),
+                  ),
+                ),
+              ],
+            );
+          }),
+          barTouchData: BarTouchData(
+            touchTooltipData: BarTouchTooltipData(
+              tooltipRoundedRadius: 8,
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                return BarTooltipItem(
+                  '${rod.toY.toStringAsFixed(0)} $unit',
+                  const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                );
+              },
             ),
-        },            
+          ),
+        ),
       ),
     );
   }
