@@ -57,12 +57,27 @@ class HealthAnalysisScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Play Time card (full width for now)
-            SummaryCard(
-              icon: Icons.play_circle_filled_rounded,
-              label: 'Play Time',
-              value: '8h 15m',
-              color: const Color(0xFF00695C),
+            // Play Time & Calories side by side
+            Row(
+              children: [
+                Expanded(
+                  child: SummaryCard(
+                    icon: Icons.play_circle_filled_rounded,
+                    label: 'Play Time',
+                    value: '8h 15m',
+                    color: const Color(0xFF00695C),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SummaryCard(
+                    icon: Icons.local_fire_department_rounded,
+                    label: 'Calories',
+                    value: '2,450',
+                    color: const Color(0xFF00796B),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
