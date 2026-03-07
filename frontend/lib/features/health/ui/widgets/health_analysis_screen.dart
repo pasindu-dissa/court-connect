@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 import 'summary_card.dart';
 import 'daily_goal_card.dart';
 
@@ -22,8 +23,14 @@ class HealthAnalysisScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ── Dark mode values ─────────────────────────────────────────────────
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF2F4F7);
+    final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final borderColor = isDark
+        ? const Color(0xFF2C2C2C)
+        : const Color(0xFFE0E0E0);
     final textPrimary = isDark ? Colors.white : const Color(0xFF212121);
     final textSecondary = isDark ? Colors.white60 : const Color(0xFF757575);
 
@@ -45,6 +52,18 @@ class HealthAnalysisScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
+        // Dark mode toggle for testing
+        actions: [
+          IconButton(
+            icon: Icon(
+              isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+              color: textPrimary,
+            ),
+            onPressed: () {
+              themeNotifier.value = isDark ? ThemeMode.light : ThemeMode.dark;
+            },
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(20),
           child: Padding(
@@ -61,7 +80,7 @@ class HealthAnalysisScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Summary section ─────────────────────────────────────
+            // ── Summary section ──────────────────────────────────────
             Text(
               "This Week's Summary",
               style: TextStyle(
@@ -77,7 +96,8 @@ class HealthAnalysisScreen extends StatelessWidget {
                   child: SummaryCard(
                     icon: Icons.play_circle_filled_rounded,
                     label: 'Play Time',
-                    value: '8h 15m',
+                    value:
+                        '${_HealthMockData.playTimeHours}h ${_HealthMockData.playTimeMinutes}m',
                     color: const Color(0xFF00695C),
                   ),
                 ),
@@ -86,7 +106,7 @@ class HealthAnalysisScreen extends StatelessWidget {
                   child: SummaryCard(
                     icon: Icons.local_fire_department_rounded,
                     label: 'Calories',
-                    value: '2,450',
+                    value: '${_HealthMockData.caloriesBurned}',
                     color: const Color(0xFF00796B),
                   ),
                 ),
@@ -96,7 +116,7 @@ class HealthAnalysisScreen extends StatelessWidget {
             SummaryCard(
               icon: Icons.location_on_rounded,
               label: 'Courts Visited',
-              value: '4',
+              value: '${_HealthMockData.courtsVisited}',
               color: const Color(0xFF00897B),
             ),
 
@@ -112,10 +132,8 @@ class HealthAnalysisScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-
             Row(
               children: [
-                // Activity goal
                 Expanded(
                   child: DailyGoalCard(
                     icon: Icons.directions_run_rounded,
@@ -127,7 +145,6 @@ class HealthAnalysisScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                // Calories goal
                 Expanded(
                   child: DailyGoalCard(
                     icon: Icons.local_fire_department_rounded,
@@ -140,6 +157,7 @@ class HealthAnalysisScreen extends StatelessWidget {
                 ),
               ],
             ),
+
             const SizedBox(height: 32),
 
             // ── View Full History button ─────────────────────────────
@@ -154,7 +172,9 @@ class HealthAnalysisScreen extends StatelessWidget {
                   ),
                   elevation: 0,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  // TODO: navigate to full history screen
+                },
                 child: const Text(
                   'View Full History',
                   style: TextStyle(
