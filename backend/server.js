@@ -21,6 +21,8 @@ const express = require('express');
     app.use('/api/courts', require('./routes/courtRoutes'));
     app.use('/api/bookings', require('./routes/bookingRoutes'));
     app.use('/api/health', require('./routes/heartRateRoutes'));
+    app.use('/api/health', require('./routes/healthRoutes'));
+
 
     // 4. Base Route
     app.get('/', (req, res) => {
