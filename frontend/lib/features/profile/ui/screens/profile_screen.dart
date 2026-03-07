@@ -54,5 +54,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
           : const Center(child: Text('Profile Loaded')),
     );
   }
-  
+  void _handleUnauthorized() {
+  FirebaseAuth.instance.signOut();
+  Navigator.of(context).pushNamedAndRemoveUntil(
+    '/login',
+    (route) => false,
+  );
+}
+
+Future<void> _handleLogout() async {
+  final confirm = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Logout'),
+      content: const Text('Are you sure you want to logout?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text(
+            'Logout',
+            style: TextStyle(color: Colors.red),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  if (confirm == true) {
+    await FirebaseAuth.instance.signOut();
+    if (mounted) {
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/login',
+        (route) => false,
+      );
+    }
+  }
+}
+
+Widget _buildErrorState() {
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(
+            _errorMessage!,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: _loadProfile,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0F766E),
+            ),
+            child: const Text(
+              'Try Again',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 }
