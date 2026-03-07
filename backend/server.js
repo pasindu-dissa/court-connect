@@ -20,6 +20,7 @@ const express = require('express');
     app.use('/api/matches', require('./routes/matchRoutes'));
     app.use('/api/courts', require('./routes/courtRoutes'));
     app.use('/api/bookings', require('./routes/bookingRoutes'));
+    app.use('/api/health', require('./routes/heartRateRoutes'));
 
     // 4. Base Route
     app.get('/', (req, res) => {
