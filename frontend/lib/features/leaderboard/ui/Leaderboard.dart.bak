@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'shared_data.dart'; // This connects your UI to the shared database!
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -9,32 +8,36 @@ class LeaderboardScreen extends StatefulWidget {
 }
 
 class _LeaderboardScreenState extends State<LeaderboardScreen> {
-  // The local dummy data list was removed from here.
+  final List<Map<String, dynamic>> topPlayers = [
+    {'name': 'Alex', 'score': 1580, 'status': 'up'},
+    {'name': 'Sam', 'score': 1420, 'status': 'hot'},
+    {'name': 'Jordan', 'score': 1350, 'status': 'down'},
+    {'name': 'Taylor', 'score': 1200, 'status': 'up'},
+    {'name': 'Casey', 'score': 1100, 'status': 'down'},
+  ];
 
   @override
   Widget build(BuildContext context) {
-    // Read the latest data directly from the shared global list
-    final topPlayers = CourtDatabase.players;
-
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFF5F6F8,
-      ), // Light grey background from Figma
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF5F6F8),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).iconTheme.color,
+          ),
           onPressed: () {
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(const SnackBar(content: Text('Back ')));
           },
         ),
-        title: const Text(
+        title: Text(
           'Leaderboard',
           style: TextStyle(
-            color: Colors.black,
+            color: Theme.of(context).textTheme.titleLarge?.color,
             fontWeight: FontWeight.w800,
             fontSize: 22,
           ),
@@ -43,10 +46,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         actions: [
           TextButton(
             onPressed: () {},
-            child: const Text(
+            child: Text(
               'Bambalapitiya',
               style: TextStyle(
-                color: Colors.teal,
+                color: Theme.of(context).primaryColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -89,7 +92,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -104,21 +107,21 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
+                    children: [
+                      const Text(
                         'Current Streak',
                         style: TextStyle(
                           color: Colors.blueGrey,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 5),
+                      const SizedBox(height: 5),
                       Text(
                         '5 Wins',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w900,
-                          color: Color(0xFF1A202C),
+                          color: Theme.of(context).textTheme.titleLarge?.color,
                         ),
                       ),
                     ],
@@ -134,9 +137,13 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             const SizedBox(height: 25),
 
             // --- Challenges & Badges Section ---
-            const Text(
+            Text(
               'Challenges & Badges',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.titleLarge?.color,
+              ),
             ),
             const SizedBox(height: 15),
             Row(
@@ -164,9 +171,13 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             const SizedBox(height: 25),
 
             // --- Top Players Section ---
-            const Text(
+            Text(
               'Top Players',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.titleLarge?.color,
+              ),
             ),
             const SizedBox(height: 15),
             ListView.builder(
@@ -195,9 +206,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             const SnackBar(content: Text('Add new match tapped!')),
           );
         },
-        backgroundColor: const Color(
-          0xFF65C4B0,
-        ), // Match the Teal FAB from Figma
+        backgroundColor: Theme.of(context).primaryColor,
         child: const Icon(Icons.add, size: 30),
       ),
     );
@@ -214,7 +223,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -237,10 +246,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           const SizedBox(height: 10),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w900,
-              color: Color(0xFF1A202C),
+              color: Theme.of(context).textTheme.titleLarge?.color,
             ),
           ),
           const SizedBox(height: 5),
@@ -298,7 +307,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               child: isCircleIcon
                   ? CircleAvatar(
                       radius: 35,
-                      backgroundColor: Colors.white,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).scaffoldBackgroundColor,
                       child: Icon(icon, size: 40, color: Colors.grey),
                     )
                   : Icon(icon, size: 70, color: Colors.white),
@@ -311,9 +322,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
+                    color: Theme.of(context).textTheme.titleLarge?.color,
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -367,7 +379,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -381,15 +393,19 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
         leading: CircleAvatar(
           radius: 25,
-          backgroundColor: Colors.grey[300],
-          child: const Icon(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          child: Icon(
             Icons.person,
-            color: Colors.white,
+            color: Theme.of(context).iconTheme.color,
           ), // Replace with NetworkImage in production
         ),
         title: Text(
           '$rank. $name',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: Theme.of(context).textTheme.titleLarge?.color,
+          ),
         ),
         subtitle: Text(
           '$score Points',
