@@ -1,3 +1,5 @@
+// lib/features/health/ui/widgets/health_charts_section.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/health_notifier.dart';
@@ -20,13 +22,32 @@ class _HealthChartsSectionState extends State<HealthChartsSection> {
       context.read<HealthNotifier>().loadAll();
     });
   }
-}
+
   @override
   Widget build(BuildContext context) {
     final notifier = context.watch<HealthNotifier>();
-  }
 
-  final activityData = List.generate(7, (i) {
+    if (notifier.hasError) {
+      return _PermissionError(
+        message: notifier.errorMessage,
+        onRetry: () {
+          notifier.clearError();
+          notifier.loadAll();
+        },
+      );
+    }
+
+    if (notifier.isLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32),
+          child: CircularProgressIndicator(color: Color(0xFF00BFA5)),
+        ),
+      );
+    }
+
+    // Build last-7-days mock data from today's steps (real device will have full data)
+    final activityData = List.generate(7, (i) {
       final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       // Today's real steps for last bar, simulated for others
       final value = i == 6
@@ -38,7 +59,6 @@ class _HealthChartsSectionState extends State<HealthChartsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text('Activity (Steps)',
@@ -71,4 +91,43 @@ class _HealthChartsSectionState extends State<HealthChartsSection> {
                 child: HeartRateChart(data: notifier.heartRateData),
               ),
       ],
-    );  
+    );
+  }
+}
+
+class _PermissionError extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _PermissionError({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.health_and_safety_outlined, size: 48, color: Colors.grey),
+          const SizedBox(height: 12),
+          Text(
+            message.isEmpty ? 'Health permissions are required.' : message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Grant Permission'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF00BFA5),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
