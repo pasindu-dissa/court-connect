@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/services/auth_service.dart';
+import '../../../../core/services/user_provider.dart';
 import '../../../home/ui/main_wrapper.dart';
+import '../../../admin_panel/ui/screens/court_owner_dashboard.dart'; // Import Admin Screen
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,22 +20,32 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passController = TextEditingController();
   bool _isLoading = false;
 
+  Future<void> _checkRoleAndRedirect() async {
+    // 1. Fetch User Data from MongoDB
+    await Provider.of<UserProvider>(context, listen: false).loadUser();
+    
+    // 2. Get User Object
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    
+    if (mounted) {
+      // 3. Check Role
+      if (user != null && user['role'] == 'court_owner') {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const CourtOwnerDashboard()));
+      } else {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainWrapper()));
+      }
+    }
+  }
+
   void _handleLogin() async {
     if (_emailController.text.isEmpty || _passController.text.isEmpty) return;
     
     setState(() => _isLoading = true);
     try {
       await _auth.signIn(_emailController.text.trim(), _passController.text.trim());
-      
-      if (mounted) {
-        Navigator.pushReplacement(
-          context, 
-          MaterialPageRoute(builder: (_) => const MainWrapper()),
-        );
-      }
+      await _checkRoleAndRedirect(); // New Logic
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -41,15 +54,9 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
     try {
       await _auth.signInWithGoogle();
-      if (mounted) {
-        Navigator.pushReplacement(
-          context, 
-          MaterialPageRoute(builder: (_) => const MainWrapper()),
-        );
-      }
+      await _checkRoleAndRedirect(); // New Logic
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Google Sign In Failed: $e")));
-    } finally {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Google Sign In Failed: $e")));
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -113,7 +120,6 @@ class _LoginScreenState extends State<LoginScreen> {
               
               const SizedBox(height: 16),
               
-              // OR Divider
               Row(
                 children: [
                   Expanded(child: Divider(color: Colors.grey[300])),
