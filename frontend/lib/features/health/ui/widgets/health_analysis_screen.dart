@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import 'summary_card.dart';
 
 class HealthAnalysisScreen extends StatelessWidget {
   const HealthAnalysisScreen({super.key});
@@ -41,7 +42,46 @@ class HealthAnalysisScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: const Center(child: Text('Health Analysis Screen')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "This Week's Summary",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: textPrimary,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Play Time & Calories side by side
+            Row(
+              children: [
+                Expanded(
+                  child: SummaryCard(
+                    icon: Icons.play_circle_filled_rounded,
+                    label: 'Play Time',
+                    value: '8h 15m',
+                    color: const Color(0xFF00695C),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SummaryCard(
+                    icon: Icons.local_fire_department_rounded,
+                    label: 'Calories',
+                    value: '2,450',
+                    color: const Color(0xFF00796B),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
