@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../data/models/profile_model.dart';
 import '../../data/services/profile_service.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final ProfileModel profile;
@@ -200,5 +202,93 @@ Future<void> _saveProfile() async {
   } finally {
     if (mounted) setState(() => _isLoading = false);
   }
+}
+
+
+
+File? _selectedImage;
+bool _isUploadingImage = false;
+
+Future<void> _pickImage() async {
+  final picker = ImagePicker();
+  final pickedFile = await picker.pickImage(
+    source: ImageSource.gallery,
+    imageQuality: 80,
+  );
+  if (pickedFile != null) {
+    setState(() {
+      _selectedImage = File(pickedFile.path);
+    });
+  }
+}
+
+Future<String?> _uploadImage() async {
+  if (_selectedImage == null) return null;
+  setState(() => _isUploadingImage = true);
+  try {
+    final imageUrl =
+        await _profileService.uploadProfileImage(_selectedImage!);
+    return imageUrl;
+  } catch (e) {
+    _showSnackBar('Failed to upload image.', isError: true);
+    return null;
+  } finally {
+    setState(() => _isUploadingImage = false);
+  }
+}
+
+Widget _buildImagePicker() {
+  return Center(
+    child: Stack(
+      children: [
+        CircleAvatar(
+          radius: 60,
+          backgroundColor: const Color(0xFF0F766E).withOpacity(0.2),
+          backgroundImage: _selectedImage != null
+              ? FileImage(_selectedImage!)
+              : (widget.profile.profileImage.isNotEmpty
+                  ? NetworkImage(widget.profile.profileImage)
+                  : null) as ImageProvider?,
+          child: (_selectedImage == null &&
+                  widget.profile.profileImage.isEmpty)
+              ? const Icon(
+                  Icons.person,
+                  size: 60,
+                  color: Color(0xFF0F766E),
+                )
+              : null,
+        ),
+        if (_isUploadingImage)
+          Positioned.fill(
+            child: CircleAvatar(
+              radius: 60,
+              backgroundColor: Colors.black45,
+              child: const CircularProgressIndicator(
+                color: Colors.white,
+              ),
+            ),
+          ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: GestureDetector(
+            onTap: _isUploadingImage ? null : _pickImage,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Color(0xFF0F766E),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.camera_alt,
+                size: 20,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 }
