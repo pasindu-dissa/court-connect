@@ -125,6 +125,34 @@ class HealthAnalysisScreen extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 32),
+
+            // ── View Full History button ─────────────────────────────
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryDark,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  elevation: 0,
+                ),
+                onPressed: () {
+                  // TODO: navigate to full history screen
+                },
+                child: const Text(
+                  'View Full History',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
