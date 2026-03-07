@@ -5,7 +5,11 @@ import 'screens/home_screen.dart';
 // Import the new Booking Screen
 import '../../booking/ui/screens/booking_screen.dart';
 import '../../matchmaking/ui/screens/matchmaking_screen.dart'; // Import this
+<<<<<<< HEAD
 import '../../leaderboard/ui/screens/screen/leaderboard_screen.dart';
+=======
+import '../../leaderboard/ui/Leaderboard.dart'; // Import Leaderboard
+>>>>>>> 57a9c36c7b9f1ee73f7ab25ce6d5b1947db65410
 
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
@@ -21,6 +25,7 @@ class _MainWrapperState extends State<MainWrapper> {
     const HomeScreen(),
     const BookingScreen(),
     const MatchmakingScreen(), // <--- LINKED HERE (Index 2)
+<<<<<<< HEAD
     LeaderboardScreen(
       onLocationTapped: () {
         setState(() {
@@ -29,6 +34,10 @@ class _MainWrapperState extends State<MainWrapper> {
       },
     ),
     const ProfileScreen(),
+=======
+    const LeaderboardScreen(), // <--- LINKED HERE (Index 3)
+    const Center(child: Text("Profile Screen")),
+>>>>>>> 57a9c36c7b9f1ee73f7ab25ce6d5b1947db65410
   ];
 
   // ... (Rest of the file remains exactly the same as the previous step) ...
