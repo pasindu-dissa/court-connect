@@ -1,186 +1,378 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../data/models/user_model.dart';
+import '../../data/models/match_model.dart';
+import '../../data/models/booking_model.dart';
+import '../../data/mock_data/profile_mock_data.dart';
+import '../widgets/stat_card.dart';
+import '../widgets/booking_card.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({Key? key}) : super(key: key);
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool _isDarkTheme = false;
-  final TextEditingController _nameController = TextEditingController(text: "Alex Johnson");
-  final TextEditingController _emailController = TextEditingController(text: "alex.johnson@example.com");
+  late UserModel _user;
+  late MatchModel _upcomingMatch;
+  late List<BookingModel> _bookings;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    // Simulate API call
+    await Future.delayed(const Duration(seconds: 1));
+    
+    setState(() {
+      _user = ProfileMockData.getMockUser();
+      _upcomingMatch = ProfileMockData.getMockUpcomingMatch();
+      _bookings = ProfileMockData.getMockBookings();
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F4F7),
+      backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: const Text("My Profile", style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
-          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.menu, color: Colors.black),
+          onPressed: () {},
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Profile Image with Edit Badge
-            Center(
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 4),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5)),
-                      ],
-                    ),
-                    child: const CircleAvatar(
-                      radius: 60,
-                      backgroundImage: NetworkImage("https://i.pravatar.cc/300"),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 20),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
+            _buildProfileHeader(),
+            const SizedBox(height: 24),
+            _buildUpcomingMatch(),
+            const SizedBox(height: 24),
+            _buildMyBookings(),
+            const SizedBox(height: 24),
+            _buildActivity(),
+            const SizedBox(height: 24),
+            _buildFindMatchButton(),
             const SizedBox(height: 32),
-
-            // 2. Edit Details Section
-            _buildSectionHeader("Personal Details"),
-            const SizedBox(height: 16),
-            _buildTextField("Full Name", _nameController, Icons.person_outline),
-            const SizedBox(height: 16),
-            _buildTextField("Email", _emailController, Icons.email_outlined),
-
-            const SizedBox(height: 32),
-
-            // 3. Settings Section
-            _buildSectionHeader("Settings"),
-            const SizedBox(height: 16),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
-              ),
-              child: Column(
-                children: [
-                  // Theme Toggle
-                  SwitchListTile(
-                    activeColor: AppColors.primary,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                    title: const Text("Dark Mode", style: TextStyle(fontWeight: FontWeight.w600)),
-                    secondary: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: Colors.purple.withOpacity(0.1), shape: BoxShape.circle),
-                      child: const Icon(Icons.dark_mode_rounded, color: Colors.purple),
-                    ),
-                    value: _isDarkTheme,
-                    onChanged: (val) {
-                      setState(() => _isDarkTheme = val);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Theme switched! (Demo Only)")),
-                      );
-                    },
-                  ),
-                  const Divider(height: 1, indent: 20, endIndent: 20),
-                  // About App
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), shape: BoxShape.circle),
-                      child: const Icon(Icons.info_outline_rounded, color: Colors.blue),
-                    ),
-                    title: const Text("About App", style: TextStyle(fontWeight: FontWeight.w600)),
-                    trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
-                    onTap: () {
-                      showAboutDialog(
-                        context: context,
-                        applicationName: "Court Connect",
-                        applicationVersion: "1.0.0",
-                        applicationLegalese: "© 2026 Court Connect Inc.",
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
-            // 4. Sign Out Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle Sign Out Logic
-                  Navigator.pop(context); 
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.error.withOpacity(0.1),
-                  foregroundColor: AppColors.error,
-                  elevation: 0,
-                  side: const BorderSide(color: AppColors.error, width: 1),
-                ),
-                child: const Text("Sign Out"),
-              ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+  Widget _buildProfileHeader() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      color: Colors.white,
+      child: Row(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF0F766E), width: 2),
+            ),
+            child: ClipOval(
+              child: Image.network(
+                _user.avatarUrl ?? 'https://i.pravatar.cc/150?img=12',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: const Color(0xFF0F766E),
+                    child: const Icon(Icons.person, color: Colors.white, size: 30),
+                  );
+                },
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Text(
+            'Hi, ${_user.name}!',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, IconData icon) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, color: AppColors.textSecondary),
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+  Widget _buildUpcomingMatch() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+            ),
+            child: Image.network(
+              _upcomingMatch.imageUrl ?? '',
+              height: 200,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 200,
+                  color: Colors.grey[800],
+                  child: const Center(
+                    child: Icon(Icons.sports_tennis, size: 60, color: Colors.white),
+                  ),
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Upcoming Match',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Vs. ${_upcomingMatch.opponentName}',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _upcomingMatch.formattedTime,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _upcomingMatch.venue,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Checked in successfully!')),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0F766E),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        'Check In',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMyBookings() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            'My Bookings',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 160,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            itemCount: _bookings.length,
+            itemBuilder: (context, index) {
+              final booking = _bookings[index];
+              Color bgColor;
+              
+              if (booking.courtType == 'Hard') {
+                bgColor = Colors.blue[100]!;
+              } else if (booking.courtType == 'Clay') {
+                bgColor = Colors.orange[200]!;
+              } else {
+                bgColor = Colors.green[200]!;
+              }
+              
+              return Padding(
+                padding: EdgeInsets.only(right: index < _bookings.length - 1 ? 12 : 0),
+                child: BookingCard(
+                  date: booking.formattedDate,
+                  courtInfo: booking.courtInfo,
+                  imageUrl: booking.imageUrl,
+                  backgroundColor: bgColor,
+                ),
+              );
+            },
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+      ],
+    );
+  }
+
+  Widget _buildActivity() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Activity',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 16),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 1.4,
+            children: [
+              StatCard(
+                icon: Icons.sports_tennis,
+                value: '${_user.activityStats.matchesPlayed}',
+                label: 'Matches Played',
+              ),
+              StatCard(
+                icon: Icons.trending_up,
+                value: _user.activityStats.winLossRatio,
+                label: 'Win/Loss Ratio',
+              ),
+              StatCard(
+                icon: Icons.access_time,
+                value: '${_user.activityStats.hoursOnCourt}h',
+                label: 'Hours on Court',
+              ),
+              StatCard(
+                icon: Icons.emoji_events,
+                value: '#${_user.activityStats.clubRank}',
+                label: 'Club Rank',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFindMatchButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: () {
+            // Navigate to matchmaking
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF0F766E),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 2,
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.add, size: 24),
+              SizedBox(width: 8),
+              Text(
+                'Find a Match',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
