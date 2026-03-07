@@ -6,7 +6,9 @@ import 'package:geocoding/geocoding.dart';
 import '../../../../../core/constants/api_constants.dart';
 
 class LeaderboardScreen extends StatefulWidget {
-  const LeaderboardScreen({super.key});
+  final VoidCallback? onLocationTapped;
+
+  const LeaderboardScreen({super.key, this.onLocationTapped});
 
   @override
   State<LeaderboardScreen> createState() => _LeaderboardScreenState();
@@ -131,19 +133,28 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         centerTitle: true,
         actions: [
           TextButton(
-            onPressed: () {
-              setState(() {
-                _currentLocation = "Fetching Location...";
-              });
-              _fetchCurrentLocation();
-            },
-            child: Text(
-              _currentLocation,
-              style: const TextStyle(
-                color: Colors.teal,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+            onPressed:
+                widget.onLocationTapped ??
+                () {
+                  setState(() {
+                    _currentLocation = "Fetching Location...";
+                  });
+                  _fetchCurrentLocation();
+                },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.location_on, color: Colors.teal, size: 18),
+                const SizedBox(width: 4),
+                Text(
+                  _currentLocation,
+                  style: const TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

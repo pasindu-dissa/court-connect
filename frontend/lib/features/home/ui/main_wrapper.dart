@@ -15,11 +15,17 @@ class MainWrapper extends StatefulWidget {
 class _MainWrapperState extends State<MainWrapper> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
+  late final List<Widget> _screens = [
     const HomeScreen(),
     const BookingScreen(),
     const MatchmakingScreen(), // <--- LINKED HERE (Index 2)
-    const LeaderboardScreen(),
+    LeaderboardScreen(
+      onLocationTapped: () {
+        setState(() {
+          _currentIndex = 1;
+        });
+      },
+    ),
     const Center(child: Text("Profile Screen")),
   ];
 
