@@ -109,10 +109,12 @@ class _DirectionsMapScreenState extends State<DirectionsMapScreen> {
     for (final latLng in list) {
       if (minLat == null || latLng.latitude < minLat) minLat = latLng.latitude;
       if (maxLat == null || latLng.latitude > maxLat) maxLat = latLng.latitude;
-      if (minLng == null || latLng.longitude < minLng)
+      if (minLng == null || latLng.longitude < minLng) {
         minLng = latLng.longitude;
-      if (maxLng == null || latLng.longitude > maxLng)
+      }
+      if (maxLng == null || latLng.longitude > maxLng) {
         maxLng = latLng.longitude;
+      }
     }
     return LatLngBounds(
       southwest: LatLng(minLat!, minLng!),

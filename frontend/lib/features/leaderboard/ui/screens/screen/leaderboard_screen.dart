@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import '../../../../../core/constants/api_constants.dart';
 
 class LeaderboardScreen extends StatefulWidget {
@@ -12,6 +14,85 @@ class LeaderboardScreen extends StatefulWidget {
 
 class _LeaderboardScreenState extends State<LeaderboardScreen> {
   // The local dummy data list was removed from here.
+  String _currentLocation = "Fetching Location...";
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCurrentLocation();
+  }
+
+  Future<void> _fetchCurrentLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          setState(() {
+            _currentLocation = "Location Disabled";
+          });
+        }
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            setState(() {
+              _currentLocation = "Permission Denied";
+            });
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          setState(() {
+            _currentLocation = "Permission Denied";
+          });
+        }
+        return;
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks[0];
+        if (mounted) {
+          setState(() {
+            // Use locality (city) or subLocality (neighborhood)
+            _currentLocation = place.subLocality?.isNotEmpty == true
+                ? place.subLocality!
+                : (place.locality?.isNotEmpty == true
+                      ? place.locality!
+                      : "Unknown Location");
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _currentLocation = "Unknown Location";
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Error fetching location: \$e");
+      if (mounted) {
+        setState(() {
+          _currentLocation = "Location Error";
+        });
+      }
+    }
+  }
 
   Future<List<dynamic>> _fetchLeaderboard() async {
     try {
@@ -50,10 +131,15 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         centerTitle: true,
         actions: [
           TextButton(
-            onPressed: () {},
-            child: const Text(
-              'Bambalapitiya',
-              style: TextStyle(
+            onPressed: () {
+              setState(() {
+                _currentLocation = "Fetching Location...";
+              });
+              _fetchCurrentLocation();
+            },
+            child: Text(
+              _currentLocation,
+              style: const TextStyle(
                 color: Colors.teal,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
