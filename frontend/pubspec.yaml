@@ -40,28 +40,22 @@ dependencies:
 
   # For formatting dates nicely
   intl: ^0.18.1
-  # Flutter plugin to integrate Google Maps into the application
-  google_maps_flutter: ^2.5.0
-  # Used to make HTTP requests to backend APIs or external services
-  http: ^1.1.0
-  # Initializes and connects the Flutter app with Firebase services
-  firebase_core: ^2.32.0
-  # Handles user authentication with Firebase (email/password, etc.)
-  firebase_auth: ^4.20.0
-  # Enables Google account authentication for login/sign-in functionality
-  google_sign_in: ^6.2.1
-  # State management package used to manage and share app data across widgets
-  provider: ^6.0.0
-  # Accesses health and fitness data (steps, activity, etc.) from device health services
-  health: ^10.2.0
-  # Requests and manages runtime permissions (location, health data, etc.)
-  permission_handler: ^11.3.0
-  # Charting library used to create graphs and visualizations in the app
-  fl_chart: ^0.68.0
 
   # Google maps
+  google_maps_flutter: ^2.5.0
   geolocator: ^10.1.0  # <--- Add this
-  
+
+  # Networking
+  http: ^1.1.0
+
+  # Firebase Authentication
+  firebase_core: ^2.32.0 
+  firebase_auth: ^4.20.0
+  google_sign_in: ^6.2.1
+
+  # State Management
+  provider: ^6.0.0
+
   # Utilities
   url_launcher: ^6.2.1
 
