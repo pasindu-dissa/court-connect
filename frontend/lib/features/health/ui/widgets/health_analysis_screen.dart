@@ -1,8 +1,21 @@
-// Commit 16: Implement Circular Progress for Calories goal
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import 'summary_card.dart';
 import 'daily_goal_card.dart';
+
+class _HealthMockData {
+  static const int playTimeHours = 8;
+  static const int playTimeMinutes = 15;
+  static const int caloriesBurned = 2450;
+  static const int courtsVisited = 4;
+
+  static const int activityGoalPct = 80;
+  static const int caloriesGoalPct = 65;
+  static const int activityCurrent = 48;
+  static const int activityTarget = 60;
+  static const int caloriesCurrent = 325;
+  static const int caloriesTarget = 500;
+}
 
 class HealthAnalysisScreen extends StatelessWidget {
   const HealthAnalysisScreen({super.key});
@@ -107,8 +120,9 @@ class HealthAnalysisScreen extends StatelessWidget {
                   child: DailyGoalCard(
                     icon: Icons.directions_run_rounded,
                     label: 'Activity',
-                    sublabel: '48 / 60 min',
-                    percent: 80,
+                    sublabel:
+                        '${_HealthMockData.activityCurrent} / ${_HealthMockData.activityTarget} min',
+                    percent: _HealthMockData.activityGoalPct,
                     color: AppColors.primary,
                   ),
                 ),
@@ -118,8 +132,9 @@ class HealthAnalysisScreen extends StatelessWidget {
                   child: DailyGoalCard(
                     icon: Icons.local_fire_department_rounded,
                     label: 'Calories',
-                    sublabel: '325 / 500 kcal',
-                    percent: 65,
+                    sublabel:
+                        '${_HealthMockData.caloriesCurrent} / ${_HealthMockData.caloriesTarget} kcal',
+                    percent: _HealthMockData.caloriesGoalPct,
                     color: AppColors.primary,
                   ),
                 ),
@@ -139,9 +154,7 @@ class HealthAnalysisScreen extends StatelessWidget {
                   ),
                   elevation: 0,
                 ),
-                onPressed: () {
-                  // TODO: navigate to full history screen
-                },
+                onPressed: () {},
                 child: const Text(
                   'View Full History',
                   style: TextStyle(
