@@ -1,6 +1,8 @@
+// Commit 16: Implement Circular Progress for Calories goal
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import 'summary_card.dart';
+import 'daily_goal_card.dart';
 
 class HealthAnalysisScreen extends StatelessWidget {
   const HealthAnalysisScreen({super.key});
@@ -17,7 +19,6 @@ class HealthAnalysisScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        // Back button
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: textPrimary),
           onPressed: () => Navigator.of(context).maybePop(),
@@ -47,6 +48,7 @@ class HealthAnalysisScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Summary section ─────────────────────────────────────
             Text(
               "This Week's Summary",
               style: TextStyle(
@@ -56,8 +58,6 @@ class HealthAnalysisScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-
-            // Play Time & Calories side by side
             Row(
               children: [
                 Expanded(
@@ -80,35 +80,50 @@ class HealthAnalysisScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-
-            // Courts Visited (full width)
             SummaryCard(
               icon: Icons.location_on_rounded,
               label: 'Courts Visited',
               value: '4',
               color: const Color(0xFF00897B),
             ),
+
             const SizedBox(height: 28),
 
-            // ── Placeholder for upcoming sections ───────────────────────
-            Container(
-              width: double.infinity,
-              height: 160,
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isDark
-                      ? const Color(0xFF2C2C2C)
-                      : const Color(0xFFE0E0E0),
-                ),
+            // ── Daily Goals section ──────────────────────────────────
+            Text(
+              'Daily Goals',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: textPrimary,
               ),
-              child: Center(
-                child: Text(
-                  'Activity Levels — coming next',
-                  style: TextStyle(color: textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+
+            Row(
+              children: [
+                // Activity goal
+                Expanded(
+                  child: DailyGoalCard(
+                    icon: Icons.directions_run_rounded,
+                    label: 'Activity',
+                    sublabel: '48 / 60 min',
+                    percent: 80,
+                    color: AppColors.primary,
+                  ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                // Calories goal
+                Expanded(
+                  child: DailyGoalCard(
+                    icon: Icons.local_fire_department_rounded,
+                    label: 'Calories',
+                    sublabel: '325 / 500 kcal',
+                    percent: 65,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
