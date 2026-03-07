@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<String> _bannerImages = [
     "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800",
-    "https://images.unsplash.com/photo-1626224583764-847890e058f5?q=80&w=800",
+    "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=800",
     "https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=800",
   ];
 
@@ -336,7 +336,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const _CreativeCourtCard(
                   name: "Royal Badminton Complex",
                   image:
-                      "https://images.unsplash.com/photo-1626224583764-847890e058f5?q=80&w=800&auto=format&fit=crop",
+                      "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=800&auto=format&fit=crop",
                   price: "LKR 2500",
                   rating: "4.9",
                 ),

@@ -28,7 +28,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadData() async {
     // Simulate API call
     await Future.delayed(const Duration(seconds: 1));
-    
+
     setState(() {
       _user = ProfileMockData.getMockUser();
       _upcomingMatch = ProfileMockData.getMockUpcomingMatch();
@@ -40,9 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
@@ -56,8 +54,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         actions: [
           IconButton(
-             icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-             onPressed: () {},
+            icon: const Icon(Icons.notifications_outlined, color: Colors.black),
+            onPressed: () {},
           ),
         ],
       ),
@@ -101,7 +99,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     color: const Color(0xFF0F766E),
-                    child: const Icon(Icons.person, color: Colors.white, size: 30),
+                    child: const Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: 30,
+                    ),
                   );
                 },
               ),
@@ -153,8 +155,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 200,
                   color: Colors.grey[800],
                   child: const Center(
-                    child: Icon(Icons.sports_tennis, size: 60, color: Colors.white),
-                  );
+                    child: Icon(
+                      Icons.sports_tennis,
+                      size: 60,
+                      color: Colors.white,
+                    ),
+                  ),
+                );
               },
             ),
           ),
@@ -208,7 +215,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ElevatedButton(
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Checked in successfully!')),
+                          const SnackBar(
+                            content: Text('Checked in successfully!'),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
@@ -265,7 +274,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             itemBuilder: (context, index) {
               final booking = _bookings[index];
               Color bgColor;
-              
+
               if (booking.courtType == 'Hard') {
                 bgColor = Colors.blue[100]!;
               } else if (booking.courtType == 'Clay') {
@@ -273,9 +282,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               } else {
                 bgColor = Colors.green[200]!;
               }
-              
+
               return Padding(
-                padding: EdgeInsets.only(right: index < _bookings.length - 1 ? 12 : 0),
+                padding: EdgeInsets.only(
+                  right: index < _bookings.length - 1 ? 12 : 0,
+                ),
                 child: BookingCard(
                   date: booking.formattedDate,
                   courtInfo: booking.courtInfo,
@@ -354,7 +365,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
-               borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12),
             ),
             elevation: 2,
           ),
@@ -365,10 +376,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SizedBox(width: 8),
               Text(
                 'Find a Match',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ],
           ),

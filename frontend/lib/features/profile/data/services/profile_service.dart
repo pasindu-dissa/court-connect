@@ -6,10 +6,10 @@ import '../models/profile_model.dart';
 
 class ProfileService {
   // Change IP based on your testing device:
-  // Android Emulator  → http://10.0.2.2:5000
-  // Physical Device   → http://YOUR_PC_IP:5000
-  // iOS Simulator     → http://127.0.0.1:5000
-  static const String baseUrl = 'http://10.0.2.2:5000/api/users/profile';
+  // Android Emulator  → http://10.0.2.2:5005
+  // Physical Device   → http://YOUR_PC_IP:5005
+  // iOS Simulator     → http://127.0.0.1:5005
+  static const String baseUrl = 'http://10.0.2.2:5005/api/users/profile';
 
   // Get Firebase JWT token
   Future<String?> _getToken() async {
@@ -34,14 +34,11 @@ class ProfileService {
   }
 
   // GET /api/users/profile
-  
+
   Future<ProfileModel> fetchProfile() async {
     try {
       final headers = await _authHeaders();
-      final response = await http.get(
-        Uri.parse(baseUrl),
-        headers: headers,
-      );
+      final response = await http.get(Uri.parse(baseUrl), headers: headers);
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
@@ -55,9 +52,9 @@ class ProfileService {
       rethrow;
     }
   }
- 
+
   // PUT /api/users/profile
-  
+
   Future<ProfileModel> updateProfile(ProfileModel profile) async {
     try {
       final headers = await _authHeaders();
@@ -80,24 +77,17 @@ class ProfileService {
     }
   }
 
-  
   // PUT /api/users/profile/image
-  
+
   Future<String> uploadProfileImage(File imageFile) async {
     try {
       final token = await _getToken();
-      final request = http.MultipartRequest(
-        'PUT',
-        Uri.parse('$baseUrl/image'),
-      );
+      final request = http.MultipartRequest('PUT', Uri.parse('$baseUrl/image'));
 
       request.headers['Authorization'] = 'Bearer $token';
 
       request.files.add(
-        await http.MultipartFile.fromPath(
-          'profileImage',
-          imageFile.path,
-        ),
+        await http.MultipartFile.fromPath('profileImage', imageFile.path),
       );
 
       final streamedResponse = await request.send();
@@ -116,16 +106,12 @@ class ProfileService {
     }
   }
 
-  
   // DELETE /api/users/profile
-  
+
   Future<void> deleteAccount() async {
     try {
       final headers = await _authHeaders();
-      final response = await http.delete(
-        Uri.parse(baseUrl),
-        headers: headers,
-      );
+      final response = await http.delete(Uri.parse(baseUrl), headers: headers);
 
       if (response.statusCode == 200) {
         return;

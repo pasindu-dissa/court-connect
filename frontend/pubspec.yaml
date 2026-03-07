@@ -2,7 +2,7 @@ name: frontend
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -53,28 +53,14 @@ dependencies:
   # State management package used to manage and share app data across widgets
   provider: ^6.0.0
   # Accesses health and fitness data (steps, activity, etc.) from device health services
-  health: ^10.2.0
+  health: ^11.0.0
   # Requests and manages runtime permissions (location, health data, etc.)
   permission_handler: ^11.3.0
   # Charting library used to create graphs and visualizations in the app
   fl_chart: ^0.68.0
 
-  # Google maps
-  google_maps_flutter: ^2.5.0
-  geolocator: ^10.1.0  # <--- Add this
-
-  # Networking
-  http: ^1.1.0
-
-  # Firebase Authentication
-  firebase_core: ^2.32.0 
-  firebase_auth: ^4.20.0
-  google_sign_in: ^6.2.1
-
-  # State Management
-  provider: ^6.0.0
-
-  # Utilities
+  # Geolocation and Utilities
+  geolocator: ^10.1.0 # <--- Add this
   url_launcher: ^6.2.1
   geocoding: ^4.0.0
 
@@ -94,7 +80,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
