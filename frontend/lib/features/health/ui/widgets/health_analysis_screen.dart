@@ -79,6 +79,15 @@ class HealthAnalysisScreen extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+
+            // Courts Visited (full width)
+            SummaryCard(
+              icon: Icons.location_on_rounded,
+              label: 'Courts Visited',
+              value: '4',
+              color: const Color(0xFF00897B),
+            ),
           ],
         ),
       ),
