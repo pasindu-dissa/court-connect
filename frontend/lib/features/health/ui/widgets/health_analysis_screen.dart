@@ -88,6 +88,28 @@ class HealthAnalysisScreen extends StatelessWidget {
               value: '4',
               color: const Color(0xFF00897B),
             ),
+            const SizedBox(height: 28),
+
+            // ── Placeholder for upcoming sections ───────────────────────
+            Container(
+              width: double.infinity,
+              height: 160,
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark
+                      ? const Color(0xFF2C2C2C)
+                      : const Color(0xFFE0E0E0),
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  'Activity Levels — coming next',
+                  style: TextStyle(color: textSecondary, fontSize: 13),
+                ),
+              ),
+            ),
           ],
         ),
       ),
