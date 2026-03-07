@@ -4,6 +4,9 @@ import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import '../../../../../core/constants/api_constants.dart';
+import 'featured_challenge_screen.dart';
+import 'new_badge_screen.dart';
+import 'streak_screen.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   final VoidCallback? onLocationTapped;
@@ -191,49 +194,87 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             const SizedBox(height: 15),
 
             // --- Current Streak Card ---
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        const StreakScreen(currentStreak: 5),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                          var begin = const Offset(0.0, 1.0);
+                          var end = Offset.zero;
+                          var curve = Curves.easeOutCubic;
+                          var tween = Tween(
+                            begin: begin,
+                            end: end,
+                          ).chain(CurveTween(curve: curve));
+                          return SlideTransition(
+                            position: animation.drive(tween),
+                            child: child,
+                          );
+                        },
                   ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Current Streak',
-                        style: TextStyle(
-                          color: Colors.blueGrey,
-                          fontWeight: FontWeight.bold,
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 15,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Current Streak',
+                          style: TextStyle(
+                            color: Colors.blueGrey,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        '5 Wins',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFF1A202C),
+                        SizedBox(height: 5),
+                        Text(
+                          '5 Weeks',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF1A202C),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const Icon(
-                    Icons.local_fire_department,
-                    color: Colors.deepOrange,
-                    size: 40,
-                  ),
-                ],
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.local_fire_department,
+                          color: Colors.deepOrange,
+                          size: 40,
+                        ),
+                        const SizedBox(width: 5),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.grey.shade400,
+                          size: 16,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 25),
@@ -252,6 +293,14 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     icon: Icons.emoji_events,
                     title: 'Featured Challenge',
                     subtitle: 'Win 5 games this week',
+                    onViewPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FeaturedChallengeScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 15),
@@ -262,6 +311,30 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     title: 'New Badge Unlocked',
                     subtitle: 'The Rival',
                     isCircleIcon: true,
+                    onViewPressed: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  const NewBadgeScreen(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                                var begin = const Offset(0.0, 1.0);
+                                var end = Offset.zero;
+                                var curve = Curves.easeOutCubic;
+                                var tween = Tween(
+                                  begin: begin,
+                                  end: end,
+                                ).chain(CurveTween(curve: curve));
+                                return SlideTransition(
+                                  position: animation.drive(tween),
+                                  child: child,
+                                );
+                              },
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -388,6 +461,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     required String title,
     required String subtitle,
     bool isCircleIcon = false,
+    VoidCallback? onViewPressed,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -451,7 +525,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: onViewPressed ?? () {},
                     child: const Text(
                       'View',
                       style: TextStyle(color: Colors.white),
