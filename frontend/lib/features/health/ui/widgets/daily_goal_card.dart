@@ -12,13 +12,8 @@ class DailyGoalCard extends StatelessWidget {
 
   final IconData icon;
   final String label;
-
-  /// e.g. "48 / 60 min"
   final String sublabel;
-
-  /// 0–100
   final int percent;
-
   final Color color;
 
   @override
@@ -39,15 +34,52 @@ class DailyGoalCard extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── Circular progress placeholder ──────────────────────────
-          Container(
+          // ── Circular Progress ──────────────────────────────────────
+          SizedBox(
             width: 80,
             height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: color.withOpacity(0.3), width: 7),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Background track
+                SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: CircularProgressIndicator(
+                    value: 1,
+                    strokeWidth: 7,
+                    color: color.withOpacity(0.18),
+                  ),
+                ),
+                // Foreground progress
+                SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: CircularProgressIndicator(
+                    value: percent / 100,
+                    strokeWidth: 7,
+                    color: color,
+                    strokeCap: StrokeCap.round,
+                  ),
+                ),
+                // Icon + percent inside ring
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, color: color, size: 20),
+                    const SizedBox(height: 2),
+                    Text(
+                      '$percent%',
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            child: Center(child: Icon(icon, color: color, size: 28)),
           ),
 
           const SizedBox(height: 12),
