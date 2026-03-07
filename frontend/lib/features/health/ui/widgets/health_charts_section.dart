@@ -54,5 +54,21 @@ class _HealthChartsSectionState extends State<HealthChartsSection> {
         ),
 
         const SizedBox(height: 24),
+
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text('Heart Rate',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
+        notifier.heartRateData.isEmpty
+            ? const Padding(
+                padding: EdgeInsets.all(16),
+                child: Text('No heart rate data available.',
+                    style: TextStyle(color: Colors.grey)),
+              )
+            : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: HeartRateChart(data: notifier.heartRateData),
+              ),
       ],
-    );
+    );  

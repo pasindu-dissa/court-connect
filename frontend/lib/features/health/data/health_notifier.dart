@@ -1,4 +1,3 @@
-// ✅ Commit 15: State notifier for health data updates
 // lib/features/health/data/health_notifier.dart
 
 import 'package:flutter/foundation.dart';
@@ -56,7 +55,6 @@ class HealthNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// ✅ Used by Commit 18: error handling for permission denial
   void clearError() {
     hasError = false;
     errorMessage = '';
