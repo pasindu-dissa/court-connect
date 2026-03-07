@@ -160,4 +160,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
     );
   }
+  void _showSnackBar(String message, {required bool isError}) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      backgroundColor: isError ? Colors.red : const Color(0xFF0F766E),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    ),
+  );
+}
+
+Future<void> _saveProfile() async {
+  if (!_formKey.currentState!.validate()) return;
+  setState(() => _isLoading = true);
+  try {
+    final updatedProfile = widget.profile.copyWith(
+      name: _nameController.text.trim(),
+      phone: _phoneController.text.trim(),
+      bio: _bioController.text.trim(),
+      location: _locationController.text.trim(),
+      district: _districtController.text.trim(),
+    );
+    final result = await _profileService.updateProfile(updatedProfile);
+    if (mounted) {
+      _showSnackBar('Profile updated successfully!', isError: false);
+      await Future.delayed(const Duration(seconds: 1));
+      Navigator.pop(context, result);
+    }
+  } catch (e) {
+    if (!mounted) return;
+    if (e.toString().contains('UNAUTHORIZED')) {
+      _showSnackBar('Session expired. Please login again.', isError: true);
+    } else {
+      _showSnackBar('Failed to update profile.', isError: true);
+    }
+  } finally {
+    if (mounted) setState(() => _isLoading = false);
+  }
+}
 }
