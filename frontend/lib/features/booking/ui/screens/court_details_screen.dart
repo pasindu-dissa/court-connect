@@ -42,9 +42,10 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
 
   IconData _getSportIcon(String sport) {
     switch (sport.toLowerCase()) {
-      case 'tennis': return Icons.sports_baseball_outlined;
+      case 'tennis': return Icons.sports_tennis;
       case 'basketball': return Icons.sports_basketball;
-      case 'football': return Icons.sports_soccer;
+      case 'football':
+      case 'futsal': return Icons.sports_soccer;
       case 'cricket': return Icons.sports_cricket;
       case 'swimming': return Icons.pool;
       case 'badminton': return Icons.sports_tennis; 
@@ -59,8 +60,41 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
     setState(() {
       _bookedSlots = bookings;
       _isLoadingSlots = false;
+      // Remove any slots that might now be invalid due to date change
       _selectedTimeSlots.clear(); 
     });
+  }
+
+  // --- NEW: Check if slot time has passed ---
+  bool _isSlotPassed(String slotTime) {
+    final now = DateTime.now();
+    
+    // 1. If it's a future day, nothing is passed
+    if (_selectedDate.year > now.year ||
+        (_selectedDate.year == now.year && _selectedDate.month > now.month) ||
+        (_selectedDate.year == now.year && _selectedDate.month == now.month && _selectedDate.day > now.day)) {
+      return false; 
+    }
+    
+    // 2. If it's a past day, everything is passed
+    if (_selectedDate.year < now.year ||
+        (_selectedDate.year == now.year && _selectedDate.month < now.month) ||
+        (_selectedDate.year == now.year && _selectedDate.month == now.month && _selectedDate.day < now.day)) {
+      return true; 
+    }
+
+    // 3. It's today. Compare the exact hour
+    final parts = slotTime.split(' ');
+    final timeParts = parts[0].split(':');
+    int slotHour = int.parse(timeParts[0]);
+    final isPM = parts[1] == 'PM';
+
+    if (slotHour == 12 && !isPM) slotHour = 0;
+    if (slotHour != 12 && isPM) slotHour += 12;
+
+    if (now.hour > slotHour) return true;
+    if (now.hour == slotHour && now.minute > 0) return true; // Assuming slots are on the hour
+    return false;
   }
 
   void _toggleSlot(String slot) {
@@ -166,7 +200,6 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
     double totalPrice = price * _selectedTimeSlots.length;
     final bool isHosting = widget.pendingMatchData != null;
 
-    // Resolve Sports array
     List<dynamic> sportsList = widget.court['sports'] ?? [];
     if (sportsList.isEmpty && widget.court['sport'] != null) {
       sportsList = [widget.court['sport']];
@@ -227,7 +260,6 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
                       
                       const SizedBox(height: 24),
 
-                      // Sports Badges
                       const Text("Available Sports", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       const SizedBox(height: 12),
                       Wrap(
@@ -286,19 +318,32 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
                         : Wrap(
                             spacing: 10, runSpacing: 10,
                             children: _allSlots.map((slot) {
+                              bool isPassed = _isSlotPassed(slot);
                               bool isBooked = _bookedSlots.contains(slot);
+                              bool isUnavailable = isPassed || isBooked;
                               bool isSelected = _selectedTimeSlots.contains(slot);
+                              
                               return GestureDetector(
-                                onTap: isBooked ? null : () => _toggleSlot(slot),
+                                onTap: isUnavailable ? null : () => _toggleSlot(slot),
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 200),
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                                   decoration: BoxDecoration(
-                                    color: isBooked ? (isDark ? Colors.white10 : Colors.grey[200]) : (isSelected ? AppColors.primary : cardColor),
+                                    // Make passed slots slightly lighter than booked slots for visual distinction
+                                    color: isUnavailable 
+                                      ? (isDark ? Colors.white10 : (isPassed ? Colors.grey[100] : Colors.grey[200])) 
+                                      : (isSelected ? AppColors.primary : cardColor),
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(color: isSelected ? AppColors.primary : (isDark ? Colors.transparent : Colors.grey.shade300))
                                   ),
-                                  child: Text(slot, style: TextStyle(color: isBooked ? Colors.grey : (isSelected ? Colors.white : textColor), decoration: isBooked ? TextDecoration.lineThrough : null, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                                  child: Text(
+                                    slot, 
+                                    style: TextStyle(
+                                      color: isUnavailable ? Colors.grey : (isSelected ? Colors.white : textColor), 
+                                      decoration: isBooked ? TextDecoration.lineThrough : null, // Strikethrough ONLY for booked, passed is just greyed out
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal
+                                    )
+                                  ),
                                 ),
                               );
                             }).toList(),
