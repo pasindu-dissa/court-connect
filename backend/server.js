@@ -1,3 +1,4 @@
+
 const express = require('express');
     const dotenv = require('dotenv');
     const cors = require('cors');
@@ -20,9 +21,7 @@ const express = require('express');
     app.use('/api/matches', require('./routes/matchRoutes'));
     app.use('/api/courts', require('./routes/courtRoutes'));
     app.use('/api/bookings', require('./routes/bookingRoutes'));
-    app.use('/api/health', require('./routes/heartRateRoutes'));
-    app.use('/api/health', require('./routes/healthRoutes'));
-
+    app.use('/api/users/profile', require('./routes/profileRoutes'));
 
     // 4. Base Route
     app.get('/', (req, res) => {
