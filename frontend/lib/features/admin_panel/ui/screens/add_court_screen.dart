@@ -87,7 +87,7 @@ class _AddCourtScreenState extends State<AddCourtScreen> {
       "contactNumber": _contactController.text.trim(),
       "images": [
         _imageController.text.trim().isEmpty
-            ? "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0"
+            ? "https://images.unsplash.com/photo-1593491205049-7f032d28cf01"
             : _imageController.text.trim(),
       ],
       "latitude": lat,
@@ -108,11 +108,10 @@ class _AddCourtScreenState extends State<AddCourtScreen> {
         Navigator.pop(context, true);
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted)
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Error: $e")));
-      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

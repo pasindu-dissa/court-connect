@@ -48,8 +48,3 @@ node_modules/
 
 .env
 
-.metadata
-
-# Firebase keys (DO NOT COMMIT)
-firebase-service-account.json
-*firebase*.json
