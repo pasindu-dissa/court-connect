@@ -171,10 +171,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         return;
       }
 
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent + 120,
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
+      _scrollController.jumpTo(
+        _scrollController.position.maxScrollExtent,
       );
     });
   }
