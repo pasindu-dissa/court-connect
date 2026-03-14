@@ -189,128 +189,85 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             switchInCurve: Curves.easeOut,
             switchOutCurve: Curves.easeIn,
             child: showIntro
-                ? Column(
+                ? Container(
                     key: const ValueKey('chat-intro'),
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.fromLTRB(20, 12, 20, 10),
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              AppColors.primary,
-                              AppColors.primaryDark,
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                    margin: const EdgeInsets.fromLTRB(20, 12, 20, 10),
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          AppColors.primary,
+                          AppColors.primaryDark,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.18),
+                          blurRadius: 18,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 18,
+                              backgroundColor: Colors.white24,
+                              child: Icon(
+                                Icons.smart_toy_rounded,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Your in-app sports assistant',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Ask for booking help, player coordination, or a quick game-day plan without leaving the app.',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.88),
+                            height: 1.4,
                           ),
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withOpacity(0.18),
-                              blurRadius: 18,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        const SizedBox(height: 14),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
                           children: [
-                            const Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 18,
-                                  backgroundColor: Colors.white24,
-                                  child: Icon(
-                                    Icons.smart_toy_rounded,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    'Your in-app sports assistant',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            _InfoChip(
+                              icon: Icons.bolt_rounded,
+                              label: _isSending ? 'Thinking...' : 'Live replies',
                             ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Ask for booking help, player coordination, or a quick game-day plan without leaving the app.',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.88),
-                                height: 1.4,
-                              ),
+                            _InfoChip(
+                              icon: Icons.link_rounded,
+                              label: _sessionId == null
+                                  ? 'New session'
+                                  : 'Connected',
                             ),
-                            const SizedBox(height: 14),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: [
-                                _InfoChip(
-                                  icon: Icons.bolt_rounded,
-                                  label: _isSending
-                                      ? 'Thinking...'
-                                      : 'Live replies',
-                                ),
-                                _InfoChip(
-                                  icon: Icons.link_rounded,
-                                  label: _sessionId == null
-                                      ? 'New session'
-                                      : 'Connected',
-                                ),
-                                const _InfoChip(
-                                  icon: Icons.sports_tennis_rounded,
-                                  label: 'Booking tips',
-                                ),
-                              ],
+                            const _InfoChip(
+                              icon: Icons.sports_tennis_rounded,
+                              label: 'Booking tips',
                             ),
                           ],
                         ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: theme.cardColor.withOpacity(0.82),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Try one of these prepared questions',
-                              style: TextStyle(
-                                color: theme.colorScheme.onSurface,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  for (final quickReply in _quickReplies) ...[
-                                    _QuickReplyButton(
-                                      label: quickReply,
-                                      enabled: !_isSending,
-                                      onTap: () => _sendMessage(quickReply),
-                                    ),
-                                    const SizedBox(width: 10),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   )
                 : const SizedBox(
                     key: ValueKey('chat-intro-hidden'),
@@ -348,60 +305,100 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             top: false,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: Row(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      focusNode: _inputFocusNode,
-                      enabled: !_isSending,
-                      textInputAction: TextInputAction.send,
-                      minLines: 1,
-                      maxLines: 4,
-                      onSubmitted: (_) => _sendMessage(),
-                      decoration: InputDecoration(
-                        hintText: _isSending
-                            ? 'Court Coach is replying...'
-                            : 'Ask Court Coach...',
-                        filled: true,
-                        fillColor: theme.cardColor,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(22),
-                          borderSide: BorderSide.none,
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: theme.cardColor.withOpacity(0.82),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Try one of these prepared questions',
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 16,
+                        const SizedBox(height: 10),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              for (final quickReply in _quickReplies) ...[
+                                _QuickReplyButton(
+                                  label: quickReply,
+                                  enabled: !_isSending,
+                                  onTap: () => _sendMessage(quickReply),
+                                ),
+                                const SizedBox(width: 10),
+                              ],
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: _isSending ? null : _sendMessage,
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: _isSending
-                            ? AppColors.primaryLight
-                            : AppColors.primary,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withOpacity(0.22),
-                            blurRadius: 12,
-                            offset: const Offset(0, 6),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          focusNode: _inputFocusNode,
+                          enabled: !_isSending,
+                          textInputAction: TextInputAction.send,
+                          minLines: 1,
+                          maxLines: 4,
+                          onSubmitted: (_) => _sendMessage(),
+                          decoration: InputDecoration(
+                            hintText: _isSending ? 'Typing...' : 'Message...',
+                            filled: true,
+                            fillColor: theme.cardColor,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(22),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 16,
+                            ),
                           ),
-                        ],
+                        ),
                       ),
-                      child: Icon(
-                        _isSending
-                            ? Icons.more_horiz_rounded
-                            : Icons.send_rounded,
-                        color: Colors.white,
+                      const SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: _isSending ? null : _sendMessage,
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: _isSending
+                                ? AppColors.primaryLight
+                                : AppColors.primary,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.22),
+                                blurRadius: 12,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            _isSending
+                                ? Icons.more_horiz_rounded
+                                : Icons.send_rounded,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
