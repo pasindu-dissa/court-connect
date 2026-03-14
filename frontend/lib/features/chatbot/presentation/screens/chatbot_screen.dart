@@ -35,6 +35,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   ];
   String? _sessionId;
   bool _isSending = false;
+  bool _hasOpenedPreparedQuestions = false;
 
   @override
   void initState() {
@@ -60,7 +61,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   bool get _shouldCollapseIntro {
-    return _inputFocusNode.hasFocus || _controller.text.trim().isNotEmpty;
+    return _inputFocusNode.hasFocus ||
+        _controller.text.trim().isNotEmpty ||
+        _hasOpenedPreparedQuestions;
   }
 
   Future<void> _sendMessage([String? presetText]) async {
@@ -176,6 +179,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   Future<void> _showPreparedQuestionsSheet() async {
+    if (!_hasOpenedPreparedQuestions && mounted) {
+      setState(() {
+        _hasOpenedPreparedQuestions = true;
+      });
+    }
+
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
