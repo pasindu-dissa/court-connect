@@ -320,7 +320,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                       decoration: InputDecoration(
                         hintText: _isSending
                             ? 'Court Coach is replying...'
-                            : 'Ask Court Coach about courts, players, or prep...',
+                            : 'Ask Court Coach...',
                         filled: true,
                         fillColor: theme.cardColor,
                         border: OutlineInputBorder(
