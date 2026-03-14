@@ -4,6 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/services/app_activity_service.dart';
 import '../../../../core/services/api_service.dart';
 import '../chat_ui/chat_bubble.dart';
+import '../models/chat_session_store.dart';
 
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({super.key});
@@ -13,30 +14,28 @@ class ChatbotScreen extends StatefulWidget {
 }
 
 class _ChatbotScreenState extends State<ChatbotScreen> {
+  final ChatSessionStore _sessionStore = ChatSessionStore.instance;
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode();
   final ApiService _apiService = ApiService();
-  final List<_Message> _messages = const [
-    _Message(
-      text:
-          'Hi, I am Court Coach. I can help with bookings, player invites, venue questions, and match prep.',
-      isUser: false,
-      label: 'Court Coach',
-      footer: 'Ready to connect to live assistant',
-    ),
-  ].toList();
-  List<String> _quickReplies = const [
-    'Can you find an evening badminton court for me?',
-    'Can you draft a player invite message?',
-    'What should I pack for match day?',
-    'Can you help me find doubles players?',
-    'Which courts are best for beginners?',
-    'How early should I arrive for my game?',
-  ];
-  String? _sessionId;
   bool _isSending = false;
-  bool _hasOpenedPreparedQuestions = false;
+
+  List<_Message> get _messages {
+    return _sessionStore.messages
+        .map(
+          (message) => _Message(
+            text: message['text'] as String? ?? '',
+            isUser: message['isUser'] as bool? ?? false,
+            label: message['label'] as String?,
+            footer: message['footer'] as String?,
+            isError: message['isError'] as bool? ?? false,
+          ),
+        )
+        .toList();
+  }
+
+  List<String> get _quickReplies => _sessionStore.quickReplies;
 
   @override
   void initState() {
@@ -65,7 +64,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   bool get _shouldCollapseIntro {
     return _inputFocusNode.hasFocus ||
         _controller.text.trim().isNotEmpty ||
-        _hasOpenedPreparedQuestions;
+        _sessionStore.hasOpenedPreparedQuestions;
   }
 
   Future<void> _sendMessage([String? presetText]) async {
@@ -85,12 +84,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         .toList();
 
     setState(() {
-      _hasOpenedPreparedQuestions = true;
-      _messages.add(
-        _Message(
-          text: text,
-          isUser: true,
-        ),
+      _sessionStore.setHasOpenedPreparedQuestions(true);
+      _sessionStore.addMessage(
+        text: text,
+        isUser: true,
       );
       _isSending = true;
     });
@@ -103,7 +100,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         message: text,
         history: history,
         activityContext: AppActivityService.instance.buildContextPayload(),
-        sessionId: _sessionId,
+        sessionId: _sessionStore.sessionId,
       );
 
       if (!mounted) {
@@ -111,17 +108,15 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       }
 
       setState(() {
-        _sessionId = reply.sessionId;
+        _sessionStore.setSessionId(reply.sessionId);
         if (reply.quickReplies.isNotEmpty) {
-          _quickReplies = reply.quickReplies;
+          _sessionStore.setQuickReplies(reply.quickReplies);
         }
-        _messages.add(
-          _Message(
-            text: reply.reply,
-            isUser: false,
-            label:
-                reply.source == 'openai' ? 'Court Coach AI' : 'Court Coach Demo',
-          ),
+        _sessionStore.addMessage(
+          text: reply.reply,
+          isUser: false,
+          label:
+              reply.source == 'openai' ? 'Court Coach AI' : 'Court Coach Demo',
         );
       });
     } on ApiException catch (error) {
@@ -130,15 +125,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       }
 
       setState(() {
-        _messages.add(
-          _Message(
-            text:
-                'I could not reach the chatbot backend. ${error.message} Check that the backend is running and that the app is pointing to the correct local port.',
-            isUser: false,
-            isError: true,
-            label: 'Connection issue',
-            footer: 'Expected local backend on port 52445',
-          ),
+        _sessionStore.addMessage(
+          text:
+              'I could not reach the chatbot backend. ${error.message} Check that the backend is running and that the app is pointing to the correct local port.',
+          isUser: false,
+          isError: true,
+          label: 'Connection issue',
+          footer: 'Expected local backend on port 52445',
         );
       });
     } catch (_) {
@@ -147,15 +140,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       }
 
       setState(() {
-        _messages.add(
-          const _Message(
-            text:
-                'Something unexpected happened while contacting the assistant. Restart the backend and try again.',
-            isUser: false,
-            isError: true,
-            label: 'Unexpected error',
-            footer: 'Court Coach could not complete this request',
-          ),
+        _sessionStore.addMessage(
+          text:
+              'Something unexpected happened while contacting the assistant. Restart the backend and try again.',
+          isUser: false,
+          isError: true,
+          label: 'Unexpected error',
+          footer: 'Court Coach could not complete this request',
         );
       });
     } finally {
@@ -181,9 +172,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   Future<void> _showPreparedQuestionsSheet() async {
-    if (!_hasOpenedPreparedQuestions && mounted) {
+    if (!_sessionStore.hasOpenedPreparedQuestions && mounted) {
       setState(() {
-        _hasOpenedPreparedQuestions = true;
+        _sessionStore.setHasOpenedPreparedQuestions(true);
       });
     }
 
@@ -350,7 +341,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                                 ),
                                 _InfoChip(
                                   icon: Icons.link_rounded,
-                                  label: _sessionId == null
+                                  label: _sessionStore.sessionId == null
                                       ? 'New session'
                                       : 'Connected',
                                 ),
