@@ -29,6 +29,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     'Can you find an evening badminton court for me?',
     'Can you draft a player invite message?',
     'What should I pack for match day?',
+    'Can you help me find doubles players?',
+    'Which courts are best for beginners?',
+    'How early should I arrive for my game?',
   ];
   String? _sessionId;
   bool _isSending = false;
@@ -170,6 +173,76 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         curve: Curves.easeOut,
       );
     });
+  }
+
+  Future<void> _showPreparedQuestionsSheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        final sheetTheme = Theme.of(sheetContext);
+
+        return SafeArea(
+          top: false,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+            decoration: BoxDecoration(
+              color: sheetTheme.scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 42,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.35),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'Prepared questions',
+                  style: TextStyle(
+                    color: sheetTheme.colorScheme.onSurface,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Pick a starter and Court Coach will send it instantly.',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                ..._quickReplies.map(
+                  (quickReply) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _PreparedQuestionTile(
+                      label: quickReply,
+                      enabled: !_isSending,
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        _sendMessage(quickReply);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -315,34 +388,47 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                       color: theme.cardColor.withOpacity(0.82),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Try one of these prepared questions',
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurface,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: _isSending ? null : _showPreparedQuestionsSheet,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              for (final quickReply in _quickReplies) ...[
-                                _QuickReplyButton(
-                                  label: quickReply,
-                                  enabled: !_isSending,
-                                  onTap: () => _sendMessage(quickReply),
+                              Text(
+                                'Try one of these prepared questions',
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurface,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
                                 ),
-                                const SizedBox(width: 10),
-                              ],
+                              ),
+                              const Spacer(),
+                              const Icon(
+                                Icons.expand_less_rounded,
+                                color: AppColors.textSecondary,
+                              ),
                             ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 10),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                for (final quickReply in _quickReplies.take(3)) ...[
+                                  _QuickReplyButton(
+                                    label: quickReply,
+                                    enabled: !_isSending,
+                                    onTap: _showPreparedQuestionsSheet,
+                                  ),
+                                  const SizedBox(width: 10),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   Row(
@@ -495,6 +581,65 @@ class _QuickReplyButton extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w600,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PreparedQuestionTile extends StatelessWidget {
+  const _PreparedQuestionTile({
+    required this.label,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(18),
+        child: Ink(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: AppColors.primary.withOpacity(0.12),
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.chat_bubble_outline_rounded,
+                color: AppColors.primary,
+                size: 18,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: AppColors.textSecondary,
+              ),
+            ],
           ),
         ),
       ),
