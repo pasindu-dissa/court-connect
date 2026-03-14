@@ -83,6 +83,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         .toList();
 
     setState(() {
+      _hasOpenedPreparedQuestions = true;
       _messages.add(
         _Message(
           text: text,
@@ -439,7 +440,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                                 return _QuickReplyButton(
                                   label: quickReply,
                                   enabled: !_isSending,
-                                  onTap: _showPreparedQuestionsSheet,
+                                  onTap: () => _sendMessage(quickReply),
                                 );
                               },
                             ),
