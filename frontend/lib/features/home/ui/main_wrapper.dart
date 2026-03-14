@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../chatbot/presentation/screens/chatbot_screen.dart';
 import 'screens/home_screen.dart';
 // Import the new Booking Screen
 import '../../booking/ui/screens/booking_screen.dart';
@@ -17,7 +18,7 @@ class _MainWrapperState extends State<MainWrapper> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const BookingScreen(), // <--- Replaced placeholder with Real Screen
-    const Center(child: Text("Connect Screen")),
+    const ChatbotScreen(),
     const Center(child: Text("Leaderboard Screen")),
     const Center(child: Text("Profile Screen")),
   ];
@@ -44,7 +45,7 @@ class _MainWrapperState extends State<MainWrapper> {
               children: [
                 _buildNavItem(0, Icons.grid_view_rounded, "Home"),
                 _buildNavItem(1, Icons.calendar_month_rounded, "Bookings"),
-                _buildNavItem(2, Icons.group_add_rounded, "Connect"),
+                _buildNavItem(2, Icons.smart_toy_rounded, "Chat"),
                 _buildNavItem(3, Icons.emoji_events_rounded, "Rank"),
                 _buildNavItem(4, Icons.person_rounded, "Profile"),
               ],
