@@ -178,13 +178,16 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   Future<void> _showPreparedQuestionsSheet() async {
     await showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
         final sheetTheme = Theme.of(sheetContext);
+        final maxHeight = MediaQuery.of(sheetContext).size.height * 0.72;
 
         return SafeArea(
           top: false,
           child: Container(
+            constraints: BoxConstraints(maxHeight: maxHeight),
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
             decoration: BoxDecoration(
               color: sheetTheme.scaffoldBackgroundColor,
@@ -192,52 +195,54 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 top: Radius.circular(28),
               ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 42,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.35),
-                      borderRadius: BorderRadius.circular(999),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 42,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.35),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 18),
-                Text(
-                  'Prepared questions',
-                  style: TextStyle(
-                    color: sheetTheme.colorScheme.onSurface,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Pick a starter and Court Coach will send it instantly.',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                ..._quickReplies.map(
-                  (quickReply) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: _PreparedQuestionTile(
-                      label: quickReply,
-                      enabled: !_isSending,
-                      onTap: () {
-                        Navigator.pop(sheetContext);
-                        _sendMessage(quickReply);
-                      },
+                  const SizedBox(height: 18),
+                  Text(
+                    'Prepared questions',
+                    style: TextStyle(
+                      color: sheetTheme.colorScheme.onSurface,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 6),
+                  Text(
+                    'Pick a starter and Court Coach will send it instantly.',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  ..._quickReplies.map(
+                    (quickReply) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _PreparedQuestionTile(
+                        label: quickReply,
+                        enabled: !_isSending,
+                        onTap: () {
+                          Navigator.pop(sheetContext);
+                          _sendMessage(quickReply);
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -412,19 +417,22 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                             ],
                           ),
                           const SizedBox(height: 10),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                for (final quickReply in _quickReplies.take(3)) ...[
-                                  _QuickReplyButton(
-                                    label: quickReply,
-                                    enabled: !_isSending,
-                                    onTap: _showPreparedQuestionsSheet,
-                                  ),
+                          SizedBox(
+                            height: 42,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: _quickReplies.take(3).length,
+                              separatorBuilder: (_, __) =>
                                   const SizedBox(width: 10),
-                                ],
-                              ],
+                              itemBuilder: (context, index) {
+                                final quickReply =
+                                    _quickReplies.take(3).elementAt(index);
+                                return _QuickReplyButton(
+                                  label: quickReply,
+                                  enabled: !_isSending,
+                                  onTap: _showPreparedQuestionsSheet,
+                                );
+                              },
                             ),
                           ),
                         ],
