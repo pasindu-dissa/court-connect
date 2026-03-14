@@ -6,7 +6,8 @@ const router = Router();
 
 router.post('/chat', async (req, res, next) => {
   try {
-    const { message, history = [], sessionId } = req.body ?? {};
+    const { message, history = [], sessionId, activityContext = null } =
+      req.body ?? {};
 
     if (typeof message !== 'string' || !message.trim()) {
       return res.status(400).json({
@@ -23,6 +24,10 @@ router.post('/chat', async (req, res, next) => {
     const reply = await createAiReply({
       message: message.trim(),
       history,
+      activityContext:
+        activityContext && typeof activityContext === 'object'
+          ? activityContext
+          : null,
       sessionId: typeof sessionId === 'string' ? sessionId : null,
     });
 

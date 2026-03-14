@@ -82,7 +82,12 @@ If a user asks about anything outside those topics, politely refuse and redirect
 Keep answers concise, clear, and useful on a mobile screen.
 `.trim();
 
-export async function createAiReply({ message, history, sessionId }) {
+export async function createAiReply({
+  message,
+  history,
+  activityContext,
+  sessionId,
+}) {
   const currentSessionId = sessionId || crypto.randomUUID();
   const analysis = analyzeMessage(message);
   const client = getOpenAIClient();
@@ -103,7 +108,7 @@ export async function createAiReply({ message, history, sessionId }) {
 
   const response = await client.responses.create({
     model: process.env.OPENAI_MODEL || 'gpt-4.1-mini',
-    instructions: systemPrompt,
+    instructions: buildSystemPrompt(activityContext),
     input: [
       ...sanitizeHistory(history),
       {
@@ -132,6 +137,19 @@ function getOpenAIClient() {
   }
 
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
+
+function buildSystemPrompt(activityContext) {
+  if (!activityContext) {
+    return systemPrompt;
+  }
+
+  return `${systemPrompt}
+
+Recent in-app activity context:
+${JSON.stringify(activityContext)}
+
+Use this activity context only when it helps answer the user's sports or Court Connect question more personally and accurately.`;
 }
 
 function sanitizeHistory(history) {

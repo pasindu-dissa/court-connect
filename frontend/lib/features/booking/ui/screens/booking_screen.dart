@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/services/app_activity_service.dart';
 import '../../data/mock_data.dart';
 import 'court_details_screen.dart';
 
@@ -27,6 +28,13 @@ class _BookingScreenState extends State<BookingScreen> {
       final matchesFilter = _selectedFilters.isEmpty || _selectedFilters.contains(court.sportType);
       return matchesSearch && matchesFilter;
     }).toList();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    AppActivityService.instance.recordScreenView('bookings');
+    _recordActivity();
   }
 
   @override
@@ -69,6 +77,7 @@ class _BookingScreenState extends State<BookingScreen> {
                            _isSearchVisible = !_isSearchVisible;
                            if (!_isSearchVisible) _searchQuery = ""; // Clear on close
                          });
+                         _recordActivity();
                       }
                     ),
 
@@ -92,7 +101,10 @@ class _BookingScreenState extends State<BookingScreen> {
                   height: _isSearchVisible ? 60 : 0,
                   margin: const EdgeInsets.only(top: 10),
                   child: _isSearchVisible ? TextField(
-                    onChanged: (val) => setState(() => _searchQuery = val),
+                    onChanged: (val) {
+                      setState(() => _searchQuery = val);
+                      _recordActivity(searchQuery: val);
+                    },
                     style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
                     decoration: InputDecoration(
                       hintText: "Search courts...",
@@ -128,7 +140,10 @@ class _BookingScreenState extends State<BookingScreen> {
 
   Widget _buildMapView() {
     return GestureDetector(
-      onTap: () => setState(() => _selectedCourt = null),
+      onTap: () {
+        setState(() => _selectedCourt = null);
+        _recordActivity(selectedCourt: '');
+      },
       child: Container(
         width: double.infinity, height: double.infinity,
         decoration: const BoxDecoration(
@@ -144,7 +159,10 @@ class _BookingScreenState extends State<BookingScreen> {
               top: MediaQuery.of(context).size.height * court.top,
               left: MediaQuery.of(context).size.width * court.left,
               child: GestureDetector(
-                onTap: () => setState(() => _selectedCourt = court),
+                onTap: () {
+                  setState(() => _selectedCourt = court);
+                  _recordActivity(selectedCourt: court.name);
+                },
                 child: Column(
                   children: [
                     Container(
@@ -176,9 +194,13 @@ class _BookingScreenState extends State<BookingScreen> {
       itemCount: _filteredCourts.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
+        final court = _filteredCourts[index];
         return GestureDetector(
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CourtDetailsScreen(court: _filteredCourts[index]))),
-          child: _buildCourtPreviewCard(_filteredCourts[index]),
+          onTap: () {
+            _recordActivity(selectedCourt: court.name);
+            Navigator.push(context, MaterialPageRoute(builder: (_) => CourtDetailsScreen(court: court)));
+          },
+          child: _buildCourtPreviewCard(court),
         );
       },
     );
@@ -264,6 +286,7 @@ class _BookingScreenState extends State<BookingScreen> {
                             }
                           });
                           setState(() {}); // Update Parent Screen
+                          _recordActivity();
                         },
                         checkmarkColor: Colors.white,
                         selectedColor: AppColors.primary,
@@ -290,7 +313,10 @@ class _BookingScreenState extends State<BookingScreen> {
   Widget _buildToggleBtn(String text, bool isMap) {
     final isActive = _isMapView == isMap;
     return GestureDetector(
-      onTap: () => setState(() => _isMapView = isMap),
+      onTap: () {
+        setState(() => _isMapView = isMap);
+        _recordActivity(bookingView: isMap ? 'map' : 'list');
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(color: isActive ? Colors.white : Colors.transparent, borderRadius: BorderRadius.circular(20)),
@@ -333,5 +359,23 @@ class _BookingScreenState extends State<BookingScreen> {
     if (status == "Available") return Colors.green;
     if (status == "Busy") return Colors.red;
     return Colors.orange;
+  }
+
+  void _recordActivity({
+    String? searchQuery,
+    String? selectedCourt,
+    String? bookingView,
+  }) {
+    final selectedSport = _selectedFilters.isNotEmpty
+        ? _selectedFilters.first.name
+        : null;
+
+    AppActivityService.instance.recordBookingState(
+      selectedSport: selectedSport,
+      searchQuery: searchQuery ?? _searchQuery,
+      selectedCourt: selectedCourt ?? _selectedCourt?.name,
+      bookingView: bookingView ?? (_isMapView ? 'map' : 'list'),
+      selectedFilterCount: _selectedFilters.length,
+    );
   }
 }

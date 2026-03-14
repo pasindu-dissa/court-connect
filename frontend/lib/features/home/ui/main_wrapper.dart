@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/services/app_activity_service.dart';
 import '../../chatbot/presentation/screens/chatbot_screen.dart';
 import 'screens/home_screen.dart';
 // Import the new Booking Screen
@@ -14,6 +15,13 @@ class MainWrapper extends StatefulWidget {
 
 class _MainWrapperState extends State<MainWrapper> {
   int _currentIndex = 0;
+  final List<String> _screenNames = const [
+    'home',
+    'bookings',
+    'chat',
+    'leaderboard',
+    'profile',
+  ];
 
   final List<Widget> _screens = [
     const HomeScreen(),
@@ -22,6 +30,12 @@ class _MainWrapperState extends State<MainWrapper> {
     const Center(child: Text("Leaderboard Screen")),
     const Center(child: Text("Profile Screen")),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    AppActivityService.instance.recordScreenView(_screenNames[_currentIndex]);
+  }
 
 // ... (Rest of the file remains exactly the same as the previous step) ...
 // Copy the rest of the file from the previous "Navigation Bar" response.
@@ -59,7 +73,10 @@ class _MainWrapperState extends State<MainWrapper> {
   Widget _buildNavItem(int index, IconData icon, String label) {
     bool isSelected = _currentIndex == index;
     return GestureDetector(
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () {
+        AppActivityService.instance.recordScreenView(_screenNames[index]);
+        setState(() => _currentIndex = index);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,

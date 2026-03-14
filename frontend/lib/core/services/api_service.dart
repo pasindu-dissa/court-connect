@@ -15,6 +15,7 @@ class ApiService {
   Future<ChatReplyPayload> sendChatMessage({
     required String message,
     required List<ChatRequestMessage> history,
+    Map<String, dynamic>? activityContext,
     String? sessionId,
   }) async {
     final uri = Uri.parse('$_baseUrl/api/ai/chat');
@@ -27,6 +28,7 @@ class ApiService {
             'message': message,
             'sessionId': sessionId,
             'history': history.map((item) => item.toJson()).toList(),
+            'activityContext': activityContext,
           }),
         )
         .timeout(const Duration(seconds: 25));

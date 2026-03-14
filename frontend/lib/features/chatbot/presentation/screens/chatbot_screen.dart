@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/services/app_activity_service.dart';
 import '../../../../core/services/api_service.dart';
 import '../chat_ui/chat_bubble.dart';
 
@@ -40,6 +41,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   @override
   void initState() {
     super.initState();
+    AppActivityService.instance.recordScreenView('chat');
     _controller.addListener(_handleComposerChanged);
     _inputFocusNode.addListener(_handleComposerChanged);
   }
@@ -100,6 +102,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       final reply = await _apiService.sendChatMessage(
         message: text,
         history: history,
+        activityContext: AppActivityService.instance.buildContextPayload(),
         sessionId: _sessionId,
       );
 
