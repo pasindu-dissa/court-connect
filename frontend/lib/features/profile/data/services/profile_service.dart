@@ -3,13 +3,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/profile_model.dart';
+import '../../../../core/constants/api_constants.dart';
 
 class ProfileService {
-  // Change IP based on your testing device:
-  // Android Emulator  → http://10.0.2.2:5000
-  // Physical Device   → http://YOUR_PC_IP:5000
-  // iOS Simulator     → http://127.0.0.1:5000
-  static const String baseUrl = 'http://10.0.2.2:5000/api/users/profile';
+  // Use ApiConstants for base URL
+  static const String baseUrl = '${ApiConstants.baseUrl}/users/profile';
 
   // Get Firebase JWT token
   Future<String?> _getToken() async {
