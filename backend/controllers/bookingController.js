@@ -1,0 +1,44 @@
+const Booking = require('../models/booking');
+
+// @desc    Create a new booking
+// @route   POST /api/bookings
+const createBooking = async (req, res) => {
+  try {
+    const { courtId, userId, date, startTime, totalPrice } = req.body;
+
+    // Check if slot is already taken
+    const existing = await Booking.findOne({ courtId, date, startTime, status: 'Confirmed' });
+    if (existing) {
+      return res.status(400).json({ message: 'Slot already booked' });
+    }
+
+    const booking = await Booking.create({
+      courtId,
+      userId,
+      date,
+      startTime,
+      totalPrice
+    });
+
+    res.status(201).json(booking);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// @desc    Get bookings for a specific court and date
+// @route   GET /api/bookings/:courtId
+const getCourtBookings = async (req, res) => {
+  try {
+    const { date } = req.query; // ?date=YYYY-MM-DD
+    const query = { courtId: req.params.courtId, status: 'Confirmed' };
+    if (date) query.date = date;
+
+    const bookings = await Booking.find(query).select('startTime');
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createBooking, getCourtBookings };
