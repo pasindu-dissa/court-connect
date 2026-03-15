@@ -4,9 +4,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart'; // Added for date formatting
 import '../../../../core/constants/app_colors.dart';
+<<<<<<< HEAD
 import '../../../../core/utils/marker_generator.dart';
 import '../../data/booking_service.dart';
 import '../widgets/court_card.dart'; 
+=======
+import '../../../../core/services/app_activity_service.dart';
+import '../../data/mock_data.dart';
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
 import 'court_details_screen.dart';
 import 'directions_map_screen.dart';
 import '../widgets/booking_filters_modal.dart';
@@ -116,6 +121,13 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    AppActivityService.instance.recordScreenView('bookings');
+    _recordActivity();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -163,6 +175,29 @@ class _BookingScreenState extends State<BookingScreen> {
                         ),
                       ],
                     ),
+<<<<<<< HEAD
+=======
+                    
+                    const SizedBox(width: 8),
+
+                    // Search Toggle Button
+                    _buildGlassButton(
+                      context,
+                      icon: _isSearchVisible ? Icons.close : Icons.search, 
+                      label: "Search", 
+                      onTap: () {
+                         setState(() {
+                           _isSearchVisible = !_isSearchVisible;
+                           if (!_isSearchVisible) _searchQuery = ""; // Clear on close
+                         });
+                         _recordActivity();
+                      }
+                    ),
+
+                    const Spacer(),
+
+                    // Map/List Toggle
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.8), borderRadius: BorderRadius.circular(30)),
@@ -175,7 +210,15 @@ class _BookingScreenState extends State<BookingScreen> {
                   height: _isSearchVisible ? 60 : 0,
                   margin: const EdgeInsets.only(top: 10),
                   child: _isSearchVisible ? TextField(
+<<<<<<< HEAD
                     onChanged: (val) { setState(() => _searchQuery = val); if(_isMapView) _updateMarkers(); },
+=======
+                    onChanged: (val) {
+                      setState(() => _searchQuery = val);
+                      _recordActivity(searchQuery: val);
+                    },
+                    style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
                     decoration: InputDecoration(
                       hintText: "Search courts...", filled: true, fillColor: Theme.of(context).cardColor,
                       prefixIcon: const Icon(Icons.search, color: AppColors.primary),
@@ -224,6 +267,7 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
+<<<<<<< HEAD
   Widget _buildGoogleMap() {
     return GoogleMap(
       initialCameraPosition: _defaultLocation,
@@ -232,6 +276,55 @@ class _BookingScreenState extends State<BookingScreen> {
       myLocationEnabled: true,
       zoomControlsEnabled: false,
       onMapCreated: (c) { _mapController.complete(c); _locateUser(); },
+=======
+  Widget _buildMapView() {
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedCourt = null);
+        _recordActivity(selectedCourt: '');
+      },
+      child: Container(
+        width: double.infinity, height: double.infinity,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: NetworkImage("https://placehold.co/800x1200/png?text=Map+View"), 
+            fit: BoxFit.cover,
+            opacity: 0.6,
+          ),
+        ),
+        child: Stack(
+          children: _filteredCourts.map((court) {
+            return Positioned(
+              top: MediaQuery.of(context).size.height * court.top,
+              left: MediaQuery.of(context).size.width * court.left,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() => _selectedCourt = court);
+                  _recordActivity(selectedCourt: court.name);
+                },
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: _getStatusColor(court.status), 
+                        shape: BoxShape.circle, 
+                        border: Border.all(color: Colors.white, width: 2), 
+                        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 8)]
+                      ),
+                      // Dynamic Icon based on Sport Type
+                      child: Icon(_getSportIcon(court.sportType), color: Colors.white, size: 22),
+                    ),
+                    // Pin Needle
+                    Container(height: 10, width: 2, color: Colors.black54)
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
     );
   }
 
@@ -241,12 +334,22 @@ class _BookingScreenState extends State<BookingScreen> {
       itemCount: _filteredCourts.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
+<<<<<<< HEAD
         return CourtCard(
           court: _filteredCourts[index],
           onTap: () async {
             await Navigator.push(context, MaterialPageRoute(builder: (_) => CourtDetailsScreen(court: _filteredCourts[index])));
             _updateMarkers(); // Refresh pin colors when coming back
           },
+=======
+        final court = _filteredCourts[index];
+        return GestureDetector(
+          onTap: () {
+            _recordActivity(selectedCourt: court.name);
+            Navigator.push(context, MaterialPageRoute(builder: (_) => CourtDetailsScreen(court: court)));
+          },
+          child: _buildCourtPreviewCard(court),
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
         );
       },
     );
@@ -305,13 +408,86 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
+<<<<<<< HEAD
   void _showFilterModal() {
     showModalBottomSheet(context: context, backgroundColor: Colors.transparent, builder: (_) => BookingFiltersModal(onApply: (sport) { setState(() => _sportFilter = sport); if(_isMapView) _updateMarkers(); }));
+=======
+  // --- HELPERS ---
+
+  void _showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Filter by Sport", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color)),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 10, runSpacing: 10,
+                    children: SportType.values.map((type) {
+                      final isSelected = _selectedFilters.contains(type);
+                      return FilterChip(
+                        label: Text(type.name.toUpperCase()),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setModalState(() {
+                            if (selected) {
+                              _selectedFilters.add(type);
+                            } else {
+                              _selectedFilters.remove(type);
+                            }
+                          });
+                          setState(() {}); // Update Parent Screen
+                          _recordActivity();
+                        },
+                        checkmarkColor: Colors.white,
+                        selectedColor: AppColors.primary,
+                        backgroundColor: Theme.of(context).cardColor,
+                        labelStyle: TextStyle(color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50), backgroundColor: AppColors.primary),
+                    child: const Text("Apply Filters"),
+                  )
+                ],
+              ),
+            );
+          },
+        );
+      }
+    );
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
   }
 
   Widget _buildToggleBtn(String text, bool isMap) {
     final isActive = _isMapView == isMap;
+<<<<<<< HEAD
     return GestureDetector(onTap: () => setState(() => _isMapView = isMap), child: Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), decoration: BoxDecoration(color: isActive ? Colors.white : Colors.transparent, borderRadius: BorderRadius.circular(20)), child: Text(text, style: TextStyle(color: isActive ? Colors.black : Colors.white, fontWeight: FontWeight.w600))));
+=======
+    return GestureDetector(
+      onTap: () {
+        setState(() => _isMapView = isMap);
+        _recordActivity(bookingView: isMap ? 'map' : 'list');
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(color: isActive ? Colors.white : Colors.transparent, borderRadius: BorderRadius.circular(20)),
+        child: Text(text, style: TextStyle(color: isActive ? Colors.black : Colors.white, fontWeight: FontWeight.w600)),
+      ),
+    );
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
   }
 
   Widget _buildGlassButton({required IconData icon, required String label, required VoidCallback onTap, bool isActive = false}) {
@@ -320,5 +496,23 @@ class _BookingScreenState extends State<BookingScreen> {
 
   Widget _buildGlassIconBtn({required IconData icon, required VoidCallback onTap, bool isActive = false}) {
     return GestureDetector(onTap: onTap, child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: isActive ? AppColors.primary : Colors.white.withValues(alpha: 0.9), shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10)]), child: Icon(icon, size: 20, color: isActive ? Colors.white : Colors.black)));
+  }
+
+  void _recordActivity({
+    String? searchQuery,
+    String? selectedCourt,
+    String? bookingView,
+  }) {
+    final selectedSport = _selectedFilters.isNotEmpty
+        ? _selectedFilters.first.name
+        : null;
+
+    AppActivityService.instance.recordBookingState(
+      selectedSport: selectedSport,
+      searchQuery: searchQuery ?? _searchQuery,
+      selectedCourt: selectedCourt ?? _selectedCourt?.name,
+      bookingView: bookingView ?? (_isMapView ? 'map' : 'list'),
+      selectedFilterCount: _selectedFilters.length,
+    );
   }
 }

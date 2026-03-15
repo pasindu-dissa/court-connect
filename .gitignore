@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # OS / editor
 .DS_Store
 Thumbs.db
@@ -41,3 +42,7 @@ frontend/windows/flutter/ephemeral/
 
 # Misc generated metadata
 .metadata
+=======
+node_modules/
+.env
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/profile/ui/screens/profile_screen.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/services/app_activity_service.dart';
 import 'screens/home_screen.dart';
 // Import the new Booking Screen
 import '../../booking/ui/screens/booking_screen.dart';
@@ -16,9 +17,16 @@ class MainWrapper extends StatefulWidget {
 
 class _MainWrapperState extends State<MainWrapper> {
   int _currentIndex = 0;
+  final List<String> _screenNames = const [
+    'home',
+    'bookings',
+    'leaderboard',
+    'profile',
+  ];
 
   late final List<Widget> _screens = [
     const HomeScreen(),
+<<<<<<< HEAD
     const BookingScreen(),
     const MatchmakingScreen(), // <--- LINKED HERE (Index 2)
     LeaderboardScreen(
@@ -34,6 +42,22 @@ class _MainWrapperState extends State<MainWrapper> {
   // ... (Rest of the file remains exactly the same as the previous step) ...
   // Copy the rest of the file from the previous "Navigation Bar" response.
   // Do not change the logic below this line.
+=======
+    const BookingScreen(), // <--- Replaced placeholder with Real Screen
+    const Center(child: Text("Leaderboard Screen")),
+    const Center(child: Text("Profile Screen")),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    AppActivityService.instance.recordScreenView(_screenNames[_currentIndex]);
+  }
+
+// ... (Rest of the file remains exactly the same as the previous step) ...
+// Copy the rest of the file from the previous "Navigation Bar" response.
+// Do not change the logic below this line.
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,9 +86,8 @@ class _MainWrapperState extends State<MainWrapper> {
               children: [
                 _buildNavItem(0, Icons.grid_view_rounded, "Home"),
                 _buildNavItem(1, Icons.calendar_month_rounded, "Bookings"),
-                _buildNavItem(2, Icons.group_add_rounded, "Connect"),
-                _buildNavItem(3, Icons.emoji_events_rounded, "Rank"),
-                _buildNavItem(4, Icons.person_rounded, "Profile"),
+                _buildNavItem(2, Icons.emoji_events_rounded, "Rank"),
+                _buildNavItem(3, Icons.person_rounded, "Profile"),
               ],
             ),
           ),
@@ -76,7 +99,10 @@ class _MainWrapperState extends State<MainWrapper> {
   Widget _buildNavItem(int index, IconData icon, String label) {
     bool isSelected = _currentIndex == index;
     return GestureDetector(
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () {
+        AppActivityService.instance.recordScreenView(_screenNames[index]);
+        setState(() => _currentIndex = index);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,

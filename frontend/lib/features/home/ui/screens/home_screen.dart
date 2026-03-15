@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import '../../../../core/constants/app_colors.dart';
+<<<<<<< HEAD
 import '../../../../core/services/user_provider.dart';
 import '../../../chatbot/presentation/screens/chatbot_screen.dart';
 import '../widgets/profile_modal.dart';
 import 'notifications_screen.dart';
+=======
+import '../../../chatbot/presentation/screens/chatbot_screen.dart';
+import '../widgets/profile_modal.dart'; // Import Modal
+import 'notifications_screen.dart'; // Import Screen
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -71,7 +77,11 @@ class _HomeScreenState extends State<HomeScreen> {
           CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
+<<<<<<< HEAD
           // 1. Header
+=======
+          // 1. Updated Header with Interactions
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(24, 60, 24, 20),
             sliver: SliverToBoxAdapter(
@@ -222,6 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
             bottom: 110,
             child: Material(
               color: Colors.transparent,
+<<<<<<< HEAD
               child: InkWell(
                 borderRadius: BorderRadius.circular(30),
                 onTap: () {
@@ -230,26 +241,54 @@ class _HomeScreenState extends State<HomeScreen> {
                     MaterialPageRoute(
                       builder: (_) => const ChatbotScreen(),
                     ),
+=======
+              elevation: 10,
+              borderRadius: BorderRadius.circular(28),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(28),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ChatbotScreen()),
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
                   );
                 },
                 child: Ink(
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
+<<<<<<< HEAD
                     color: AppColors.primary,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.18),
                         blurRadius: 16,
+=======
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.18),
+                        blurRadius: 18,
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
                         offset: const Offset(0, 8),
                       ),
                     ],
                   ),
+<<<<<<< HEAD
                   child: const Icon(
                     Icons.smart_toy_rounded,
                     color: Colors.white,
                     size: 30,
+=======
+                  child: Center(
+                    child: const Icon(
+                      Icons.support_agent_rounded,
+                      size: 32,
+                      color: AppColors.primary,
+                    ),
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
                   ),
                 ),
               ),

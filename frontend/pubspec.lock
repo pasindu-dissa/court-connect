@@ -432,8 +432,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+<<<<<<< HEAD
   html:
     dependency: transitive
+=======
+  http:
+    dependency: "direct main"
+>>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
     description:
       name: html
       sha256: "6d1264f2dffa1b1101c25a91dff0dc2daee4c18e87cd8538729773c073dbf602"
