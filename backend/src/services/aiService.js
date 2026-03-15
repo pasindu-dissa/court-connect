@@ -106,29 +106,39 @@ export async function createAiReply({
     });
   }
 
-  const response = await client.responses.create({
-    model: process.env.OPENAI_MODEL || 'gpt-4.1-mini',
-    instructions: buildSystemPrompt(activityContext),
-    input: [
-      ...sanitizeHistory(history),
-      {
-        role: 'user',
-        content: message,
-      },
-    ],
-  });
+  try {
+    const response = await client.responses.create({
+      model: process.env.OPENAI_MODEL || 'gpt-4.1-mini',
+      instructions: buildSystemPrompt(activityContext),
+      input: [
+        ...sanitizeHistory(history),
+        {
+          role: 'user',
+          content: message,
+        },
+      ],
+    });
 
-  return {
-    sessionId: currentSessionId,
-    reply:
-      response.output_text?.trim() ||
-      'I could not generate a response just now. Please try again in a moment.',
-    source: 'openai',
-    model: response.model || process.env.OPENAI_MODEL || 'gpt-4.1-mini',
-    responseId: response.id,
-    quickReplies: buildQuickReplies(analysis.intent),
-    timestamp: new Date().toISOString(),
-  };
+    return {
+      sessionId: currentSessionId,
+      reply:
+        response.output_text?.trim() ||
+        'I could not generate a response just now. Please try again in a moment.',
+      source: 'openai',
+      model: response.model || process.env.OPENAI_MODEL || 'gpt-4.1-mini',
+      responseId: response.id,
+      quickReplies: buildQuickReplies(analysis.intent),
+      timestamp: new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error('OpenAI request failed, falling back to mock reply.', error);
+
+    return buildMockReply({
+      message,
+      sessionId: currentSessionId,
+      intent: analysis.intent,
+    });
+  }
 }
 
 function getOpenAIClient() {
