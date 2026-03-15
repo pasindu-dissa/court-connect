@@ -259,7 +259,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               const SizedBox(height: 16),
 
-              Row(children: [Expanded(child: Divider(color: Colors.grey[300])), const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text("OR", style: TextStyle(color: Colors.grey))), Expanded(child: Divider(color: Colors.grey[300]))]),
+              Row(
+                children: [
+                  Expanded(child: Divider(color: Colors.grey[300])),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text("OR", style: TextStyle(color: Colors.grey)),
+                  ),
+                  Expanded(child: Divider(color: Colors.grey[300])),
+                ],
+              ),
               const SizedBox(height: 16),
 
               // Google Button
@@ -267,12 +276,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 height: 50,
                 child: OutlinedButton.icon(
                   onPressed: _isLoading ? null : _handleGoogleSignUp,
-                   icon: Image.network('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png', height: 24),
+                  icon: Image.network(
+                    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
+                    height: 24,
+                  ),
                   label: const Text("Register using Google"),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.black87,
                     side: BorderSide(color: Colors.grey.shade300),
-                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
