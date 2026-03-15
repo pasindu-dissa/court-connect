@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'dart:async';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/services/user_provider.dart';
+import '../../../chatbot/presentation/screens/chatbot_screen.dart';
 import '../widgets/profile_modal.dart';
 import 'notifications_screen.dart';
 
@@ -65,9 +66,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final String userImage = user?['profileImage'] ?? "https://i.pravatar.cc/300"; // Fallback image
 
     return Scaffold(
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
+      body: Stack(
+        children: [
+          CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
           // 1. Header
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(24, 60, 24, 20),
@@ -210,6 +213,46 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 20),
                 const _CreativeCourtCard(name: "Blue Water Swimming", image: "https://images.unsplash.com/photo-1576610616656-d3aa5d1f4534?q=80&w=800&auto=format&fit=crop", price: "LKR 800", rating: "4.8"),
               ]),
+            ),
+          ),
+            ],
+          ),
+          Positioned(
+            right: 20,
+            bottom: 110,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(30),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ChatbotScreen(),
+                    ),
+                  );
+                },
+                child: Ink(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.18),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.smart_toy_rounded,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ),
             ),
           ),
         ],

@@ -1,0 +1,575 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import '../../../../core/constants/api_constants.dart';
+import '../../../../core/constants/app_colors.dart';
+
+class ChatbotScreen extends StatefulWidget {
+  const ChatbotScreen({super.key});
+
+  @override
+  State<ChatbotScreen> createState() => _ChatbotScreenState();
+}
+
+class _ChatbotScreenState extends State<ChatbotScreen> {
+  final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  final List<_ChatMessage> _messages = const [
+    _ChatMessage(
+      text:
+          'Hi, I am Court Coach. I can help with bookings, player invites, venue questions, and match prep.',
+      isUser: false,
+      label: 'Court Coach',
+      footer: 'Ready to connect to live assistant',
+    ),
+  ].toList();
+
+  final List<String> _preparedQuestions = const [
+    'Can you find an evening badminton court for me?',
+    'Can you draft a player invite message?',
+    'What should I pack for match day?',
+    'Can you help me find doubles players?',
+  ];
+
+  bool _isSending = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendMessage([String? presetText]) async {
+    final text = (presetText ?? _controller.text).trim();
+    if (text.isEmpty || _isSending) {
+      return;
+    }
+
+    setState(() {
+      _messages.add(
+        _ChatMessage(
+          text: text,
+          isUser: true,
+        ),
+      );
+      _controller.clear();
+      _isSending = true;
+    });
+    _scrollToBottom();
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${ApiConstants.baseUrl}/ai/chat'),
+            headers: const {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'message': text,
+              'history': _messages
+                  .where((message) => !message.isError)
+                  .map(
+                    (message) => {
+                      'role': message.isUser ? 'user' : 'assistant',
+                      'content': message.text,
+                    },
+                  )
+                  .toList(),
+            }),
+          )
+          .timeout(const Duration(seconds: 25));
+
+      final decoded = response.body.isNotEmpty
+          ? jsonDecode(response.body) as Map<String, dynamic>
+          : <String, dynamic>{};
+
+      if (response.statusCode >= 400) {
+        throw Exception(decoded['error'] ?? 'Chat request failed.');
+      }
+
+      final reply = decoded['reply'] as String?;
+      if (reply == null || reply.trim().isEmpty) {
+        throw Exception('Backend returned an empty chatbot response.');
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _messages.add(
+          _ChatMessage(
+            text: reply.trim(),
+            isUser: false,
+            label: decoded['source'] == 'openai'
+                ? 'Court Coach AI'
+                : 'Court Coach Demo',
+          ),
+        );
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _messages.add(
+          const _ChatMessage(
+            text:
+                'Something unexpected happened while contacting the assistant. Restart the backend and try again.',
+            isUser: false,
+            label: 'Unexpected error',
+            footer: 'Court Coach could not complete this request',
+            isError: true,
+          ),
+        );
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSending = false;
+        });
+        _scrollToBottom();
+      }
+    }
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Court Coach'),
+        centerTitle: true,
+      ),
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFFEAF7F0),
+                  Color(0xFFDCEFE6),
+                  Color(0xFFEFF8F3),
+                ],
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.fromLTRB(20, 12, 20, 10),
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        AppColors.primary,
+                        AppColors.primaryDark,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.18),
+                        blurRadius: 18,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const CircleAvatar(
+                        radius: 18,
+                        backgroundColor: Colors.white24,
+                        child: Icon(
+                          Icons.smart_toy_rounded,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Your in-app sports assistant',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.cardColor.withOpacity(0.55),
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    child: ListView(
+                      controller: _scrollController,
+                      physics: const BouncingScrollPhysics(),
+                      children: [
+                        for (final message in _messages)
+                          _ChatBubble(message: message),
+                        if (_isSending) const _TypingIndicatorBubble(),
+                      ],
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.fromLTRB(20, 12, 20, 10),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor.withOpacity(0.82),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Try one of these prepared questions',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const Spacer(),
+                          const Icon(
+                            Icons.expand_less_rounded,
+                            color: AppColors.textSecondary,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: 42,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _preparedQuestions.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 10),
+                          itemBuilder: (context, index) {
+                            final quickReply = _preparedQuestions[index];
+                            return GestureDetector(
+                              onTap: _isSending
+                                  ? null
+                                  : () => _sendMessage(quickReply),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: theme.cardColor,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: AppColors.primary.withOpacity(0.16),
+                                  ),
+                                ),
+                                child: Text(
+                                  quickReply,
+                                  style: TextStyle(
+                                    color: theme.colorScheme.onSurface,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _controller,
+                            enabled: !_isSending,
+                            textInputAction: TextInputAction.send,
+                            minLines: 1,
+                            maxLines: 4,
+                            onSubmitted: (_) => _sendMessage(),
+                            decoration: InputDecoration(
+                              hintText: _isSending ? 'Typing...' : 'Message...',
+                              filled: true,
+                              fillColor: theme.cardColor,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(22),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: _isSending ? null : _sendMessage,
+                          child: Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: _isSending
+                                  ? AppColors.primaryLight
+                                  : AppColors.primary,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withOpacity(0.22),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              _isSending
+                                  ? Icons.more_horiz_rounded
+                                  : Icons.send_rounded,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChatMessage {
+  const _ChatMessage({
+    required this.text,
+    required this.isUser,
+    this.label,
+    this.footer,
+    this.isError = false,
+  });
+
+  final String text;
+  final bool isUser;
+  final String? label;
+  final String? footer;
+  final bool isError;
+}
+
+class _ChatBubble extends StatelessWidget {
+  const _ChatBubble({required this.message});
+
+  final _ChatMessage message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bubbleColor = message.isUser
+        ? AppColors.primary
+        : message.isError
+            ? AppColors.error.withOpacity(0.10)
+            : theme.cardColor;
+    final textColor =
+        message.isUser ? Colors.white : theme.colorScheme.onSurface;
+    final labelColor = message.isUser
+        ? Colors.white.withOpacity(0.84)
+        : message.isError
+            ? AppColors.error
+            : AppColors.textSecondary;
+
+    return Align(
+      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 320),
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: bubbleColor,
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(20),
+              topRight: const Radius.circular(20),
+              bottomLeft: Radius.circular(message.isUser ? 20 : 8),
+              bottomRight: Radius.circular(message.isUser ? 8 : 20),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: message.isUser
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
+            children: [
+              if (message.label != null) ...[
+                Text(
+                  message.label!,
+                  style: TextStyle(
+                    color: labelColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 6),
+              ],
+              Text(
+                message.text,
+                style: TextStyle(
+                  color: textColor,
+                  height: 1.4,
+                ),
+              ),
+              if (message.footer != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  message.footer!,
+                  style: TextStyle(
+                    color: labelColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TypingIndicatorBubble extends StatefulWidget {
+  const _TypingIndicatorBubble();
+
+  @override
+  State<_TypingIndicatorBubble> createState() => _TypingIndicatorBubbleState();
+}
+
+class _TypingIndicatorBubbleState extends State<_TypingIndicatorBubble>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+            bottomLeft: Radius.circular(8),
+            bottomRight: Radius.circular(20),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Court Coach is typing',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 10),
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) {
+                return Row(
+                  children: List.generate(3, (index) {
+                    final phase = (_controller.value - (index * 0.2)).clamp(
+                      0.0,
+                      1.0,
+                    );
+                    final opacity = 0.25 + (phase * 0.75);
+
+                    return Container(
+                      width: 8,
+                      height: 8,
+                      margin: EdgeInsets.only(right: index == 2 ? 0 : 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(opacity),
+                        shape: BoxShape.circle,
+                      ),
+                    );
+                  }),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
