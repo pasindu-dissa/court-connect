@@ -1,17 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:async';
+
 import '../../../../core/constants/app_colors.dart';
-<<<<<<< HEAD
 import '../../../../core/services/user_provider.dart';
 import '../../../chatbot/presentation/screens/chatbot_screen.dart';
 import '../widgets/profile_modal.dart';
 import 'notifications_screen.dart';
-=======
-import '../../../chatbot/presentation/screens/chatbot_screen.dart';
-import '../widgets/profile_modal.dart'; // Import Modal
-import 'notifications_screen.dart'; // Import Screen
->>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,16 +22,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _timer;
 
   final List<String> _bannerImages = [
-    "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800",
-    "https://images.unsplash.com/photo-1626224583764-847890e058f5?q=80&w=800",
-    "https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=800",
+    'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800',
+    'https://images.unsplash.com/photo-1626224583764-847890e058f5?q=80&w=800',
+    'https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=800',
   ];
 
   @override
   void initState() {
     super.initState();
     _startAutoScroll();
-    // Ensure user data is loaded if not already
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<UserProvider>(context, listen: false).loadUser();
     });
@@ -43,13 +38,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _startAutoScroll() {
     _timer = Timer.periodic(const Duration(seconds: 4), (Timer timer) {
-      if (_currentPage < _bannerImages.length - 1) {
-        _currentPage++;
-      } else {
-        _currentPage = 0;
-      }
+      _currentPage = _currentPage < _bannerImages.length - 1 ? _currentPage + 1 : 0;
       if (_pageController.hasClients) {
-        _pageController.animateToPage(_currentPage, duration: const Duration(milliseconds: 600), curve: Curves.easeInOut);
+        _pageController.animateToPage(
+          _currentPage,
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeInOut,
+        );
       }
     });
   }
@@ -63,13 +58,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Access User Data
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.user;
-    
-    // Default values if loading or null
-    final String userName = user?['name'] ?? "Player";
-    final String userImage = user?['profileImage'] ?? "https://i.pravatar.cc/300"; // Fallback image
+    final userName = user?['name'] ?? 'Player';
+    final userImage = user?['profileImage'] ?? 'https://i.pravatar.cc/300';
 
     return Scaffold(
       body: Stack(
@@ -77,154 +69,291 @@ class _HomeScreenState extends State<HomeScreen> {
           CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-<<<<<<< HEAD
-          // 1. Header
-=======
-          // 1. Updated Header with Interactions
->>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(24, 60, 24, 20),
-            sliver: SliverToBoxAdapter(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        backgroundColor: Colors.transparent,
-                        isScrollControlled: true,
-                        builder: (context) => const ProfileModal(),
-                      );
-                    },
-                    child: Row(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Theme.of(context).cardColor, width: 2),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8)],
-                          ),
-                          child: CircleAvatar(
-                            radius: 26,
-                            backgroundImage: NetworkImage(userImage),
-                            onBackgroundImageError: (_, __) => const Icon(Icons.person), // Handle broken URLs
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(24, 60, 24, 20),
+                sliver: SliverToBoxAdapter(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            backgroundColor: Colors.transparent,
+                            isScrollControlled: true,
+                            builder: (context) => const ProfileModal(),
+                          );
+                        },
+                        child: Row(
                           children: [
-                            const Text("Welcome back,", style: TextStyle(color: Colors.grey, fontSize: 13)),
-                            userProvider.isLoading 
-                              ? const SizedBox(width: 100, height: 20, child: LinearProgressIndicator())
-                              : Text(userName, style: TextStyle(color: Theme.of(context).textTheme.titleLarge?.color, fontWeight: FontWeight.bold, fontSize: 18)),
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Theme.of(context).cardColor,
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 8,
+                                  ),
+                                ],
+                              ),
+                              child: CircleAvatar(
+                                radius: 26,
+                                backgroundImage: NetworkImage(userImage),
+                                onBackgroundImageError: (_, __) =>
+                                    const Icon(Icons.person),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Welcome back,',
+                                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                                ),
+                                userProvider.isLoading
+                                    ? const SizedBox(
+                                        width: 100,
+                                        height: 20,
+                                        child: LinearProgressIndicator(),
+                                      )
+                                    : Text(
+                                        userName,
+                                        style: TextStyle(
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge
+                                              ?.color,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                              ],
+                            ),
                           ],
                         ),
-                      ],
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const NotificationsScreen(),
+                          ),
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: Stack(
+                            children: [
+                              Icon(
+                                Icons.notifications_none_rounded,
+                                size: 26,
+                                color: Theme.of(context).iconTheme.color,
+                              ),
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.error,
+                                    shape: BoxShape.circle,
+                                    border: Border.fromBorderSide(
+                                      BorderSide(color: Colors.white, width: 2),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 180,
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: _bannerImages.length,
+                    onPageChanged: (index) => setState(() => _currentPage = index),
+                    itemBuilder: (context, index) {
+                      return Container(
+                        margin: const EdgeInsets.only(right: 16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24),
+                          image: DecorationImage(
+                            image: NetworkImage(_bannerImages[index]),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24),
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(20),
+                          alignment: Alignment.bottomLeft,
+                          child: const Text(
+                            'Summer Tournament\nRegistration Open!',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 30)),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    'Start Playing',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.titleLarge?.color,
                     ),
                   ),
-                  
-                  // Notification Icon
-                  GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())),
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                sliver: SliverGrid.count(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 0.9,
+                  children: const [
+                    _SportCard(
+                      name: 'Cricket',
+                      icon: Icons.sports_cricket,
+                      color: Color(0xFFE91E63),
+                    ),
+                    _SportCard(
+                      name: 'Tennis',
+                      icon: Icons.sports_tennis,
+                      color: Color(0xFFFF9800),
+                    ),
+                    _SportCard(
+                      name: 'Basketball',
+                      icon: Icons.sports_basketball,
+                      color: Color(0xFFFF5722),
+                    ),
+                    _SportCard(
+                      name: 'Football',
+                      icon: Icons.sports_soccer,
+                      color: Color(0xFF4CAF50),
+                    ),
+                    _SportCard(
+                      name: 'Badminton',
+                      icon: Icons.sports_tennis,
+                      color: Color(0xFF009688),
+                    ),
+                    _SportCard(
+                      name: 'Swimming',
+                      icon: Icons.pool,
+                      color: Color(0xFF2196F3),
+                    ),
+                  ],
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 30)),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                sliver: SliverToBoxAdapter(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Popular Nearby',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).textTheme.titleLarge?.color,
+                        ),
                       ),
-                      child: Stack(
-                        children: [
-                          Icon(Icons.notifications_none_rounded, size: 26, color: Theme.of(context).iconTheme.color),
-                          Positioned(right: 0, top: 0, child: Container(width: 10, height: 10, decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle, border: Border.fromBorderSide(BorderSide(color: Colors.white, width: 2))))),
-                        ],
+                      TextButton(
+                        onPressed: () {},
+                        child: const Text(
+                          'See All',
+                          style: TextStyle(color: AppColors.primary),
+                        ),
                       ),
-                    ),
-                  )
-                ],
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-
-          // ... (Rest of body: Banners, Grid, Courts - Same as before)
-          // [Paste the Slider and Grid code from previous versions here to keep it complete]
-          // I will include just the Slider for brevity, assuming you keep the rest.
-           SliverToBoxAdapter(
-            child: SizedBox(
-              height: 180,
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: _bannerImages.length,
-                onPageChanged: (int index) => setState(() => _currentPage = index),
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.only(right: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      image: DecorationImage(image: NetworkImage(_bannerImages[index]), fit: BoxFit.cover),
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(24), gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withOpacity(0.7)])),
-                      padding: const EdgeInsets.all(20),
-                      alignment: Alignment.bottomLeft,
-                      child: const Text("Summer Tournament\nRegistration Open! 🏆", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-                    ),
-                  );
-                },
+              const SliverToBoxAdapter(child: SizedBox(height: 10)),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(
+                    const [
+                      _CreativeCourtCard(
+                        name: 'Royal Badminton Complex',
+                        image:
+                            'https://images.unsplash.com/photo-1626224583764-847890e058f5?q=80&w=800&auto=format&fit=crop',
+                        price: 'LKR 2500',
+                        rating: '4.9',
+                      ),
+                      SizedBox(height: 20),
+                      _CreativeCourtCard(
+                        name: 'Urban Basketball Arena',
+                        image:
+                            'https://images.unsplash.com/photo-1505666287802-931dc83948e9?q=80&w=800&auto=format&fit=crop',
+                        price: 'LKR 1200',
+                        rating: '4.5',
+                      ),
+                      SizedBox(height: 20),
+                      _CreativeCourtCard(
+                        name: 'City Futsal Club',
+                        image:
+                            'https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=800&auto=format&fit=crop',
+                        price: 'LKR 3000',
+                        rating: '4.7',
+                      ),
+                      SizedBox(height: 20),
+                      _CreativeCourtCard(
+                        name: 'Blue Water Swimming',
+                        image:
+                            'https://images.unsplash.com/photo-1576610616656-d3aa5d1f4534?q=80&w=800&auto=format&fit=crop',
+                        price: 'LKR 800',
+                        rating: '4.8',
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-          
-          const SliverToBoxAdapter(child: SizedBox(height: 30)),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            sliver: SliverToBoxAdapter(child: Text("Start Playing", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color))),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            sliver: SliverGrid.count(
-              crossAxisCount: 3, mainAxisSpacing: 16, crossAxisSpacing: 16, childAspectRatio: 0.9,
-              children: [
-                _SportCard(name: "Cricket", icon: Icons.sports_cricket, color: const Color(0xFFE91E63)),
-                _SportCard(name: "Tennis", icon: Icons.sports_tennis, color: const Color(0xFFFF9800)),
-                _SportCard(name: "Basketball", icon: Icons.sports_basketball, color: const Color(0xFFFF5722)),
-                _SportCard(name: "Football", icon: Icons.sports_soccer, color: const Color(0xFF4CAF50)),
-                _SportCard(name: "Badminton", icon: Icons.sports_tennis, color: const Color(0xFF009688)),
-                _SportCard(name: "Swimming", icon: Icons.pool, color: const Color(0xFF2196F3)),
-              ],
-            ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 30)),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            sliver: SliverToBoxAdapter(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Popular Nearby", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color)),
-                  TextButton(onPressed: () {}, child: const Text("See All", style: TextStyle(color: AppColors.primary))),
-                ],
-              ),
-            ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 10)),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                const _CreativeCourtCard(name: "Royal Badminton Complex", image: "https://images.unsplash.com/photo-1626224583764-847890e058f5?q=80&w=800&auto=format&fit=crop", price: "LKR 2500", rating: "4.9"),
-                const SizedBox(height: 20),
-                const _CreativeCourtCard(name: "Urban Basketball Arena", image: "https://images.unsplash.com/photo-1505666287802-931dc83948e9?q=80&w=800&auto=format&fit=crop", price: "LKR 1200", rating: "4.5"),
-                const SizedBox(height: 20),
-                const _CreativeCourtCard(name: "City Futsal Club", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=800&auto=format&fit=crop", price: "LKR 3000", rating: "4.7"),
-                const SizedBox(height: 20),
-                const _CreativeCourtCard(name: "Blue Water Swimming", image: "https://images.unsplash.com/photo-1576610616656-d3aa5d1f4534?q=80&w=800&auto=format&fit=crop", price: "LKR 800", rating: "4.8"),
-              ]),
-            ),
-          ),
             ],
           ),
           Positioned(
@@ -232,63 +361,32 @@ class _HomeScreenState extends State<HomeScreen> {
             bottom: 110,
             child: Material(
               color: Colors.transparent,
-<<<<<<< HEAD
               child: InkWell(
                 borderRadius: BorderRadius.circular(30),
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => const ChatbotScreen(),
-                    ),
-=======
-              elevation: 10,
-              borderRadius: BorderRadius.circular(28),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(28),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ChatbotScreen()),
->>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
+                    MaterialPageRoute(builder: (_) => const ChatbotScreen()),
                   );
                 },
                 child: Ink(
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-<<<<<<< HEAD
                     color: AppColors.primary,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.18),
                         blurRadius: 16,
-=======
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.18),
-                        blurRadius: 18,
->>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
                         offset: const Offset(0, 8),
                       ),
                     ],
                   ),
-<<<<<<< HEAD
                   child: const Icon(
                     Icons.smart_toy_rounded,
                     color: Colors.white,
                     size: 30,
-=======
-                  child: Center(
-                    child: const Icon(
-                      Icons.support_agent_rounded,
-                      size: 32,
-                      color: AppColors.primary,
-                    ),
->>>>>>> 57585150f2f1c98b8b02485b0cd0afe96ded3d9f
                   ),
                 ),
               ),
@@ -300,31 +398,55 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// --- SUB-WIDGETS (Updated for Dark Mode) ---
-
 class _SportCard extends StatelessWidget {
+  const _SportCard({
+    required this.name,
+    required this.icon,
+    required this.color,
+  });
+
   final String name;
   final IconData icon;
   final Color color;
-  const _SportCard({required this.name, required this.icon, required this.color});
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: color.withOpacity(0.08), blurRadius: 15, offset: const Offset(0, 5))],
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(gradient: LinearGradient(colors: [color.withOpacity(0.2), color.withOpacity(0.05)], begin: Alignment.topLeft, end: Alignment.bottomRight), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [color.withOpacity(0.2), color.withOpacity(0.05)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
+            ),
             child: Icon(icon, color: color, size: 28),
           ),
           const SizedBox(height: 12),
-          Text(name, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Theme.of(context).textTheme.bodyLarge?.color)),
+          Text(
+            name,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+          ),
         ],
       ),
     );
@@ -332,11 +454,18 @@ class _SportCard extends StatelessWidget {
 }
 
 class _CreativeCourtCard extends StatelessWidget {
+  const _CreativeCourtCard({
+    required this.name,
+    required this.image,
+    required this.price,
+    required this.rating,
+  });
+
   final String name;
   final String image;
   final String price;
   final String rating;
-  const _CreativeCourtCard({required this.name, required this.image, required this.price, required this.rating});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -344,13 +473,97 @@ class _CreativeCourtCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
         image: DecorationImage(image: NetworkImage(image), fit: BoxFit.cover),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Stack(
         children: [
-          Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(30), gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withOpacity(0.85)], stops: const [0.5, 1.0]))),
-          Positioned(top: 16, right: 16, child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5), decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(15)), child: Row(children: [const Icon(Icons.star_rounded, color: Colors.amber, size: 16), const SizedBox(width: 4), Text(rating, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black))]))),
-          Positioned(bottom: 20, left: 20, right: 20, child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)), const SizedBox(height: 4), Text("$price / hour", style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14))])), Container(padding: const EdgeInsets.all(12), decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle), child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20))])),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, Colors.black.withOpacity(0.85)],
+                stops: const [0.5, 1.0],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 16,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+                  const SizedBox(width: 4),
+                  Text(
+                    rating,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 20,
+            left: 20,
+            right: 20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '$price / hour',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.arrow_forward_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
