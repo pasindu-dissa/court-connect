@@ -42,11 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _currentPage = 0;
       }
       if (_pageController.hasClients) {
-        _pageController.animateToPage(
-          _currentPage,
-          duration: const Duration(milliseconds: 600),
-          curve: Curves.easeInOut,
-        );
+        _pageController.animateToPage(_currentPage, duration: const Duration(milliseconds: 600), curve: Curves.easeInOut);
       }
     });
   }
@@ -63,11 +59,10 @@ class _HomeScreenState extends State<HomeScreen> {
     // Access User Data
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.user;
-
+    
     // Default values if loading or null
     final String userName = user?['name'] ?? "Player";
-    final String userImage =
-        user?['profileImage'] ?? "https://i.pravatar.cc/300"; // Fallback image
+    final String userImage = user?['profileImage'] ?? "https://i.pravatar.cc/300"; // Fallback image
 
     return Scaffold(
       body: CustomScrollView(
@@ -94,103 +89,47 @@ class _HomeScreenState extends State<HomeScreen> {
                         Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Theme.of(context).cardColor,
-                              width: 2,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 8,
-                              ),
-                            ],
+                            border: Border.all(color: Theme.of(context).cardColor, width: 2),
+                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8)],
                           ),
                           child: CircleAvatar(
                             radius: 26,
                             backgroundImage: NetworkImage(userImage),
-                            onBackgroundImageError: (_, _) =>
-                                const Icon(Icons.person), // Handle broken URLs
+                            onBackgroundImageError: (_, __) => const Icon(Icons.person), // Handle broken URLs
                           ),
                         ),
                         const SizedBox(width: 14),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              "Welcome back,",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 13,
-                              ),
-                            ),
-                            userProvider.isLoading
-                                ? const SizedBox(
-                                    width: 100,
-                                    height: 20,
-                                    child: LinearProgressIndicator(),
-                                  )
-                                : Text(
-                                    userName,
-                                    style: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).textTheme.titleLarge?.color,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                    ),
-                                  ),
+                            const Text("Welcome back,", style: TextStyle(color: Colors.grey, fontSize: 13)),
+                            userProvider.isLoading 
+                              ? const SizedBox(width: 100, height: 20, child: LinearProgressIndicator())
+                              : Text(userName, style: TextStyle(color: Theme.of(context).textTheme.titleLarge?.color, fontWeight: FontWeight.bold, fontSize: 18)),
                           ],
                         ),
                       ],
                     ),
                   ),
-
+                  
                   // Notification Icon
                   GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const NotificationsScreen(),
-                      ),
-                    ),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())),
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(14),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                          ),
-                        ],
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
                       ),
                       child: Stack(
                         children: [
-                          Icon(
-                            Icons.notifications_none_rounded,
-                            size: 26,
-                            color: Theme.of(context).iconTheme.color,
-                          ),
-                          Positioned(
-                            right: 0,
-                            top: 0,
-                            child: Container(
-                              width: 10,
-                              height: 10,
-                              decoration: const BoxDecoration(
-                                color: AppColors.error,
-                                shape: BoxShape.circle,
-                                border: Border.fromBorderSide(
-                                  BorderSide(color: Colors.white, width: 2),
-                                ),
-                              ),
-                            ),
-                          ),
+                          Icon(Icons.notifications_none_rounded, size: 26, color: Theme.of(context).iconTheme.color),
+                          Positioned(right: 0, top: 0, child: Container(width: 10, height: 10, decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle, border: Border.fromBorderSide(BorderSide(color: Colors.white, width: 2))))),
                         ],
                       ),
                     ),
-                  ),
+                  )
                 ],
               ),
             ),
@@ -199,106 +138,49 @@ class _HomeScreenState extends State<HomeScreen> {
           // ... (Rest of body: Banners, Grid, Courts - Same as before)
           // [Paste the Slider and Grid code from previous versions here to keep it complete]
           // I will include just the Slider for brevity, assuming you keep the rest.
-          SliverToBoxAdapter(
+           SliverToBoxAdapter(
             child: SizedBox(
               height: 180,
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: _bannerImages.length,
-                onPageChanged: (int index) =>
-                    setState(() => _currentPage = index),
+                onPageChanged: (int index) => setState(() => _currentPage = index),
                 itemBuilder: (context, index) {
                   return Container(
                     margin: const EdgeInsets.only(right: 16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
-                      image: DecorationImage(
-                        image: NetworkImage(_bannerImages[index]),
-                        fit: BoxFit.cover,
-                      ),
+                      image: DecorationImage(image: NetworkImage(_bannerImages[index]), fit: BoxFit.cover),
                     ),
                     child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.7),
-                          ],
-                        ),
-                      ),
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(24), gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withOpacity(0.7)])),
                       padding: const EdgeInsets.all(20),
                       alignment: Alignment.bottomLeft,
-                      child: const Text(
-                        "Summer Tournament\nRegistration Open! 🏆",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
+                      child: const Text("Summer Tournament\nRegistration Open! 🏆", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
                     ),
                   );
                 },
               ),
             ),
           ),
-
+          
           const SliverToBoxAdapter(child: SizedBox(height: 30)),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            sliver: SliverToBoxAdapter(
-              child: Text(
-                "Start Playing",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).textTheme.titleLarge?.color,
-                ),
-              ),
-            ),
+            sliver: SliverToBoxAdapter(child: Text("Start Playing", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color))),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             sliver: SliverGrid.count(
-              crossAxisCount: 3,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 0.9,
+              crossAxisCount: 3, mainAxisSpacing: 16, crossAxisSpacing: 16, childAspectRatio: 0.9,
               children: [
-                _SportCard(
-                  name: "Cricket",
-                  icon: Icons.sports_cricket,
-                  color: const Color(0xFFE91E63),
-                ),
-                _SportCard(
-                  name: "Tennis",
-                  icon: Icons.sports_tennis,
-                  color: const Color(0xFFFF9800),
-                ),
-                _SportCard(
-                  name: "Basketball",
-                  icon: Icons.sports_basketball,
-                  color: const Color(0xFFFF5722),
-                ),
-                _SportCard(
-                  name: "Football",
-                  icon: Icons.sports_soccer,
-                  color: const Color(0xFF4CAF50),
-                ),
-                _SportCard(
-                  name: "Badminton",
-                  icon: Icons.sports_tennis,
-                  color: const Color(0xFF009688),
-                ),
-                _SportCard(
-                  name: "Swimming",
-                  icon: Icons.pool,
-                  color: const Color(0xFF2196F3),
-                ),
+                _SportCard(name: "Cricket", icon: Icons.sports_cricket, color: const Color(0xFFE91E63)),
+                _SportCard(name: "Tennis", icon: Icons.sports_tennis, color: const Color(0xFFFF9800)),
+                _SportCard(name: "Basketball", icon: Icons.sports_basketball, color: const Color(0xFFFF5722)),
+                _SportCard(name: "Football", icon: Icons.sports_soccer, color: const Color(0xFF4CAF50)),
+                _SportCard(name: "Badminton", icon: Icons.sports_tennis, color: const Color(0xFF009688)),
+                _SportCard(name: "Swimming", icon: Icons.pool, color: const Color(0xFF2196F3)),
               ],
             ),
           ),
@@ -309,21 +191,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "Popular Nearby",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.titleLarge?.color,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      "See All",
-                      style: TextStyle(color: AppColors.primary),
-                    ),
-                  ),
+                  Text("Popular Nearby", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color)),
+                  TextButton(onPressed: () {}, child: const Text("See All", style: TextStyle(color: AppColors.primary))),
                 ],
               ),
             ),
@@ -333,37 +202,13 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                const _CreativeCourtCard(
-                  name: "Royal Badminton Complex",
-                  image:
-                      "https://images.unsplash.com/photo-1626224583764-847890e058f5?q=80&w=800&auto=format&fit=crop",
-                  price: "LKR 2500",
-                  rating: "4.9",
-                ),
+                const _CreativeCourtCard(name: "Royal Badminton Complex", image: "https://images.unsplash.com/photo-1626224583764-847890e058f5?q=80&w=800&auto=format&fit=crop", price: "LKR 2500", rating: "4.9"),
                 const SizedBox(height: 20),
-                const _CreativeCourtCard(
-                  name: "Urban Basketball Arena",
-                  image:
-                      "https://images.unsplash.com/photo-1505666287802-931dc83948e9?q=80&w=800&auto=format&fit=crop",
-                  price: "LKR 1200",
-                  rating: "4.5",
-                ),
+                const _CreativeCourtCard(name: "Urban Basketball Arena", image: "https://images.unsplash.com/photo-1505666287802-931dc83948e9?q=80&w=800&auto=format&fit=crop", price: "LKR 1200", rating: "4.5"),
                 const SizedBox(height: 20),
-                const _CreativeCourtCard(
-                  name: "City Futsal Club",
-                  image:
-                      "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=800&auto=format&fit=crop",
-                  price: "LKR 3000",
-                  rating: "4.7",
-                ),
+                const _CreativeCourtCard(name: "City Futsal Club", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=800&auto=format&fit=crop", price: "LKR 3000", rating: "4.7"),
                 const SizedBox(height: 20),
-                const _CreativeCourtCard(
-                  name: "Blue Water Swimming",
-                  image:
-                      "https://images.unsplash.com/photo-1576610616656-d3aa5d1f4534?q=80&w=800&auto=format&fit=crop",
-                  price: "LKR 800",
-                  rating: "4.8",
-                ),
+                const _CreativeCourtCard(name: "Blue Water Swimming", image: "https://images.unsplash.com/photo-1576610616656-d3aa5d1f4534?q=80&w=800&auto=format&fit=crop", price: "LKR 800", rating: "4.8"),
               ]),
             ),
           ),
@@ -379,49 +224,25 @@ class _SportCard extends StatelessWidget {
   final String name;
   final IconData icon;
   final Color color;
-  const _SportCard({
-    required this.name,
-    required this.icon,
-    required this.color,
-  });
+  const _SportCard({required this.name, required this.icon, required this.color});
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.08),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: color.withOpacity(0.08), blurRadius: 15, offset: const Offset(0, 5))],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [color.withOpacity(0.2), color.withOpacity(0.05)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(gradient: LinearGradient(colors: [color.withOpacity(0.2), color.withOpacity(0.05)], begin: Alignment.topLeft, end: Alignment.bottomRight), shape: BoxShape.circle),
             child: Icon(icon, color: color, size: 28),
           ),
           const SizedBox(height: 12),
-          Text(
-            name,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
-            ),
-          ),
+          Text(name, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Theme.of(context).textTheme.bodyLarge?.color)),
         ],
       ),
     );
@@ -433,12 +254,7 @@ class _CreativeCourtCard extends StatelessWidget {
   final String image;
   final String price;
   final String rating;
-  const _CreativeCourtCard({
-    required this.name,
-    required this.image,
-    required this.price,
-    required this.rating,
-  });
+  const _CreativeCourtCard({required this.name, required this.image, required this.price, required this.rating});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -446,97 +262,13 @@ class _CreativeCourtCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
         image: DecorationImage(image: NetworkImage(image), fit: BoxFit.cover),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10))],
       ),
       child: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.transparent, Colors.black.withOpacity(0.85)],
-                stops: const [0.5, 1.0],
-              ),
-            ),
-          ),
-          Positioned(
-            top: 16,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    rating,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 20,
-            left: 20,
-            right: 20,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "$price / hour",
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.arrow_forward_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(30), gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withOpacity(0.85)], stops: const [0.5, 1.0]))),
+          Positioned(top: 16, right: 16, child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5), decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(15)), child: Row(children: [const Icon(Icons.star_rounded, color: Colors.amber, size: 16), const SizedBox(width: 4), Text(rating, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black))]))),
+          Positioned(bottom: 20, left: 20, right: 20, child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)), const SizedBox(height: 4), Text("$price / hour", style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14))])), Container(padding: const EdgeInsets.all(12), decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle), child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20))])),
         ],
       ),
     );
