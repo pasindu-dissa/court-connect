@@ -4,7 +4,7 @@ const serviceAccount = require('../config/firebase-service-account.json');
 // Initialize Firebase Admin
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+    credential: admin.credential.cert(serviceAccount),
   });
 }
 
@@ -21,7 +21,7 @@ const protect = async (req, res, next) => {
 
       // Attach user info to request (uid, email)
       req.user = decodedToken;
-      
+
       next();
     } catch (error) {
       console.error(error);

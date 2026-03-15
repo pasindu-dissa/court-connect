@@ -7,6 +7,9 @@ import '../widgets/profile_stat_section.dart';
 import '../widgets/profile_info_tile.dart';
 import '../widgets/profile_booking_section.dart';
 import 'edit_profile_screen.dart';
+import '../widgets/profile_health_section.dart';
+import 'package:provider/provider.dart';
+import '../../../../features/health/data/health_notifier.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -25,6 +28,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _loadProfile();
+    // Load health data
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<HealthNotifier>().loadAll();
+    });
   }
 
   Future<void> _loadProfile() async {
@@ -52,10 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _handleUnauthorized() {
     FirebaseAuth.instance.signOut();
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      '/login',
-      (route) => false,
-    );
+    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
   }
 
   Future<void> _handleLogout() async {
@@ -71,10 +75,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Logout',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Logout', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -83,10 +84,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (confirm == true) {
       await FirebaseAuth.instance.signOut();
       if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/login',
-          (route) => false,
-        );
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil('/login', (route) => false);
       }
     }
   }
@@ -112,13 +112,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: const Color(0xFFF5F5F5),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFF0F766E),
-              ),
+              child: CircularProgressIndicator(color: Color(0xFF0F766E)),
             )
           : _errorMessage != null
-              ? _buildErrorState()
-              : _buildProfileContent(),
+          ? _buildErrorState()
+          : _buildProfileContent(),
     );
   }
 
@@ -129,11 +127,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.grey,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
               _errorMessage!,
@@ -184,6 +178,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   profile: _profile!,
                   onEditPressed: _navigateToEditProfile,
                 ),
+                const SizedBox(height: 24),
+                const ProfileHealthSection(),
                 const SizedBox(height: 24),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
