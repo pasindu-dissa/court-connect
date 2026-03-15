@@ -43,7 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _handleUnauthorized();
       } else {
         setState(() {
-          _errorMessage = 'Failed to load profile. Please try again.';
+          _errorMessage = 'Failed to load profile. Please try again.\nError: $e';
           _isLoading = false;
         });
       }
