@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
     <uses-permission android:name="android.permission.BODY_SENSORS"/>
@@ -10,13 +11,12 @@
     <uses-permission android:name="android.permission.health.READ_HEART_RATE"/>
     <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED"/>
     
-    <!-- For dev/emulator testing of Health Connect -->
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-
+   
     <application
         android:label="frontend"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true">
         
         <!-- Health Connect View Permission Usage -->
         <activity-alias
@@ -59,6 +59,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        
+        <!-- Add this tag -->
+        <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="AIzaSyAAsv0YfiW8McaD5ovbxLNN3Uba8PpcdrQ"/>
     </application>
 
     <queries>
