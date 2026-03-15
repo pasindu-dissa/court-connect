@@ -101,7 +101,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   Future<List<dynamic>> _fetchLeaderboard() async {
     try {
-      final response = await http.get(Uri.parse(ApiConstants.leaderboard));
+      final response = await http.get(Uri.parse("${ApiConstants.baseUrl}/leaderboard"));
       if (response.statusCode == 200) {
         final dynamic data = json.decode(response.body);
         return data is List
