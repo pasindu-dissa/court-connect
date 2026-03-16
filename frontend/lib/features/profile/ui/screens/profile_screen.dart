@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:frontend/core/constants/app_colors.dart';
 import '../../data/models/profile_model.dart';
 import '../../data/services/profile_service.dart';
 import '../widgets/profile_header.dart';
@@ -8,6 +9,7 @@ import '../widgets/profile_info_tile.dart';
 import '../widgets/profile_booking_section.dart';
 import 'edit_profile_screen.dart';
 import '../widgets/profile_health_section.dart';
+import '../../../../features/health/ui/widgets/health_analysis_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../../features/health/data/health_notifier.dart';
 
@@ -180,7 +182,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 24),
                 const ProfileHealthSection(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    width: 300,
+                    height: 46,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const HealthAnalysisScreen(),
+                          ),
+                        );
+                      },
+                      child: Row(
+                        children: [
+                          const Icon(Icons.favorite_border_rounded, color: AppColors.primary),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'View Health Analysis',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(

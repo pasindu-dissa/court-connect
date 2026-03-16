@@ -92,6 +92,4 @@ class HealthService {
       return 0.0;
     }
   }
-  
-
 }
