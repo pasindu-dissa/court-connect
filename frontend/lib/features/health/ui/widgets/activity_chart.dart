@@ -80,7 +80,7 @@ class ActivityChart extends StatelessWidget {
           }),
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
-              tooltipRoundedRadius: 8,
+              tooltipBorderRadius: BorderRadius.circular(8),
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 return BarTooltipItem(
                   '${rod.toY.toStringAsFixed(0)} $unit',
