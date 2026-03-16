@@ -337,7 +337,7 @@ class _ActivityBarChart extends StatelessWidget {
               x: i,
               barRods: [
                 BarChartRodData(
-                  toY: _HealthMockData.weeklyActivity[i] * 100,
+                  toY: _HealthMockData.weeklyActivity[i],
                   color: i == highlightDay
                       ? const Color(0xFF80CBC4)
                       : AppColors.primary,
