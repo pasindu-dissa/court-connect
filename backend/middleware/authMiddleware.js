@@ -45,7 +45,8 @@ const protect = async (req, res, next) => {
 
       // Attach user info to request (uid, email)
       req.user = decodedToken;
-      return next();
+
+      next();
     } catch (error) {
       console.error(error);
       return res.status(401).json({ message: 'Not authorized, token failed' });
