@@ -11,7 +11,7 @@ const {
   getGroupStats
 } = require('../controllers/leaderboardController');
 
-const { authMiddleware } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 
 // Public routes
 router.get('/', getAllLeaderboards);
@@ -21,9 +21,9 @@ router.get('/stats/:groupId', getGroupStats);
 
 // Protected routes (Court Manager only)
 // Note: Add role check middleware if you have it in your project
-router.post('/initialize', authMiddleware, initializeLeaderboard);
-router.post('/match-result', authMiddleware, recordMatchResult);
-router.put('/:id', authMiddleware, updateTeamStats);
-router.delete('/:id', authMiddleware, deleteTeam);
+router.post('/initialize', protect, initializeLeaderboard);
+router.post('/match-result', protect, recordMatchResult);
+router.put('/:id', protect, updateTeamStats);
+router.delete('/:id', protect, deleteTeam);
 
 module.exports = router;
