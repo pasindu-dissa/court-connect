@@ -11,7 +11,7 @@ import '../../../chatbot/presentation/screens/chatbot_screen.dart';
 import '../../../booking/data/booking_service.dart'; 
 import '../../../booking/ui/screens/booking_screen.dart'; 
 import '../../../booking/ui/screens/court_details_screen.dart'; 
-import '../widgets/profile_modal.dart';
+import '../../../profile/ui/screens/profile_screen.dart'; // NEW: Imported Profile Screen
 import 'notifications_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -126,11 +126,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            backgroundColor: Colors.transparent,
-                            isScrollControlled: true,
-                            builder: (context) => const ProfileModal(),
+                          // NEW: Navigates to the ProfileScreen instead of the Modal
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const ProfileScreen()),
                           );
                         },
                         child: Row(
@@ -206,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               child: Icon(
                                 isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                                size: 26,
+                                size: 22,
                                 color: isDark ? Colors.amber : Theme.of(context).iconTheme.color,
                               ),
                             ),
@@ -235,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 children: [
                                   Icon(
                                     Icons.notifications_none_rounded,
-                                    size: 26,
+                                    size: 22,
                                     color: Theme.of(context).iconTheme.color,
                                   ),
                                   Positioned(
@@ -425,14 +424,13 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           
-          // MODERN SCROLL-AWARE CHATBOT BUTTON
           Positioned(
             right: 20,
-            bottom: 100,
+            bottom: 110,
             child: AnimatedScale(
               scale: _isChatbotVisible ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 400),
-              curve: Curves.elasticOut, // Beautiful popping bounce effect
+              curve: Curves.elasticOut, 
               child: AnimatedOpacity(
                 opacity: _isChatbotVisible ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 300),
@@ -446,7 +444,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// --- MODERN ANIMATED CHATBOT BUTTON ---
 class _AnimatedChatbotButton extends StatefulWidget {
   const _AnimatedChatbotButton();
 
@@ -468,17 +465,14 @@ class _AnimatedChatbotButtonState extends State<_AnimatedChatbotButton> with Sin
       duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
 
-    // Subtle pulsing scale for the whole button
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.03).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    // Dynamic popping effect for the Bot Icon
     _iconScaleAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    // Gentle wiggling/Rotating animation for the Bot Icon
     _rotateAnimation = Tween<double>(begin: -0.05, end: 0.05).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
@@ -507,8 +501,8 @@ class _AnimatedChatbotButtonState extends State<_AnimatedChatbotButton> with Sin
             borderRadius: BorderRadius.circular(30),
             gradient: const LinearGradient(
               colors: [
-                AppColors.primary, // Base primary green/teal color
-                Color(0xFF00E676), // Beautiful vivid accent green blend
+                AppColors.primary, 
+                Color(0xFF00E676), 
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -534,7 +528,7 @@ class _AnimatedChatbotButtonState extends State<_AnimatedChatbotButton> with Sin
                 child: RotationTransition(
                   turns: _rotateAnimation,
                   child: const Icon(
-                    Icons.smart_toy_rounded, // Beautiful Bot Icon
+                    Icons.smart_toy_rounded, 
                     color: Colors.white,
                     size: 24,
                   ),
@@ -558,7 +552,6 @@ class _AnimatedChatbotButtonState extends State<_AnimatedChatbotButton> with Sin
   }
 }
 
-// MODERNIZED SPORT CARD
 class _SportCard extends StatelessWidget {
   const _SportCard({
     required this.name,
@@ -641,7 +634,6 @@ class _SportCard extends StatelessWidget {
   }
 }
 
-// REAL DATABASE COURT CARD
 class _CreativeCourtCard extends StatelessWidget {
   final Map<String, dynamic> court; 
   final VoidCallback onTap;
