@@ -215,7 +215,8 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
                 iconTheme: const IconThemeData(color: Colors.white),
                 flexibleSpace: FlexibleSpaceBar(
                   background: Image.network(image, fit: BoxFit.cover, errorBuilder: (c,e,s) => Container(color: Colors.grey)),
-                  title: Text(widget.court['name'], style: const TextStyle(color: Colors.white, fontSize: 16)),
+                  title: Text(widget.court['name'], style: const TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w600, color: Colors.white, fontSize: 18)),
+                  centerTitle: true,
                 ),
               ),
               SliverToBoxAdapter(
@@ -245,7 +246,13 @@ class _CourtDetailsScreenState extends State<CourtDetailsScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(widget.court['location'], style: TextStyle(color: Colors.grey[600]), maxLines: 2),
+                                Row(
+                                  children: [
+                                    Icon(Icons.location_on_rounded, color: Colors.redAccent, size: 20),
+                                    SizedBox(width: 2),
+                                    Text(widget.court['location'], style: TextStyle(fontWeight: FontWeight.w600, color: isDark ? Colors.grey[500] : Colors.grey[700]), maxLines: 2),
+                                  ],
+                                ),
                                 const SizedBox(height: 4),
                                 const Row(children: [Icon(Icons.star, color: Colors.amber, size: 18), Text(" 4.5 (100+ Reviews)")]),
                               ],

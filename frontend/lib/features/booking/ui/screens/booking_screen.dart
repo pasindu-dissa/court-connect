@@ -12,7 +12,6 @@ import 'directions_map_screen.dart';
 import '../widgets/booking_filters_modal.dart';
 
 class BookingScreen extends StatefulWidget {
-  // NEW: Added a parameter to catch the sport filter from the Home screen!
   final String? initialSportFilter;
 
   const BookingScreen({super.key, this.initialSportFilter});
@@ -43,7 +42,6 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   void initState() {
     super.initState();
-    // NEW: Grab the filter passed from the Home screen when the page loads!
     _sportFilter = widget.initialSportFilter;
     _loadData();
   }
@@ -142,36 +140,39 @@ class _BookingScreenState extends State<BookingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       resizeToAvoidBottomInset: false,
 
-      // If we came from the home screen, show a back button!
       appBar: widget.initialSportFilter != null
           ? AppBar(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               elevation: 0,
-              title: Text("${widget.initialSportFilter} Courts"),
+              title: Text("${widget.initialSportFilter} Courts",
+              style: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+              centerTitle: true,
               foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
             )
           : null,
 
-      floatingActionButton: Positioned(
-        bottom: 20,
-        right: 20,
-        child: FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              _searchQuery = "";
-              _sportFilter = null;
-              _isSearchVisible = false;
-            });
-            _updateMarkers();
-          },
-          backgroundColor: Colors.white,
-          mini: true,
-          child: const Icon(Icons.refresh, color: Colors.black),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            _searchQuery = "";
+            _sportFilter = null;
+            _isSearchVisible = false;
+          });
+          _updateMarkers();
+        },
+        backgroundColor: Theme.of(context).cardColor, // Fixed for Dark Mode
+        mini: true,
+        child: Icon(
+          Icons.refresh,
+          color: Theme.of(context).iconTheme.color,
+        ), // Fixed for Dark Mode
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
 
@@ -184,9 +185,7 @@ class _BookingScreenState extends State<BookingScreen> {
           ),
 
           Positioned(
-            top: widget.initialSportFilter != null
-                ? 10
-                : 50, // Adjust top padding if AppBar is present
+            top: widget.initialSportFilter != null ? 10 : 50,
             left: 20,
             right: 20,
             child: Column(
@@ -215,7 +214,9 @@ class _BookingScreenState extends State<BookingScreen> {
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.8),
+                        color: isDark
+                            ? Colors.grey[800]
+                            : Colors.black.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: Row(
@@ -237,8 +238,12 @@ class _BookingScreenState extends State<BookingScreen> {
                             setState(() => _searchQuery = val);
                             if (_isMapView) _updateMarkers();
                           },
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                          ),
                           decoration: InputDecoration(
                             hintText: "Search courts...",
+                            hintStyle: const TextStyle(color: Colors.grey),
                             filled: true,
                             fillColor: Theme.of(context).cardColor,
                             prefixIcon: const Icon(
@@ -306,7 +311,11 @@ class _BookingScreenState extends State<BookingScreen> {
         const SizedBox(width: 8),
         Text(
           text,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+          ),
         ),
       ],
     );
@@ -327,8 +336,14 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   Widget _buildListView() {
-    if (_filteredCourts.isEmpty)
-      return const Center(child: Text("No courts match this filter."));
+    if (_filteredCourts.isEmpty) {
+      return Center(
+        child: Text(
+          "No courts match this filter.",
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+        ),
+      );
+    }
 
     return ListView.separated(
       padding: EdgeInsets.fromLTRB(
@@ -362,11 +377,10 @@ class _BookingScreenState extends State<BookingScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
-        margin: const EdgeInsets.all(20),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(26), topRight: Radius.circular(26)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -479,9 +493,10 @@ class _BookingScreenState extends State<BookingScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
+          // Adapted to cardColor instead of hardcoded white
           color: isActive
               ? AppColors.primary
-              : Colors.white.withValues(alpha: 0.9),
+              : Theme.of(context).cardColor.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
@@ -492,13 +507,21 @@ class _BookingScreenState extends State<BookingScreen> {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: isActive ? Colors.white : Colors.black),
+            Icon(
+              icon,
+              size: 20,
+              color: isActive
+                  ? Colors.white
+                  : Theme.of(context).iconTheme.color,
+            ),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: isActive ? Colors.white : Colors.black,
+                color: isActive
+                    ? Colors.white
+                    : Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
           ],
@@ -517,9 +540,10 @@ class _BookingScreenState extends State<BookingScreen> {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
+          // Adapted to cardColor instead of hardcoded white
           color: isActive
               ? AppColors.primary
-              : Colors.white.withValues(alpha: 0.9),
+              : Theme.of(context).cardColor.withValues(alpha: 0.9),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
@@ -531,7 +555,7 @@ class _BookingScreenState extends State<BookingScreen> {
         child: Icon(
           icon,
           size: 20,
-          color: isActive ? Colors.white : Colors.black,
+          color: isActive ? Colors.white : Theme.of(context).iconTheme.color,
         ),
       ),
     );
