@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:frontend/core/constants/app_colors.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../core/constants/app_colors.dart';
 import '../../data/models/profile_model.dart';
 import '../../data/services/profile_service.dart';
 import '../widgets/profile_header.dart';
@@ -10,7 +12,6 @@ import '../widgets/profile_booking_section.dart';
 import 'edit_profile_screen.dart';
 import '../widgets/profile_health_section.dart';
 import '../../../../features/health/ui/widgets/health_analysis_screen.dart';
-import 'package:provider/provider.dart';
 import '../../../../features/health/data/health_notifier.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -52,7 +53,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _handleUnauthorized();
       } else {
         setState(() {
-          _errorMessage = 'Failed to load profile. Please try again.\nError: $e';
+          _errorMessage =
+              'Failed to load profile. Please try again.\nError: $e';
           _isLoading = false;
         });
       }
@@ -65,19 +67,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _handleLogout() async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        backgroundColor: Theme.of(context).cardColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          'Logout',
+          style: TextStyle(
+            color: Theme.of(context).textTheme.titleLarge?.color,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to sign out of CourtConnect?',
+          style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[700]),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: isDark ? Colors.grey[300] : Colors.grey[800],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Logout', style: TextStyle(color: Colors.red)),
+            child: const Text(
+              'Sign Out',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -111,40 +143,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF0F766E)),
+              child: CircularProgressIndicator(color: AppColors.primary),
             )
           : _errorMessage != null
           ? _buildErrorState()
-          : _buildProfileContent(),
+          : _buildProfileContent(context),
     );
   }
 
   Widget _buildErrorState() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
+            Icon(
+              Icons.wifi_off_rounded,
+              size: 80,
+              color: isDark ? Colors.white24 : Colors.grey.shade300,
+            ),
+            const SizedBox(height: 24),
             Text(
               _errorMessage!,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _loadProfile,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0F766E),
+              style: TextStyle(
+                color: isDark ? Colors.grey[400] : Colors.grey.shade600,
+                fontSize: 16,
               ),
-              child: const Text(
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: _loadProfile,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text(
                 'Try Again',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 14,
+                ),
+                elevation: 0,
               ),
             ),
           ],
@@ -153,133 +203,205 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileContent() {
+  Widget _buildProfileContent(BuildContext context) {
     if (_profile == null) return const SizedBox();
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return RefreshIndicator(
-      color: const Color(0xFF0F766E),
+      color: AppColors.primary,
+      backgroundColor: Theme.of(context).cardColor,
       onRefresh: _loadProfile,
-      child: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 0,
-            floating: true,
-            backgroundColor: const Color(0xFF0F766E),
-            automaticallyImplyLeading: false,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.logout, color: Colors.white),
-                onPressed: _handleLogout,
-              ),
-            ],
+      child: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
           ),
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ProfileHeader(
-                  profile: _profile!,
-                  onEditPressed: _navigateToEditProfile,
-                ),
-                const SizedBox(height: 24),
-                const ProfileHealthSection(),
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: SizedBox(
-                    width: 300,
-                    height: 46,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const HealthAnalysisScreen(),
-                          ),
-                        );
-                      },
-                      child: Row(
-                        children: [
-                          const Icon(Icons.favorite_border_rounded, color: AppColors.primary),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'View Health Analysis',
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ProfileHeader(
+                profile: _profile!,
+                onEditPressed: _navigateToEditProfile,
+              ),
+
+              const SizedBox(height: 24),
+
+              // --- Health Section ---
+              const ProfileHealthSection(),
+              const SizedBox(height: 20),
+
+              // --- View Health Analysis Beautiful Button ---
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 48),
+                child: Container(
+                  width: double.infinity,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(100),
+                    gradient: const LinearGradient(
+                      colors: [
+                        AppColors.primary,
+                        Color(0xFF00E676),
+                      ], // Teal to Vivid Green
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Personal Info',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ProfileInfoTile(
-                        icon: Icons.phone,
-                        label: 'Phone',
-                        value: _profile!.phone,
-                      ),
-                      const SizedBox(height: 8),
-                      ProfileInfoTile(
-                        icon: Icons.info_outline,
-                        label: 'Bio',
-                        value: _profile!.bio,
-                      ),
-                      const SizedBox(height: 8),
-                      ProfileInfoTile(
-                        icon: Icons.location_on,
-                        label: 'Location',
-                        value: _profile!.location,
-                      ),
-                      const SizedBox(height: 8),
-                      ProfileInfoTile(
-                        icon: Icons.location_city,
-                        label: 'District',
-                        value: _profile!.district,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.4),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 24),
-                ProfileStatSection(stats: _profile!.stats),
-                const SizedBox(height: 24),
-                ProfileBookingSection(bookings: const []),
-                const SizedBox(height: 24),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: _handleLogout,
-                      icon: const Icon(Icons.logout, color: Colors.red),
-                      label: const Text(
-                        'Logout',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        side: const BorderSide(color: Colors.red),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const HealthAnalysisScreen(),
                         ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.favorite_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                        SizedBox(width: 12),
+                        Text(
+                          'View Health Analysis',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 16,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 40),
+
+              // --- Personal Info Section ---
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Personal Info',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    ProfileInfoTile(
+                      icon: Icons.phone_rounded,
+                      label: 'Phone',
+                      value: _profile!.phone,
+                    ),
+                    Divider(
+                      color: isDark ? Colors.white10 : Colors.grey[200],
+                      height: 24,
+                      thickness: 1,
+                    ),
+                    ProfileInfoTile(
+                      icon: Icons.format_quote_rounded,
+                      label: 'Bio',
+                      value: _profile!.bio,
+                    ),
+                    Divider(
+                      color: isDark ? Colors.white10 : Colors.grey[200],
+                      height: 24,
+                      thickness: 1,
+                    ),
+                    ProfileInfoTile(
+                      icon: Icons.location_on_rounded,
+                      label: 'Location',
+                      value: _profile!.location,
+                    ),
+                    Divider(
+                      color: isDark ? Colors.white10 : Colors.grey[200],
+                      height: 24,
+                      thickness: 1,
+                    ),
+                    ProfileInfoTile(
+                      icon: Icons.map_rounded,
+                      label: 'District',
+                      value: _profile!.district,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 40),
+
+              // --- Stats Section ---
+              ProfileStatSection(stats: _profile!.stats),
+              const SizedBox(height: 32),
+
+              // --- Bookings Section ---
+              ProfileBookingSection(bookings: const []),
+              const SizedBox(height: 40),
+
+              // --- Logout Button ---
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 60,
+                  child: OutlinedButton.icon(
+                    onPressed: _handleLogout,
+                    icon: const Icon(
+                      Icons.logout_rounded,
+                      color: Colors.redAccent,
+                      size: 22,
+                    ),
+                    label: const Text(
+                      'Sign Out',
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: isDark
+                          ? Colors.redAccent.withOpacity(0.08)
+                          : Colors.red.shade50,
+                      side: BorderSide(
+                        color: Colors.redAccent.withOpacity(isDark ? 0.4 : 0.3),
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
-              ],
-            ),
+              ),
+              const SizedBox(height: 50),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

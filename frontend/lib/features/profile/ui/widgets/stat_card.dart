@@ -42,6 +42,8 @@ class _StatCardState extends State<StatCard> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTapDown: (_) {
         _controller.forward();
@@ -115,12 +117,12 @@ class _StatCardState extends State<StatCard> with TickerProviderStateMixin {
                 ],
               ),
               Positioned(
-                right: -10,
-                bottom: -10,
+                right: -20,
+                bottom: -20,
                 child: Icon(
                   widget.icon,
-                  size: 40,
-                  color: Colors.white.withOpacity(0.1),
+                  size: 90,
+                  color: Colors.white.withOpacity(isDark ? 0.2 : 0.1),
                 ),
               ),
             ],
