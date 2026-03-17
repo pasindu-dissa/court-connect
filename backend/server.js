@@ -34,5 +34,5 @@ app.use((error, _req, res, _next) => {
 
 const PORT = process.env.PORT || 5005;
 app.listen(PORT, () => {
-  console.log(`Court Connect backend listening on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });

@@ -36,14 +36,14 @@ class CourtCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor, 
-          borderRadius: BorderRadius.circular(20), 
+          borderRadius: BorderRadius.circular(26), 
           boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 15, offset: const Offset(0, 5))]
         ),
         child: Row(
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(16), 
-              child: Image.network(image, width: 90, height: 90, fit: BoxFit.cover, errorBuilder: (c, e, s) => Container(width: 90, height: 90, color: Colors.grey[300]))
+              child: Image.network(image, width: 100, height: 100, fit: BoxFit.cover, errorBuilder: (c, e, s) => Container(width: 100, height: 100, color: Colors.grey[300]))
             ),
             const SizedBox(width: 16),
             Expanded(

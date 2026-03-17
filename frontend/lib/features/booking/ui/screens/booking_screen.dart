@@ -1,20 +1,21 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
-
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/marker_generator.dart';
 import '../../data/booking_service.dart';
-import '../widgets/booking_filters_modal.dart';
 import '../widgets/court_card.dart';
 import 'court_details_screen.dart';
 import 'directions_map_screen.dart';
+import '../widgets/booking_filters_modal.dart';
 
 class BookingScreen extends StatefulWidget {
-  const BookingScreen({super.key});
+  // NEW: Added a parameter to catch the sport filter from the Home screen!
+  final String? initialSportFilter;
+
+  const BookingScreen({super.key, this.initialSportFilter});
 
   @override
   State<BookingScreen> createState() => _BookingScreenState();
@@ -27,7 +28,8 @@ class _BookingScreenState extends State<BookingScreen> {
   bool _isMapView = false;
   bool _isLoading = true;
   bool _isSearchVisible = false;
-  String _searchQuery = '';
+  String _searchQuery = "";
+
   String? _sportFilter;
 
   List<Map<String, dynamic>> _allCourts = [];
@@ -41,44 +43,52 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   void initState() {
     super.initState();
+    // NEW: Grab the filter passed from the Home screen when the page loads!
+    _sportFilter = widget.initialSportFilter;
     _loadData();
   }
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     final courts = await _bookingService.getAllCourts();
-    if (!mounted) return;
-    setState(() {
-      _allCourts = courts;
-      _isLoading = false;
-    });
-    await _updateMarkers();
+    if (mounted) {
+      setState(() {
+        _allCourts = courts;
+        _isLoading = false;
+      });
+      await _updateMarkers();
+    }
   }
 
   Future<void> _updateMarkers() async {
-    final newMarkers = <Marker>{};
-    final availableIcon = await MarkerGenerator.createCustomMarkerBitmap(
-      'Court',
-      color: const Color(0xFF00C853),
-    );
-    final busyIcon = await MarkerGenerator.createCustomMarkerBitmap(
-      'Court',
-      color: const Color(0xFFFF3D00),
-    );
+    Set<Marker> newMarkers = {};
 
-    final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final BitmapDescriptor availableIcon =
+        await MarkerGenerator.createCustomMarkerBitmap(
+          "Court",
+          color: const Color(0xFF00C853),
+        );
+    final BitmapDescriptor busyIcon =
+        await MarkerGenerator.createCustomMarkerBitmap(
+          "Court",
+          color: const Color(0xFFFF3D00),
+        );
 
-    for (final court in _filteredCourts) {
-      final lat = (court['latitude'] as num?)?.toDouble() ?? 6.9271;
-      final lng = (court['longitude'] as num?)?.toDouble() ?? 79.8612;
+    String todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-      var isBusy = false;
+    for (var court in _filteredCourts) {
+      double lat = (court['latitude'] as num?)?.toDouble() ?? 6.9271;
+      double lng = (court['longitude'] as num?)?.toDouble() ?? 79.8612;
+
+      bool isBusy = false;
       if (court['_id'] != null) {
         try {
-          final bookedSlots =
-              await _bookingService.getBookedSlots(court['_id'], todayStr);
+          List<String> bookedSlots = await _bookingService.getBookedSlots(
+            court['_id'],
+            todayStr,
+          );
           isBusy = bookedSlots.length >= 8;
-        } catch (_) {
+        } catch (e) {
           isBusy = false;
         }
       }
@@ -99,15 +109,15 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   Future<void> _locateUser() async {
-    var permission = await Geolocator.checkPermission();
+    LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) return;
     }
 
-    final position = await Geolocator.getCurrentPosition();
-    final controller = await _mapController.future;
-    await controller.animateCamera(
+    Position position = await Geolocator.getCurrentPosition();
+    final GoogleMapController controller = await _mapController.future;
+    controller.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
           target: LatLng(position.latitude, position.longitude),
@@ -119,11 +129,11 @@ class _BookingScreenState extends State<BookingScreen> {
 
   List<Map<String, dynamic>> get _filteredCourts {
     return _allCourts.where((court) {
-      final matchesSearch = court['name']
-          .toString()
-          .toLowerCase()
-          .contains(_searchQuery.toLowerCase());
-      final matchesSport = _sportFilter == null ||
+      final matchesSearch = court['name'].toString().toLowerCase().contains(
+        _searchQuery.toLowerCase(),
+      );
+      final matchesSport =
+          _sportFilter == null ||
           court['sport'] == _sportFilter ||
           (court['sports'] as List<dynamic>?)?.contains(_sportFilter) == true;
       return matchesSearch && matchesSport;
@@ -135,20 +145,36 @@ class _BookingScreenState extends State<BookingScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       resizeToAvoidBottomInset: false,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _searchQuery = '';
-            _sportFilter = null;
-            _isSearchVisible = false;
-          });
-          _updateMarkers();
-        },
-        backgroundColor: Colors.white,
-        mini: true,
-        child: const Icon(Icons.refresh, color: Colors.black),
+
+      // If we came from the home screen, show a back button!
+      appBar: widget.initialSportFilter != null
+          ? AppBar(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              elevation: 0,
+              title: Text("${widget.initialSportFilter} Courts"),
+              foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+            )
+          : null,
+
+      floatingActionButton: Positioned(
+        bottom: 20,
+        right: 20,
+        child: FloatingActionButton(
+          onPressed: () {
+            setState(() {
+              _searchQuery = "";
+              _sportFilter = null;
+              _isSearchVisible = false;
+            });
+            _updateMarkers();
+          },
+          backgroundColor: Colors.white,
+          mini: true,
+          child: const Icon(Icons.refresh, color: Colors.black),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
       body: Stack(
         children: [
           Positioned.fill(
@@ -156,8 +182,11 @@ class _BookingScreenState extends State<BookingScreen> {
                 ? const Center(child: CircularProgressIndicator())
                 : (_isMapView ? _buildGoogleMap() : _buildListView()),
           ),
+
           Positioned(
-            top: 50,
+            top: widget.initialSportFilter != null
+                ? 10
+                : 50, // Adjust top padding if AppBar is present
             left: 20,
             right: 20,
             child: Column(
@@ -169,7 +198,7 @@ class _BookingScreenState extends State<BookingScreen> {
                       children: [
                         _buildGlassButton(
                           icon: _isSearchVisible ? Icons.close : Icons.search,
-                          label: _isSearchVisible ? 'Close' : 'Search',
+                          label: _isSearchVisible ? "Close" : "Search",
                           isActive: _isSearchVisible,
                           onTap: () => setState(
                             () => _isSearchVisible = !_isSearchVisible,
@@ -191,8 +220,8 @@ class _BookingScreenState extends State<BookingScreen> {
                       ),
                       child: Row(
                         children: [
-                          _buildToggleBtn('List', false),
-                          _buildToggleBtn('Map', true),
+                          _buildToggleBtn("List", false),
+                          _buildToggleBtn("Map", true),
                         ],
                       ),
                     ),
@@ -209,7 +238,7 @@ class _BookingScreenState extends State<BookingScreen> {
                             if (_isMapView) _updateMarkers();
                           },
                           decoration: InputDecoration(
-                            hintText: 'Search courts...',
+                            hintText: "Search courts...",
                             filled: true,
                             fillColor: Theme.of(context).cardColor,
                             prefixIcon: const Icon(
@@ -220,8 +249,9 @@ class _BookingScreenState extends State<BookingScreen> {
                               borderRadius: BorderRadius.circular(20),
                               borderSide: BorderSide.none,
                             ),
-                            contentPadding:
-                                const EdgeInsets.symmetric(horizontal: 20),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                            ),
                           ),
                         )
                       : const SizedBox(),
@@ -229,13 +259,16 @@ class _BookingScreenState extends State<BookingScreen> {
               ],
             ),
           ),
+
           if (_isMapView && !_isLoading)
             Positioned(
-              bottom: 30,
+              bottom: 100,
               left: 20,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(16),
@@ -250,9 +283,9 @@ class _BookingScreenState extends State<BookingScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildLegendItem('Available', const Color(0xFF00C853)),
+                    _buildLegendItem("Available", const Color(0xFF00C853)),
                     const SizedBox(height: 8),
-                    _buildLegendItem('Busy / Full', const Color(0xFFFF3D00)),
+                    _buildLegendItem("Busy / Full", const Color(0xFFFF3D00)),
                   ],
                 ),
               ),
@@ -286,27 +319,35 @@ class _BookingScreenState extends State<BookingScreen> {
       markers: _markers,
       myLocationEnabled: true,
       zoomControlsEnabled: false,
-      onMapCreated: (controller) {
-        _mapController.complete(controller);
+      onMapCreated: (c) {
+        _mapController.complete(c);
         _locateUser();
       },
     );
   }
 
   Widget _buildListView() {
+    if (_filteredCourts.isEmpty)
+      return const Center(child: Text("No courts match this filter."));
+
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(20, 140, 20, 100),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        widget.initialSportFilter != null ? 80 : 140,
+        20,
+        100,
+      ),
       itemCount: _filteredCourts.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        final court = _filteredCourts[index];
         return CourtCard(
-          court: court,
+          court: _filteredCourts[index],
           onTap: () async {
             await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => CourtDetailsScreen(court: court),
+                builder: (_) =>
+                    CourtDetailsScreen(court: _filteredCourts[index]),
               ),
             );
             _updateMarkers();
@@ -358,7 +399,7 @@ class _BookingScreenState extends State<BookingScreen> {
                       );
                     },
                     icon: const Icon(Icons.directions, color: Colors.blue),
-                    label: const Text('Directions'),
+                    label: const Text("Directions"),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.blue,
                       side: const BorderSide(color: Colors.blue),
@@ -382,7 +423,7 @@ class _BookingScreenState extends State<BookingScreen> {
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('Book Now'),
+                    child: const Text("Book Now"),
                   ),
                 ),
               ],
@@ -451,11 +492,7 @@ class _BookingScreenState extends State<BookingScreen> {
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isActive ? Colors.white : Colors.black,
-            ),
+            Icon(icon, size: 20, color: isActive ? Colors.white : Colors.black),
             const SizedBox(width: 8),
             Text(
               label,
