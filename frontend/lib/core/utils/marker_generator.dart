@@ -3,46 +3,77 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MarkerGenerator {
-  static Future<BitmapDescriptor> createCustomMarkerBitmap(String title, {required Color color}) async {
+  // NEW: Cache system to prevent lag when rendering many pins
+  static final Map<String, BitmapDescriptor> _cache = {};
+
+  static Future<BitmapDescriptor> createCustomMarkerBitmap(
+    String title, {
+    required Color color,
+    String? sport, 
+  }) async {
+    // Check if we already created this exact pin color + sport combo!
+    final String cacheKey = '${color.value}_${sport ?? "default"}';
+    if (_cache.containsKey(cacheKey)) {
+      return _cache[cacheKey]!;
+    }
+
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
     
-    // Config
-    const double size = 120.0;
+    // Size limit to prevent giant markers
+    const double size = 100.0; 
+    
     final Paint circlePaint = Paint()..color = color;
     final Paint borderPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 8.0;
-    final Paint shadowPaint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.3)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10.0);
+      ..strokeWidth = 4.0; 
 
-    // 1. Draw Shadow
-    canvas.drawCircle(const Offset(size / 2, size / 2 + 5), size / 2.2, shadowPaint);
-
-    // 2. Draw Main Circle
+    // Draw Main Circle & Border
     canvas.drawCircle(const Offset(size / 2, size / 2), size / 2.2, circlePaint);
-    
-    // 3. Draw White Border
     canvas.drawCircle(const Offset(size / 2, size / 2), size / 2.2, borderPaint);
 
-    // 4. Draw Icon (Sport Icon)
+    // Determine the correct icon based on the sport
+    IconData iconData = Icons.location_on_rounded; // Default fallback
+    
+    if (sport != null && sport.isNotEmpty) {
+      switch (sport.toLowerCase()) {
+        case 'tennis': iconData = Icons.sports_tennis; break;
+        case 'basketball': iconData = Icons.sports_basketball; break;
+        case 'football': 
+        case 'futsal': iconData = Icons.sports_soccer; break;
+        case 'cricket': iconData = Icons.sports_cricket; break;
+        case 'swimming': iconData = Icons.pool; break;
+        case 'badminton': iconData = Icons.sports_tennis; break;
+        default: iconData = Icons.sports; break;
+      }
+    }
+
+    // Draw the Icon perfectly centered
     final TextPainter textPainter = TextPainter(textDirection: TextDirection.ltr);
     textPainter.text = TextSpan(
-      text: String.fromCharCode(Icons.location_on_rounded.codePoint),
+      text: String.fromCharCode(iconData.codePoint),
       style: TextStyle(
-        fontSize: size * 0.5,
-        fontFamily: Icons.location_on_rounded.fontFamily,
+        fontSize: size * 0.55,
+        fontFamily: iconData.fontFamily,
+        package: iconData.fontPackage, 
         color: Colors.white,
       ),
     );
     textPainter.layout();
-    textPainter.paint(canvas, Offset((size - textPainter.width) / 2, (size - textPainter.height) / 2));
+    
+    textPainter.paint(
+      canvas, 
+      Offset((size - textPainter.width) / 2, (size - textPainter.height) / 2)
+    );
 
     final img = await pictureRecorder.endRecording().toImage(size.toInt(), size.toInt());
     final data = await img.toByteData(format: ui.ImageByteFormat.png);
     
-    return BitmapDescriptor.fromBytes(data!.buffer.asUint8List());
+    final bitmap = BitmapDescriptor.fromBytes(data!.buffer.asUint8List());
+    
+    // Save to cache before returning
+    _cache[cacheKey] = bitmap;
+    return bitmap;
   }
 }
