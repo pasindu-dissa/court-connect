@@ -61,28 +61,37 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> {
 
   Future<void> _updateMarkers() async {
     Set<Marker> newMarkers = {};
-    final BitmapDescriptor matchIcon =
-        await MarkerGenerator.createCustomMarkerBitmap(
-          "Match",
-          color: AppColors.primary,
-        );
 
     for (var match in _filteredMatches) {
       double lat = (match['latitude'] ?? 6.9271).toDouble();
       double lng = (match['longitude'] ?? 79.8612).toDouble();
       String id = match['_id'] ?? match['title'];
+      
+      // Grab the sport string from the match data
+      String sport = match['sport']?.toString() ?? '';
+
+      // Generate the specific icon for this match's sport!
+      // Since we added caching to MarkerGenerator, doing this in a loop is super fast.
+      final BitmapDescriptor markerIcon = await MarkerGenerator.createCustomMarkerBitmap(
+        "Match",
+        color: Colors.redAccent, // Feel free to change to AppColors.primary if you prefer!
+        sport: sport, // Passing the exact sport to get the right icon
+      );
 
       newMarkers.add(
         Marker(
           markerId: MarkerId(id),
           position: LatLng(lat, lng),
-          icon: matchIcon,
+          icon: markerIcon,
           onTap: () => _showMatchPreviewBottomSheet(match),
         ),
       );
     }
 
-    setState(() => _markers = newMarkers);
+    // Safely update the state
+    if (mounted) {
+      setState(() => _markers = newMarkers);
+    }
   }
 
   Future<void> _locateUser() async {
@@ -134,9 +143,9 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> {
           if (hour == 12 && isAM) hour = 0;
           if (hour != 12 && !isAM) hour += 12;
 
-          if (_timeFilter == "Morning") {
+          if (_timeFilter == "Morning")
             matchesTime = (hour >= 5 && hour < 12);
-          } else if (_timeFilter == "Afternoon")
+          else if (_timeFilter == "Afternoon")
             matchesTime = (hour >= 12 && hour < 17);
           else if (_timeFilter == "Evening")
             matchesTime = (hour >= 17 && hour < 20);
@@ -277,6 +286,7 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> {
                           },
                           decoration: InputDecoration(
                             hintText: "Search matches...",
+                            hintStyle: const TextStyle(color: Colors.grey),
                             filled: true,
                             fillColor: Theme.of(context).cardColor,
                             prefixIcon: const Icon(
@@ -355,6 +365,7 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> {
           currentPlayers: item['currentPlayers'] ?? 1,
           maxPlayers: item['maxPlayers'] ?? 4,
           fee: (item['fee'] ?? 0).toDouble(),
+          location: item['location'] ?? "Unknown Location",
           onTap: () => _navigateToDetails(item), // Opens Details Screen
         );
       },
@@ -370,53 +381,24 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
-        margin: const EdgeInsets.all(20),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(26), topRight: Radius.circular(26)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundImage: NetworkImage(
-                    match['image'] ??
-                        "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5",
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        match['title'] ?? match['courtName'] ?? 'Match',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "${match['sport']} • ${match['time']}",
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        "LKR ${match['fee'] ?? 0} per person",
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            MatchCard(
+              sport: match['sport'] ?? "Sport",
+              courtName: match['title'] ?? match['courtName'] ?? "Match",
+              time: match['time'] ?? "Upcoming",
+              skill: match['skill'] ?? "All Levels",
+              currentPlayers: match['currentPlayers'] ?? 1,
+              maxPlayers: match['maxPlayers'] ?? 4,
+              fee: (match['fee'] ?? 0).toDouble(),
+              location: match['location'] ?? "Unknown Location",
+              onTap: () {}, // No action on tap since we have buttons below
             ),
             const SizedBox(height: 20),
             Row(
@@ -477,15 +459,15 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: isActive
               ? AppColors.primary
               : Theme.of(context).cardColor.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 10,
             ),
           ],
@@ -494,7 +476,7 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> {
           children: [
             Icon(
               icon,
-              size: 18,
+              size: 20,
               color: isActive
                   ? Colors.white
                   : Theme.of(context).iconTheme.color,

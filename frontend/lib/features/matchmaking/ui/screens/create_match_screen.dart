@@ -83,6 +83,7 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     double courtPrice = _selectedCourt != null
         ? (_selectedCourt!['pricePerHour'] as num).toDouble()
         : 0.0;
@@ -90,12 +91,16 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Host a Match"),
-        backgroundColor: Colors.white,
+        title: const Text(
+          "Host a Match",
+          style: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w600, fontSize: 16),
+        ),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
       ),
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: _isLoadingCourts
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -106,20 +111,25 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // --- 1. Basic Details ---
-                    const Text(
+                    Text(
                       "Match Title",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _titleController,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
                       decoration: InputDecoration(
                         hintText: "e.g., Weekend Friendly Doubles",
+                        hintStyle: const TextStyle(color: Colors.grey),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Theme.of(context).cardColor,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -130,25 +140,33 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                     const SizedBox(height: 24),
 
                     // --- 2. Court Selection ---
-                    const Text(
+                    Text(
                       "Select Court (Where you will play)",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<Map<String, dynamic>>(
+                      dropdownColor: Theme.of(context).cardColor,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Theme.of(context).cardColor,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                       ),
-                      hint: const Text("Choose a registered court"),
-                      initialValue: _selectedCourt,
+                      hint: const Text(
+                        "Choose a registered court",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      value: _selectedCourt,
                       items: _courts.map((court) {
                         return DropdownMenuItem<Map<String, dynamic>>(
                           value: court,
@@ -170,25 +188,33 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                     const SizedBox(height: 24),
 
                     // --- 3. Sport (Filtered by Court) ---
-                    const Text(
+                    Text(
                       "Sport",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
+                      dropdownColor: Theme.of(context).cardColor,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Theme.of(context).cardColor,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                       ),
-                      hint: const Text("Select Sport"),
-                      initialValue: _selectedSport,
+                      hint: const Text(
+                        "Select Sport",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      value: _selectedSport,
                       items:
                           (_selectedCourt != null &&
                               _selectedCourt!['sports'] != null)
@@ -209,19 +235,24 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                     const SizedBox(height: 24),
 
                     // --- 4. Skill Level ---
-                    const Text(
+                    Text(
                       "Skill Level Required",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      initialValue: _selectedSkill,
+                      value: _selectedSkill,
+                      dropdownColor: Theme.of(context).cardColor,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Theme.of(context).cardColor,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -240,11 +271,12 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           "Total Players (including you)",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                           ),
                         ),
                         Text(
@@ -263,6 +295,9 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                       max: 22,
                       divisions: 20,
                       activeColor: AppColors.primary,
+                      inactiveColor: isDark
+                          ? Colors.white24
+                          : Colors.grey.shade300,
                       onChanged: (val) =>
                           setState(() => _maxPlayers = val.toInt()),
                     ),
@@ -276,10 +311,10 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Column(
+                          Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 "Hourly Fee per Person",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
@@ -290,7 +325,9 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
                                 "Court Price ÷ Total Players",
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey,
+                                  color: isDark
+                                      ? Colors.grey.shade400
+                                      : Colors.grey.shade600,
                                 ),
                               ),
                             ],
@@ -309,26 +346,36 @@ class _CreateMatchScreenState extends State<CreateMatchScreen> {
 
                     const SizedBox(height: 20),
 
-                    // Cancellation Policy Note
+                    // Cancellation Policy Note (Adapted for Dark Mode)
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.orange.shade50,
+                        color: isDark
+                            ? Colors.orange.withValues(alpha: 0.1)
+                            : Colors.orange.shade50,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.orange.shade200),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.orange.withValues(alpha: 0.3)
+                              : Colors.orange.shade200,
+                        ),
                       ),
                       child: Row(
                         children: [
                           Icon(
                             Icons.info_outline,
-                            color: Colors.orange.shade800,
+                            color: isDark
+                                ? Colors.orange.shade300
+                                : Colors.orange.shade800,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               "Cancellation Policy: Bookings and matches cannot be refunded if cancelled within the last 12 hours before the start time.",
                               style: TextStyle(
-                                color: Colors.orange.shade900,
+                                color: isDark
+                                    ? Colors.orange.shade200
+                                    : Colors.orange.shade900,
                                 fontSize: 12,
                               ),
                             ),

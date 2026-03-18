@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class ActivityChartData {
-  final String day;   // e.g. "Mon"
+  final String day; // e.g. "Mon"
   final double value; // steps or calories
 
   const ActivityChartData({required this.day, required this.value});
@@ -33,10 +33,8 @@ class ActivityChart extends StatelessWidget {
           gridData: FlGridData(
             show: true,
             drawVerticalLine: false,
-            getDrawingHorizontalLine: (_) => FlLine(
-              color: Colors.teal.withOpacity(0.1),
-              strokeWidth: 1,
-            ),
+            getDrawingHorizontalLine: (_) =>
+                FlLine(color: Colors.teal.withOpacity(0.1), strokeWidth: 1),
           ),
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
@@ -45,7 +43,8 @@ class ActivityChart extends StatelessWidget {
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
                   final index = value.toInt();
-                  if (index < 0 || index >= data.length) return const SizedBox();
+                  if (index < 0 || index >= data.length)
+                    return const SizedBox();
                   return Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
@@ -81,11 +80,14 @@ class ActivityChart extends StatelessWidget {
           }),
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
-              tooltipRoundedRadius: 8,
+              tooltipBorderRadius: BorderRadius.circular(8),
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 return BarTooltipItem(
                   '${rod.toY.toStringAsFixed(0)} $unit',
-                  const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 );
               },
             ),

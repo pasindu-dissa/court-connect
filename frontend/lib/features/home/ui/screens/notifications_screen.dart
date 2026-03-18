@@ -29,7 +29,9 @@ class NotificationsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Notifications"),
+        title: const Text("Notifications",
+        style: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w600, fontSize: 16),
+        ),
         centerTitle: true,
       ),
       body: ListView.separated(

@@ -61,30 +61,32 @@ class _HealthChartsSectionState extends State<HealthChartsSection> {
       children: [
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text('Activity (Steps)',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          child: Text(
+            'Activity (Steps)',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: ActivityChart(
-            data: activityData,
-            unit: 'steps',
-            maxY: 12000,
-          ),
+          child: ActivityChart(data: activityData, unit: 'steps', maxY: 12000),
         ),
 
         const SizedBox(height: 24),
 
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text('Heart Rate',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          child: Text(
+            'Heart Rate',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
         ),
         notifier.heartRateData.isEmpty
             ? const Padding(
                 padding: EdgeInsets.all(16),
-                child: Text('No heart rate data available.',
-                    style: TextStyle(color: Colors.grey)),
+                child: Text(
+                  'No heart rate data available.',
+                  style: TextStyle(color: Colors.grey),
+                ),
               )
             : Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -108,7 +110,11 @@ class _PermissionError extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.health_and_safety_outlined, size: 48, color: Colors.grey),
+          const Icon(
+            Icons.health_and_safety_outlined,
+            size: 48,
+            color: Colors.grey,
+          ),
           const SizedBox(height: 12),
           Text(
             message.isEmpty ? 'Health permissions are required.' : message,
@@ -123,7 +129,9 @@ class _PermissionError extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF00BFA5),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ],

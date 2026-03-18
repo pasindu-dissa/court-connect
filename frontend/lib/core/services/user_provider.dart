@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import '../constants/api_constants.dart';
 
 class UserProvider extends ChangeNotifier {
@@ -30,10 +31,10 @@ class UserProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         _user = jsonDecode(response.body);
       } else {
-        print("Failed to load user: ${response.body}");
+        debugPrint("Failed to load user: ${response.body}");
       }
     } catch (e) {
-      print("Error loading user: $e");
+      debugPrint("Error loading user: $e");
     } finally {
       _isLoading = false;
       notifyListeners();

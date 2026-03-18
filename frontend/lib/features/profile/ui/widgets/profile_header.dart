@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../data/models/profile_model.dart';
+import '../../../../core/constants/app_colors.dart';
 
 class ProfileHeader extends StatelessWidget {
   final ProfileModel profile;
@@ -13,46 +14,81 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
-      decoration: const BoxDecoration(
-        color: Color.fromARGB(255, 0, 150, 136),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
       child: Column(
         children: [
-          // Avatar
+          // --- Modern Glowing Avatar ---
           Stack(
             children: [
-              CircleAvatar(
-                radius: 50,
-                backgroundColor: Colors.white24,
-                backgroundImage: profile.profileImage.isNotEmpty
-                    ? NetworkImage(profile.profileImage)
-                    : null,
-                child: profile.profileImage.isEmpty
-                    ? const Icon(Icons.person, size: 50, color: Colors.white)
-                    : null,
+              // Outer Gradient Ring
+              Container(
+                padding: const EdgeInsets.all(4), 
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, Color(0xFF00E676)], // Teal to Vivid Green
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                // Inner transparent gap
+                child: Container(
+                  padding: const EdgeInsets.all(4), 
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: CircleAvatar(
+                    radius: 55,
+                    backgroundColor: isDark ? Colors.white10 : Colors.grey.shade200,
+                    backgroundImage: profile.profileImage.isNotEmpty
+                        ? NetworkImage(profile.profileImage)
+                        : null,
+                    child: profile.profileImage.isEmpty
+                        ? Icon(Icons.person_rounded, size: 50, color: isDark ? Colors.white54 : Colors.grey.shade400)
+                        : null,
+                  ),
+                ),
               ),
+              
+              // Edit Button (Overlapping)
               Positioned(
                 bottom: 0,
-                right: 0,
+                right: 4,
                 child: GestureDetector(
                   onTap: onEditPressed,
                   child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(isDark ? 0.4 : 0.15),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: isDark ? Colors.white24 : Colors.grey.shade200,
+                        width: 1.5,
+                      )
                     ),
                     child: const Icon(
-                      Icons.edit,
-                      size: 16,
-                      color: Color.fromARGB(255, 0, 150, 136),
+                      Icons.edit_rounded,
+                      size: 18,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -60,46 +96,63 @@ class ProfileHeader extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
 
-          // Name
+          // --- Name ---
           Text(
             profile.name,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
           ),
 
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
 
-          // Email
+          // --- Email ---
           Text(
             profile.email,
             style: TextStyle(
-              fontSize: 14,
-              color: Colors.white.withOpacity(0.8),
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
-          // Role Badge
+          // --- Role Badge ---
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: AppColors.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white38),
-            ),
-            child: Text(
-              profile.role == 'court_owner' ? '🏟️ Court Owner' : '🎾 Player',
-              style: const TextStyle(
-                fontSize: 13,
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
+              border: Border.all(
+                color: AppColors.primary.withOpacity(0.3),
+                width: 1.5,
               ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  profile.role == 'court_owner' ? Icons.stadium_rounded : Icons.sports_tennis_rounded,
+                  size: 16,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  profile.role == 'court_owner' ? 'Court Owner' : 'Player',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

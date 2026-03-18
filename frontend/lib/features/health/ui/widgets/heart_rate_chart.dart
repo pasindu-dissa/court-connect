@@ -10,8 +10,10 @@ class HeartRateChart extends StatelessWidget {
 
   double get averageBpm {
     if (data.isEmpty) return 0;
-    double total = data.fold(0.0, (sum, p) =>
-        sum + (p.value as NumericHealthValue).numericValue.toDouble());
+    double total = data.fold(
+      0.0,
+      (sum, p) => sum + (p.value as NumericHealthValue).numericValue.toDouble(),
+    );
     return total / data.length;
   }
 
@@ -24,10 +26,11 @@ class HeartRateChart extends StatelessWidget {
 
   double get restingBpm {
     if (data.isEmpty) return 0;
-    final sorted = data
-        .map((p) => (p.value as NumericHealthValue).numericValue.toDouble())
-        .toList()
-      ..sort();
+    final sorted =
+        data
+            .map((p) => (p.value as NumericHealthValue).numericValue.toDouble())
+            .toList()
+          ..sort();
     // Take lowest 10% as approximate resting rate
     final count = (sorted.length * 0.1).ceil();
     final lowest = sorted.take(count).toList();
@@ -54,9 +57,15 @@ class HeartRateChart extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _StatLabel(label: 'Average', value: '${averageBpm.toStringAsFixed(0)} bpm'),
+            _StatLabel(
+              label: 'Average',
+              value: '${averageBpm.toStringAsFixed(0)} bpm',
+            ),
             _StatLabel(label: 'Max', value: '${maxBpm.toStringAsFixed(0)} bpm'),
-            _StatLabel(label: 'Resting', value: '${restingBpm.toStringAsFixed(0)} bpm'),
+            _StatLabel(
+              label: 'Resting',
+              value: '${restingBpm.toStringAsFixed(0)} bpm',
+            ),
           ],
         ),
       ],
@@ -101,7 +110,8 @@ class _HeartRatePainter extends CustomPainter {
       } else {
         // Smooth cubic bezier
         final prevX = size.width * (i - 1) / (values.length - 1);
-        final prevY = size.height - (size.height * (values[i - 1] - minVal) / range);
+        final prevY =
+            size.height - (size.height * (values[i - 1] - minVal) / range);
         final controlX1 = prevX + (x - prevX) / 2;
         path.cubicTo(controlX1, prevY, controlX1, y, x, y);
       }
@@ -139,9 +149,14 @@ class _StatLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(value,
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF00BFA5))),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            color: Color(0xFF00BFA5),
+          ),
+        ),
         const SizedBox(height: 2),
         Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
       ],
