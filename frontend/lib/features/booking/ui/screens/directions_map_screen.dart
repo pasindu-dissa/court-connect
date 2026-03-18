@@ -6,7 +6,7 @@ import '../../data/directions_service.dart';
 
 class DirectionsMapScreen extends StatefulWidget {
   final Map<String, dynamic> court;
-  
+
   const DirectionsMapScreen({super.key, required this.court});
 
   @override
@@ -16,11 +16,11 @@ class DirectionsMapScreen extends StatefulWidget {
 class _DirectionsMapScreenState extends State<DirectionsMapScreen> {
   final DirectionsService _directionsService = DirectionsService();
   GoogleMapController? _mapController;
-  
+
   LatLng? _currentLocation;
-  Set<Marker> _markers = {};
-  Set<Polyline> _polylines = {};
-  
+  final Set<Marker> _markers = {};
+  final Set<Polyline> _polylines = {};
+
   String _distance = "";
   String _duration = "";
   bool _isLoading = true;
@@ -33,7 +33,9 @@ class _DirectionsMapScreenState extends State<DirectionsMapScreen> {
 
   Future<void> _initDirections() async {
     // 1. Get User Location
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
     _currentLocation = LatLng(position.latitude, position.longitude);
 
     // 2. Get Court Location
@@ -51,29 +53,39 @@ class _DirectionsMapScreenState extends State<DirectionsMapScreen> {
       setState(() {
         _distance = directions['distance'];
         _duration = directions['duration'];
-        
+
         // Draw Route Line
-        _polylines.add(Polyline(
-          polylineId: const PolylineId("route"),
-          points: directions['polylinePoints'],
-          color: Colors.blue,
-          width: 5,
-        ));
+        _polylines.add(
+          Polyline(
+            polylineId: const PolylineId("route"),
+            points: directions['polylinePoints'],
+            color: Colors.blue,
+            width: 5,
+          ),
+        );
 
         // Add Pins
-        _markers.add(Marker(
-          markerId: const MarkerId("start"),
-          position: _currentLocation!,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-          infoWindow: const InfoWindow(title: "You"),
-        ));
-        
-        _markers.add(Marker(
-          markerId: const MarkerId("dest"),
-          position: destination,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-          infoWindow: InfoWindow(title: widget.court['name']),
-        ));
+        _markers.add(
+          Marker(
+            markerId: const MarkerId("start"),
+            position: _currentLocation!,
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueAzure,
+            ),
+            infoWindow: const InfoWindow(title: "You"),
+          ),
+        );
+
+        _markers.add(
+          Marker(
+            markerId: const MarkerId("dest"),
+            position: destination,
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueRed,
+            ),
+            infoWindow: InfoWindow(title: widget.court['name']),
+          ),
+        );
 
         _isLoading = false;
       });
@@ -87,7 +99,7 @@ class _DirectionsMapScreenState extends State<DirectionsMapScreen> {
         ),
       );
     } else {
-      if(mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -97,8 +109,10 @@ class _DirectionsMapScreenState extends State<DirectionsMapScreen> {
     for (final latLng in list) {
       if (minLat == null || latLng.latitude < minLat) minLat = latLng.latitude;
       if (maxLat == null || latLng.latitude > maxLat) maxLat = latLng.latitude;
-      if (minLng == null || latLng.longitude < minLng) minLng = latLng.longitude;
-      if (maxLng == null || latLng.longitude > maxLng) maxLng = latLng.longitude;
+      if (minLng == null || latLng.longitude < minLng)
+        minLng = latLng.longitude;
+      if (maxLng == null || latLng.longitude > maxLng)
+        maxLng = latLng.longitude;
     }
     return LatLngBounds(
       southwest: LatLng(minLat!, minLng!),
@@ -112,17 +126,21 @@ class _DirectionsMapScreenState extends State<DirectionsMapScreen> {
       body: Stack(
         children: [
           GoogleMap(
-            initialCameraPosition: const CameraPosition(target: LatLng(6.9271, 79.8612), zoom: 12),
+            initialCameraPosition: const CameraPosition(
+              target: LatLng(6.9271, 79.8612),
+              zoom: 12,
+            ),
             markers: _markers,
             polylines: _polylines,
             myLocationEnabled: true,
             zoomControlsEnabled: false,
             onMapCreated: (c) => _mapController = c,
           ),
-          
+
           // Back Button
           Positioned(
-            top: 50, left: 20,
+            top: 50,
+            left: 20,
             child: CircleAvatar(
               backgroundColor: Colors.white,
               child: IconButton(
@@ -135,7 +153,9 @@ class _DirectionsMapScreenState extends State<DirectionsMapScreen> {
           // Info Card
           if (!_isLoading && _duration.isNotEmpty)
             Positioned(
-              bottom: 30, left: 20, right: 20,
+              bottom: 30,
+              left: 20,
+              right: 20,
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -147,30 +167,48 @@ class _DirectionsMapScreenState extends State<DirectionsMapScreen> {
                   children: [
                     Container(
                       padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), shape: BoxShape.circle),
-                      child: const Icon(Icons.directions_car, color: Colors.blue),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.directions_car,
+                        color: Colors.blue,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("$_duration ($_distance)", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                        const Text("Fastest route now", style: TextStyle(color: Colors.grey)),
+                        Text(
+                          "$_duration ($_distance)",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                        const Text(
+                          "Fastest route now",
+                          style: TextStyle(color: Colors.grey),
+                        ),
                       ],
                     ),
                     const Spacer(),
                     ElevatedButton(
-                      onPressed: () {}, // Optional: Open external map if they really want
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+                      onPressed:
+                          () {}, // Optional: Open external map if they really want
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                      ),
                       child: const Text("Start"),
-                    )
+                    ),
                   ],
                 ),
               ),
             ),
-            
-          if (_isLoading)
-            const Center(child: CircularProgressIndicator()),
+
+          if (_isLoading) const Center(child: CircularProgressIndicator()),
         ],
       ),
     );

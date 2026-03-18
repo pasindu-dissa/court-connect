@@ -29,7 +29,14 @@ class ProfileModal extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.withOpacity(0.3), borderRadius: BorderRadius.circular(2))),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
           const SizedBox(height: 24),
 
           // User Info
@@ -41,19 +48,42 @@ class ProfileModal extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    Text(email, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      email,
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.location_on, size: 14, color: AppColors.primary),
-                        Text(location, style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
+                        const Icon(
+                          Icons.location_on,
+                          size: 14,
+                          color: AppColors.primary,
+                        ),
+                        Text(
+                          location,
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.edit_outlined, color: AppColors.primary))
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.edit_outlined, color: AppColors.primary),
+              ),
             ],
           ),
 
@@ -68,29 +98,51 @@ class ProfileModal extends StatelessWidget {
             title: "Dark Mode",
             trailing: Switch(
               value: isDark,
-              activeColor: AppColors.primary,
+              activeThumbColor: AppColors.primary,
               onChanged: (val) {
                 themeNotifier.value = val ? ThemeMode.dark : ThemeMode.light;
               },
             ),
           ),
-          
-          _buildSettingsTile(context, icon: Icons.info_outline_rounded, title: "About CourtConnect", trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey)),
+
+          _buildSettingsTile(
+            context,
+            icon: Icons.info_outline_rounded,
+            title: "About CourtConnect",
+            trailing: const Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Colors.grey,
+            ),
+          ),
 
           const SizedBox(height: 30),
 
           // Sign Out
           TextButton.icon(
             onPressed: () async {
-               await AuthService().signOut();
-               userProvider.clearUser();
-               if (context.mounted) {
-                 Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const LoginScreen()), (route) => false);
-               }
+              await AuthService().signOut();
+              userProvider.clearUser();
+              if (context.mounted) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  (route) => false,
+                );
+              }
             },
             icon: const Icon(Icons.logout, size: 16, color: AppColors.error),
-            label: const Text("Sign Out", style: TextStyle(color: AppColors.error, fontSize: 14)),
-            style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), backgroundColor: AppColors.error.withOpacity(0.1), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+            label: const Text(
+              "Sign Out",
+              style: TextStyle(color: AppColors.error, fontSize: 14),
+            ),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              backgroundColor: AppColors.error.withOpacity(0.1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
           ),
           const SizedBox(height: 10),
         ],
@@ -98,14 +150,34 @@ class ProfileModal extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingsTile(BuildContext context, {required IconData icon, required String title, required Widget trailing}) {
+  Widget _buildSettingsTile(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required Widget trailing,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
-          Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)]), child: Icon(icon, color: AppColors.primary)),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5),
+              ],
+            ),
+            child: Icon(icon, color: AppColors.primary),
+          ),
           const SizedBox(width: 16),
-          Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16))),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            ),
+          ),
           trailing,
         ],
       ),
