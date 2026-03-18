@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/profile_model.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/avatar_constants.dart';
 
 class ProfileHeader extends StatelessWidget {
   final ProfileModel profile;
@@ -52,12 +53,8 @@ class ProfileHeader extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 55,
                     backgroundColor: isDark ? Colors.white10 : Colors.grey.shade200,
-                    backgroundImage: profile.profileImage.isNotEmpty
-                        ? NetworkImage(profile.profileImage)
-                        : null,
-                    child: profile.profileImage.isEmpty
-                        ? Icon(Icons.person_rounded, size: 50, color: isDark ? Colors.white54 : Colors.grey.shade400)
-                        : null,
+                    backgroundImage: NetworkImage(AvatarConstants.avatarUrl(profile.profileImage)),
+                    child: null,
                   ),
                 ),
               ),

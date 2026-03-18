@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/avatar_constants.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/services/user_provider.dart';
 import '../../../auth/ui/screens/login_screen.dart';
@@ -38,7 +39,7 @@ class CourtOwnerDashboard extends StatelessWidget {
             // ... (Profile Header code remains same) ...
             Row(
               children: [
-                CircleAvatar(radius: 30, backgroundImage: NetworkImage(user?['profileImage'] ?? "https://i.pravatar.cc/300")),
+                CircleAvatar(radius: 30, backgroundImage: NetworkImage(AvatarConstants.avatarUrl(user?['profileImage']?.toString()))),
                 const SizedBox(width: 16),
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text("Hello, ${user?['name']}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),

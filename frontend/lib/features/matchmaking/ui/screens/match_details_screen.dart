@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/constants/avatar_constants.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/services/user_provider.dart';
 import '../../data/matchmaking_service.dart';
@@ -238,7 +239,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
     bool isHost = currentUser != null && actualHostId == currentUser['_id'];
     
     String hostName = isHostObj ? hostData['name'] : "Community Organizer";
-    String hostImage = isHostObj ? (hostData['profileImage']?.toString().isNotEmpty == true ? hostData['profileImage'] : "https://placehold.co/150x150") : "https://placehold.co/150x150";
+    String hostImage = AvatarConstants.avatarUrl(isHostObj ? hostData['profileImage']?.toString() : null);
     
     List<dynamic> images = _localMatchData['images'] ?? [];
     if (images.isEmpty && _localMatchData['image'] != null) {
@@ -387,7 +388,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                               ),
                               child: Row(
                                 children: [
-                                  CircleAvatar(radius: 16, backgroundImage: NetworkImage(player['profileImage'] ?? "https://placehold.co/150x150")),
+                                  CircleAvatar(radius: 16, backgroundImage: NetworkImage(AvatarConstants.avatarUrl(player['profileImage']?.toString()))),
                                   const SizedBox(width: 12),
                                   Expanded(child: Text(player['name'] ?? 'Player', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color))),
                                   IconButton(icon: const Icon(Icons.close, color: Colors.red), onPressed: _isProcessing ? null : () => _handlePlayerRequest(player, false)),
@@ -426,8 +427,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                               itemCount: joinedPlayers.length,
                               itemBuilder: (context, index) {
                                 final player = joinedPlayers[index];
-                                String pImage = "https://placehold.co/150x150";
-                                if (player is Map && player['profileImage']?.isNotEmpty == true) pImage = player['profileImage'];
+                                final String pImage = AvatarConstants.avatarUrl((player as Map?)?['profileImage']?.toString());
                                 
                                 return Padding(
                                   padding: const EdgeInsets.only(right: 8.0),
