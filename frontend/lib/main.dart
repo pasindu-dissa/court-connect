@@ -7,15 +7,17 @@ import 'core/services/user_provider.dart';
 import 'features/home/ui/main_wrapper.dart';
 import 'features/admin_panel/ui/screens/court_owner_dashboard.dart'; // Import Owner Dashboard
 import 'core/services/auth_service.dart';
+import 'features/health/data/health_notifier.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => UserProvider()), // Initialize provider
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => HealthNotifier()),
       ],
       child: const CourtConnectApp(),
     ),
@@ -62,7 +64,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   Future<void> _determineStartScreen() async {
     final user = AuthService().currentUser;
-    
+
     if (user == null) {
       setState(() {
         _startScreen = const LoginScreen();
@@ -74,7 +76,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     // User is logged in, fetch profile to check Role
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     await userProvider.loadUser(); // Fetch from MongoDB
-    
+
     final userData = userProvider.user;
 
     setState(() {
@@ -90,9 +92,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return _startScreen!;
   }
