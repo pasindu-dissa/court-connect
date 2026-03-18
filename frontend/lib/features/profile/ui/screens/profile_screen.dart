@@ -122,11 +122,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (confirm == true) {
-      await FirebaseAuth.instance.signOut();
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      await AuthService().signOut();
+      userProvider.clearUser();
       if (mounted) {
-        Navigator.of(
+        Navigator.pushAndRemoveUntil(
           context,
-        ).pushNamedAndRemoveUntil('/login', (route) => false);
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
       }
     }
   }
@@ -499,17 +503,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // --- Small Logout Button ---
               Center(
                 child: TextButton(
-                  onPressed: () async {
-                    await AuthService().signOut();
-                    userProvider.clearUser();
-                    if (context.mounted) {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                        (route) => false,
-                      );
-                    }
-                  },
+                  onPressed: _handleLogout,
                   child: const Text(
                     'Sign out?',
                     style: TextStyle(
