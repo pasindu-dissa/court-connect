@@ -13,7 +13,16 @@ const userSchema = mongoose.Schema(
     district: { type: String },
     city: { type: String },
     location: { type: String, default: "Colombo" },
-    
+    fcmToken: { type: String, default: '' },
+    notifications: [
+      {
+        title: String,
+        body: String,
+        type: { type: String, default: 'general' },
+        read: { type: Boolean, default: false },
+        createdAt: { type: Date, default: Date.now }
+      }
+    ],
     // --- ROLE MANAGEMENT ---
     // Change this manually in MongoDB to 'court_owner' for specific users
     role: { 

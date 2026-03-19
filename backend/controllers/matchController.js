@@ -1,5 +1,7 @@
 const Match = require('../models/Match');
 const User = require('../models/User');
+const admin = require('../config/firebaseAdmin');
+const { pushNotificationToUser } = require('../services/notificationService');
 
 const createMatch = async (req, res) => {
   try {
@@ -10,6 +12,15 @@ const createMatch = async (req, res) => {
       currentPlayers: 1
     };
     const match = await Match.create(matchData);
+
+    // Notify host about new match creation (for reminders/alerts)
+    await pushNotificationToUser(
+      hostId,
+      'Match created ✅',
+      `Your match on ${match.date} at ${match.time} has been created.`,
+      { type: 'match' }
+    );
+
     res.status(201).json(match);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -103,6 +114,15 @@ const requestJoin = async (req, res) => {
 
     match.pendingPlayers.push(userId);
     await match.save();
+
+    // Notify host that someone requested to join
+    await pushNotificationToUser(
+      match.hostId,
+      'Match request pending ⏳',
+      `A user asked to join your match on ${match.date} at ${match.time}.`,
+      { type: 'match_request' }
+    );
+
     res.json(match);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -126,6 +146,14 @@ const approvePlayer = async (req, res) => {
     if (match.currentPlayers >= match.maxPlayers) match.status = 'Full';
     
     await match.save();
+
+    await pushNotificationToUser(
+      playerId,
+      'Match request accepted ✅',
+      `Your request to join the match on ${match.date} at ${match.time} is accepted.`,
+      { type: 'match_status' }
+    );
+
     res.json(match);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -140,6 +168,14 @@ const rejectPlayer = async (req, res) => {
 
     match.pendingPlayers = match.pendingPlayers.filter(id => id.toString() !== playerId);
     await match.save();
+
+    await pushNotificationToUser(
+      playerId,
+      'Match request declined ❌',
+      `Your request to join the match on ${match.date} at ${match.time} was declined by the host.`,
+      { type: 'match_status' }
+    );
+
     res.json(match);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -155,4 +191,14 @@ const getOpponents = async (req, res) => {
   }
 };
 
-module.exports = { createMatch, getMatches, updateMatch, requestJoin, approvePlayer, rejectPlayer, getOpponents };
+// Example function to call when a match is joined
+const sendMatchNotification = async (userId, matchName, playerName) => {
+  await pushNotificationToUser(
+    userId,
+    'New Player Joined!',
+    `${playerName} just joined your match at ${matchName}.`,
+    { type: 'match' }
+  );
+};
+
+module.exports = { createMatch, getMatches, updateMatch, requestJoin, approvePlayer, rejectPlayer, getOpponents, sendMatchNotification };

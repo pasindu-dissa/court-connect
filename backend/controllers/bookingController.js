@@ -1,4 +1,6 @@
 const Booking = require('../models/booking');
+const Court = require('../models/court');
+const { pushNotificationToUser } = require('../services/notificationService');
 
 // @desc    Create a new booking
 // @route   POST /api/bookings
@@ -19,6 +21,25 @@ const createBooking = async (req, res) => {
       startTime,
       totalPrice
     });
+
+    // Notify the player
+    await pushNotificationToUser(
+      userId,
+      'Booking confirmed ✅',
+      `Your booking for ${date} at ${startTime} is confirmed.`,
+      { type: 'booking' }
+    );
+
+    // Notify court owner
+    const court = await Court.findById(courtId);
+    if (court?.ownerId) {
+      await pushNotificationToUser(
+        court.ownerId,
+        'New booking received 📅',
+        `A new booking was made for ${date} at ${startTime}.`,
+        { type: 'booking' }
+      );
+    }
 
     res.status(201).json(booking);
   } catch (error) {
