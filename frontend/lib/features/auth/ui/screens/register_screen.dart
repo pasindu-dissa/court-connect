@@ -7,6 +7,7 @@ import '../../../../core/services/auth_service.dart';
 import '../../../../core/data/sl_locations.dart';
 import '../../../home/ui/main_wrapper.dart';
 import 'login_screen.dart';
+import '../../../../core/services/push_notification_service.dart'; // <-- ADD THIS IMPORT
 
 class RegisterScreen extends StatefulWidget {
   final bool startOpened; // NEW: Parameter to track if panel should already be up
@@ -80,6 +81,10 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     setState(() => _isLoading = true);
     try {
       final credential = await _auth.signUp(_emailController.text.trim(), _passController.text.trim());
+
+      // ✅ ADD THIS LINE: Send token to backend after successful login!
+      await PushNotificationService.updateTokenOnBackend();
+
       await _registerUser(uid: credential.user!.uid, email: _emailController.text.trim(), password: "hashed_by_firebase");
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
@@ -98,6 +103,10 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     try {
       final credential = await _auth.signInWithGoogle();
       if (credential.user != null) {
+
+        // ✅ ADD THIS LINE: Send token to backend after successful login!
+        await PushNotificationService.updateTokenOnBackend();
+
         await _registerUser(uid: credential.user!.uid, email: credential.user!.email!);
       }
     } catch (e) {

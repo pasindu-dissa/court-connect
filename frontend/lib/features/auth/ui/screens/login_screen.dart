@@ -6,6 +6,7 @@ import '../../../../core/services/user_provider.dart';
 import '../../../home/ui/main_wrapper.dart';
 import '../../../admin_panel/ui/screens/court_owner_dashboard.dart';
 import 'register_screen.dart';
+import '../../../../core/services/push_notification_service.dart'; // <-- ADD THIS IMPORT
 
 class LoginScreen extends StatefulWidget {
   final bool startOpened; // NEW: Parameter to track if panel should already be up
@@ -51,6 +52,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     setState(() => _isLoading = true);
     try {
       await _auth.signIn(_emailController.text.trim(), _passController.text.trim());
+
+      // ✅ ADD THIS LINE: Send token to backend after successful login!
+      await PushNotificationService.updateTokenOnBackend();
+
       await _checkRoleAndRedirect(); 
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
@@ -62,6 +67,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     setState(() => _isLoading = true);
     try {
       await _auth.signInWithGoogle();
+
+      // ✅ ADD THIS LINE: Send token to backend after successful login!
+      await PushNotificationService.updateTokenOnBackend();
+
       await _checkRoleAndRedirect(); 
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Google Sign In Failed: $e"), backgroundColor: Colors.red));
