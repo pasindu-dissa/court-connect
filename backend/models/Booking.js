@@ -13,4 +13,5 @@ const bookingSchema = mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Booking', bookingSchema);
+// CRITICAL FIX: Check if the model already exists before compiling it to prevent OverwriteModelError
+module.exports = mongoose.models.Booking || mongoose.model('Booking', bookingSchema);
