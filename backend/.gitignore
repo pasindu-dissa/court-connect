@@ -50,6 +50,6 @@ node_modules/
 
 .metadata
 
-# Firebase keys (DO NOT COMMIT)
+# Firebase keys
 firebase-service-account.json
 *firebase*.json
