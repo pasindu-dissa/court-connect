@@ -9,6 +9,7 @@ import '../../../home/ui/screens/notifications_screen.dart';
 import '../../data/court_service.dart';
 import '../../../auth/ui/screens/login_screen.dart';
 import '../../../../core/services/auth_service.dart';
+import '../../../../core/constants/avatar_constants.dart';
 
 import 'my_courts_screen.dart';
 import 'owner_bookings_screen.dart'; // NEW
@@ -122,7 +123,8 @@ class _CourtOwnerDashboardState extends State<CourtOwnerDashboard> {
 
     final user = Provider.of<UserProvider>(context).user;
     final userName = user?['name'] ?? 'Owner';
-    final userProfileImage = user?['profileImage']?.toString() ?? '';
+    final profileImageCandidate = user?['profileImage'];
+    final userProfileImage = AvatarConstants.avatarUrl(profileImageCandidate?.toString());
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
