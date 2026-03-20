@@ -1,1 +1,4 @@
-/backend/node_modules
+backend/config/firebase-service-account.json
+backend/middleware/authMiddleware.js
+backend/node_modules
+backend/.env
