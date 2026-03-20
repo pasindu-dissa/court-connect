@@ -35,4 +35,6 @@ app.use((error, _req, res, _next) => {
 const PORT = process.env.PORT || 5005;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  //CI/CD Pipeline
+  console.log(`🐿️ CI/CD works!`);
 });
