@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/avatar_constants.dart';
 import '../../../../core/services/user_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../chatbot/presentation/screens/chatbot_screen.dart';
@@ -108,7 +109,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.user;
     final userName = user?['name'] ?? 'Player';
-    final userImage = user?['profileImage'] ?? 'https://i.pravatar.cc/300';
+    final profileImageCandidate = user?['profileImage'];
+    final userImage = AvatarConstants.avatarUrl(profileImageCandidate?.toString());
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
