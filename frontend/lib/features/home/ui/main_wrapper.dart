@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/profile/ui/screens/profile_screen.dart';
+
 import '../../../../core/constants/app_colors.dart';
-import 'screens/home_screen.dart';
-// Import the new Booking Screen
 import '../../booking/ui/screens/booking_screen.dart';
-import '../../matchmaking/ui/screens/matchmaking_screen.dart'; // Import this
 import '../../leaderboard/ui/screens/screen/leaderboard_screen.dart';
+import '../../matchmaking/ui/screens/matchmaking_screen.dart';
+import 'screens/home_screen.dart';
 
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
@@ -20,7 +20,7 @@ class _MainWrapperState extends State<MainWrapper> {
   late final List<Widget> _screens = [
     const HomeScreen(),
     const BookingScreen(),
-    const MatchmakingScreen(), // <--- LINKED HERE (Index 2)
+    const MatchmakingScreen(),
     LeaderboardScreen(
       onLocationTapped: () {
         setState(() {
@@ -31,9 +31,6 @@ class _MainWrapperState extends State<MainWrapper> {
     const ProfileScreen(),
   ];
 
-  // ... (Rest of the file remains exactly the same as the previous step) ...
-  // Copy the rest of the file from the previous "Navigation Bar" response.
-  // Do not change the logic below this line.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,11 +57,11 @@ class _MainWrapperState extends State<MainWrapper> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildNavItem(0, Icons.grid_view_rounded, "Home"),
-                _buildNavItem(1, Icons.calendar_month_rounded, "Bookings"),
-                _buildNavItem(2, Icons.group_add_rounded, "Connect"),
-                _buildNavItem(3, Icons.emoji_events_rounded, "Rank"),
-                _buildNavItem(4, Icons.person_rounded, "Profile"),
+                _buildNavItem(0, Icons.grid_view_rounded, 'Home'),
+                _buildNavItem(1, Icons.calendar_month_rounded, 'Bookings'),
+                _buildNavItem(2, Icons.group_add_rounded, 'Connect'),
+                _buildNavItem(3, Icons.emoji_events_rounded, 'Rank'),
+                _buildNavItem(4, Icons.person_rounded, 'Profile'),
               ],
             ),
           ),
@@ -74,7 +71,7 @@ class _MainWrapperState extends State<MainWrapper> {
   }
 
   Widget _buildNavItem(int index, IconData icon, String label) {
-    bool isSelected = _currentIndex == index;
+    final isSelected = _currentIndex == index;
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
       child: AnimatedContainer(

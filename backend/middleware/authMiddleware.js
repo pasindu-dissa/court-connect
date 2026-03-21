@@ -1,14 +1,13 @@
-const admin = require('firebase-admin');
-const serviceAccount = require('../config/firebase-service-account.json');
-
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-}
+const admin = require('../config/firebaseAdmin');
 
 const protect = async (req, res, next) => {
+  // Failsafe: Check if Firebase Admin initialized properly
+  if (!admin.apps.length) {
+    return res.status(500).json({ 
+      message: 'Firebase admin is not configured on this server. Add FIREBASE_SERVICE_ACCOUNT to env or check config file.' 
+    });
+  }
+
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
