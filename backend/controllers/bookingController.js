@@ -1,4 +1,4 @@
-const Booking = require('../models/Booking');
+const Booking = require('../models/booking');
 const Court = require('../models/court');
 const User = require('../models/User');
 const { pushNotificationToUser } = require('../services/notificationService');
