@@ -1,6 +1,9 @@
+const mongoose = require('mongoose');
 const Leaderboard = require('../models/Leaderboard');
+const LeaderboardEntry = require('../models/LeaderboardEntry');
 const MatchResult = require('../models/MatchResults');
 const Group = require('../models/Group');
+const User = require('../models/User');
 
 // @desc    Get leaderboard for a specific group
 // @route   GET /api/leaderboard/:groupId
@@ -370,6 +373,182 @@ exports.getGroupStats = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error fetching group statistics',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Award a point to a user for a specific sport and court
+// @route   POST /api/leaderboards/award-point
+// @access  Private (Court Manager only)
+exports.awardPoint = async (req, res) => {
+  try {
+    const { userId, courtId, sportType } = req.body;
+
+    if (!userId || !courtId || !sportType) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide userId, courtId, and sportType'
+      });
+    }
+
+    // Role check (assuming basic auth populates req.user.role)
+    // if (req.user.role !== 'court_owner' && req.user.role !== 'admin') {
+    //  return res.status(403).json({ success: false, message: 'Not authorized' });
+    // }
+
+    let entry = await LeaderboardEntry.findOne({ user: userId, courtId, sportType });
+
+    if (!entry) {
+      entry = new LeaderboardEntry({
+        user: userId,
+        courtId,
+        sportType,
+        points: 0
+      });
+    }
+
+    entry.points += 1;
+    await entry.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Point awarded successfully',
+      data: entry
+    });
+  } catch (error) {
+    console.error('Award point error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error awarding point',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get top players across specific sport and court
+// @route   GET /api/leaderboard/top-players
+// @access  Public
+exports.getTopPlayers = async (req, res) => {
+  try {
+    const { sportType, courtId, limit = 10 } = req.query;
+    
+    const matchStage = {};
+    if (sportType && sportType !== 'all') matchStage.sportType = sportType;
+    if (courtId && courtId !== 'all') {
+      try {
+        matchStage.courtId = new mongoose.Types.ObjectId(courtId);
+      } catch(e) { /* invalid format, ignore or handle */ }
+    }
+
+    const pipeline = [
+      { $match: matchStage },
+      { $sort: { points: -1 } },
+      { $limit: parseInt(limit) },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userDetails'
+        }
+      },
+      { $unwind: '$userDetails' },
+      {
+        $project: {
+          _id: 1,
+          points: 1,
+          sportType: 1,
+          courtId: 1,
+          user: {
+            _id: '$userDetails._id',
+            name: '$userDetails.name',
+            profileImage: '$userDetails.profileImage',
+            weeklyStreak: '$userDetails.weeklyStreak',
+            stats: '$userDetails.stats'
+          }
+        }
+      }
+    ];
+
+    const topPlayers = await LeaderboardEntry.aggregate(pipeline);
+
+    res.status(200).json({
+      success: true,
+      data: topPlayers // Changed from 'rankedPlayers' to 'topPlayers' to match variable name
+    });
+
+  } catch (error) {
+    console.error('Get top players error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching top players',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get current user's stats on leaderboard
+// @route   GET /api/leaderboard/my-stats
+// @access  Private
+exports.getUserStats = async (req, res) => {
+  try {
+    const { sportType, courtId } = req.query;
+    // Depending on auth implementation, req.user could have _id, id, or uid.
+    const userId = req.user._id || req.user.id || req.user.firebaseUid;
+
+    // 1. Get user streak
+    let user;
+    if (mongoose.Types.ObjectId.isValid(userId)) {
+      user = await User.findById(userId).select('weeklyStreak firebaseUid');
+    } else {
+      user = await User.findOne({ firebaseUid: userId }).select('weeklyStreak firebaseUid');
+    }
+    const realUserId = user ? user._id : userId;
+    const streak = user?.weeklyStreak?.current || 0;
+
+    // 2. Build match query
+    let matchQuery = {};
+    if (sportType && sportType !== 'all') matchQuery.sportType = sportType;
+    if (courtId && courtId !== 'all') {
+       if (mongoose.Types.ObjectId.isValid(courtId)) {
+           matchQuery.courtId = new mongoose.Types.ObjectId(courtId);
+       } else {
+           // Provide fallback string matching if courtId is not valid ObjectId
+           matchQuery.courtId = courtId; 
+       }
+    }
+
+    // 3. User's specific score in this category
+    const userScoreAgg = await LeaderboardEntry.aggregate([
+      { $match: { ...matchQuery, user: new mongoose.Types.ObjectId(realUserId) } },
+      { $group: { _id: null, totalPoints: { $sum: "$points" } } }
+    ]);
+    const score = userScoreAgg.length > 0 ? userScoreAgg[0].totalPoints : 0;
+
+    // 4. Determine user's Rank
+    const allScoresAgg = await LeaderboardEntry.aggregate([
+      { $match: matchQuery },
+      { $group: { _id: "$user", totalPoints: { $sum: "$points" } } },
+      { $sort: { totalPoints: -1 } }
+    ]);
+    
+    const rankIndex = allScoresAgg.findIndex(s => s._id.toString() === realUserId.toString());
+    const rank = rankIndex !== -1 ? rankIndex + 1 : '-';
+
+    res.status(200).json({
+      success: true,
+      data: {
+        rank,
+        score,
+        streak
+      }
+    });
+  } catch (error) {
+    console.error('getUserStats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching user stats',
       error: error.message
     });
   }
