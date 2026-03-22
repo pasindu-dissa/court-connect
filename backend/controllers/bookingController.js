@@ -62,4 +62,24 @@ const getCourtBookings = async (req, res) => {
   }
 };
 
-module.exports = { createBooking, getCourtBookings };
+const getUserBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find({
+      userId: req.params.userId,
+      status: 'Confirmed',
+      date: { $gte: new Date().toISOString().split('T')[0] }
+    })
+      .populate('courtId', 'name location images sports')
+      .sort({ date: 1, startTime: 1 });
+
+    res.json({
+      success: true,
+      count: bookings.length,
+      data: bookings
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createBooking, getCourtBookings, getUserBookings };
