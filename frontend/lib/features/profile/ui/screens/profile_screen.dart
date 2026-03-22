@@ -50,8 +50,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _errorMessage = null;
     });
     try {
+      // Fetch the profile — if this fails we show the error screen
       final profile = await _profileService.fetchProfile();
-      final bookings = await _profileService.fetchUserBookings(profile.id);
+
+      // Fetch bookings separately so a bookings error doesn't block the profile
+      List<BookingModel> bookings = [];
+      try {
+        bookings = await _profileService.fetchUserBookings(profile.id);
+      } catch (bookingError) {
+        // Silently ignore — profile still loads with an empty bookings list
+        debugPrint('Bookings fetch error (non-fatal): $bookingError');
+      }
+
       setState(() {
         _profile = profile;
         _bookings = bookings;
