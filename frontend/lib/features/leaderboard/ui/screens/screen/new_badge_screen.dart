@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/rendering.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 
 class NewBadgeScreen extends StatefulWidget {
   const NewBadgeScreen({super.key});
@@ -17,6 +23,8 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+
+  final GlobalKey _badgeKey = GlobalKey();
 
   @override
   void initState() {
@@ -126,7 +134,10 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
                           ),
                         );
                       },
-                      child: _buildBadgeArea(),
+                      child: RepaintBoundary(
+                        key: _badgeKey,
+                        child: _buildBadgeArea(),
+                      ),
                     ),
 
                     const SizedBox(height: 48),
@@ -373,8 +384,28 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
           width: double.infinity,
           height: 56,
           child: ElevatedButton(
-            onPressed: () {
-              // Add interaction logic, e.g., share
+            onPressed: () async {
+              try {
+                RenderRepaintBoundary boundary = _badgeKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+                ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+                ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+                
+                if (byteData != null) {
+                  final buffer = byteData.buffer;
+                  final tempDir = await getTemporaryDirectory();
+                  final file = await File('${tempDir.path}/badge.png').create();
+                  await file.writeAsBytes(buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+                  
+                  await Share.shareXFiles(
+                    [XFile(file.path)], 
+                    text: 'I just earned \\\'The Rival\\\' badge on CourtConnect! Think you can beat my score?'
+                  );
+                }
+              } catch (e) {
+                debugPrint("Error capturing badge screenshot: $e");
+                // Fallback to text
+                Share.share('I just earned \\\'The Rival\\\' badge on CourtConnect! Think you can beat my score?');
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFFD700), // Gold

@@ -20,6 +20,7 @@ app.use('/api/matches', require('./routes/matchRoutes'));
 app.use('/api/courts', require('./routes/courtRoutes'));
 app.use('/api/bookings', require('./routes/bookingRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
+app.use('/api/player-leaderboard', require('./routes/playerLeaderboardRoutes'));
 
 app.get('/', (_req, res) => {
   res.send('CourtConnect API is running...');
