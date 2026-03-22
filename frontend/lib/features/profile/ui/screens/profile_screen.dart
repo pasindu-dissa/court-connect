@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../data/models/profile_model.dart';
+import '../../data/models/booking_model.dart';
 import '../../data/services/profile_service.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_stat_section.dart';
@@ -14,11 +14,6 @@ import 'edit_profile_screen.dart';
 import '../widgets/profile_health_section.dart';
 import '../../../../features/health/ui/widgets/health_analysis_screen.dart';
 import '../../../../features/health/data/health_notifier.dart';
-import '../../../home/ui/screens/notifications_screen.dart'; // NEW: Imported Notifications Screen
-
-import '../../../../core/services/auth_service.dart';
-import '../../../../core/services/user_provider.dart';
-import '../../../auth/ui/screens/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -30,6 +25,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final ProfileService _profileService = ProfileService();
   ProfileModel? _profile;
+  List<BookingModel> _bookings = [];
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -37,7 +33,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _loadProfile();
-    // Load health data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<HealthNotifier>().loadAll();
     });
@@ -50,8 +45,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
     try {
       final profile = await _profileService.fetchProfile();
+      final bookings = await _profileService.fetchUserBookings(profile.id);
       setState(() {
         _profile = profile;
+        _bookings = bookings;
         _isLoading = false;
       });
     } catch (e) {
@@ -74,7 +71,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _handleLogout() async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -122,15 +118,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (confirm == true) {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      await AuthService().signOut();
-      userProvider.clearUser();
+      await FirebaseAuth.instance.signOut();
       if (mounted) {
-        Navigator.pushAndRemoveUntil(
+        Navigator.of(
           context,
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
-        );
+        ).pushNamedAndRemoveUntil('/login', (route) => false);
       }
     }
   }
@@ -215,10 +207,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildProfileContent(BuildContext context) {
     if (_profile == null) return const SizedBox();
-
-    final userProvider = Provider.of<UserProvider>(context);
-    final user = userProvider.user;
-
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return RefreshIndicator(
@@ -244,7 +232,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const ProfileHealthSection(),
               const SizedBox(height: 20),
 
-              // --- View Health Analysis Beautiful Button ---
+              // --- View Health Analysis Button ---
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 48),
                 child: Container(
@@ -253,10 +241,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(100),
                     gradient: const LinearGradient(
-                      colors: [
-                        AppColors.primary,
-                        Color(0xFF00E676),
-                      ], // Teal to Vivid Green
+                      colors: [AppColors.primary, Color(0xFF00E676)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -324,7 +309,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-
                     ProfileInfoTile(
                       icon: Icons.phone_rounded,
                       label: 'Phone',
@@ -371,146 +355,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 32),
 
               // --- Bookings Section ---
-              ProfileBookingSection(bookings: const []),
+              ProfileBookingSection(bookings: _bookings),
               const SizedBox(height: 40),
 
-              // --- NEW: Settings & More Section ---
+              // --- Logout Button ---
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Settings & More',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? Colors.white.withOpacity(0.03)
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: isDark
-                              ? Colors.white.withOpacity(0.08)
-                              : Colors.black.withOpacity(0.05),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(
-                              isDark ? 0.2 : 0.04,
-                            ),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          _buildActionTile(
-                            context: context,
-                            icon: isDark
-                                ? Icons.light_mode_rounded
-                                : Icons.dark_mode_rounded,
-                            iconColor: isDark ? Colors.amber : Colors.indigo,
-                            title: 'Dark Mode',
-                            trailing: Switch(
-                              value: isDark,
-                              onChanged: (value) {
-                                themeNotifier.value = value
-                                    ? ThemeMode.dark
-                                    : ThemeMode.light;
-                              },
-                              activeColor: AppColors.primary,
-                            ),
-                            onTap: () {
-                              themeNotifier.value = !isDark
-                                  ? ThemeMode.dark
-                                  : ThemeMode.light;
-                            },
-                          ),
-                          Divider(
-                            color: isDark ? Colors.white10 : Colors.grey[200],
-                            height: 1,
-                            thickness: 1,
-                          ),
-                          _buildActionTile(
-                            context: context,
-                            icon: Icons.notifications_none_rounded,
-                            iconColor: Colors.orangeAccent,
-                            title: 'Notifications',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const NotificationsScreen(),
-                                ),
-                              );
-                            },
-                          ),
-                          Divider(
-                            color: isDark ? Colors.white10 : Colors.grey[200],
-                            height: 1,
-                            thickness: 1,
-                          ),
-                          _buildActionTile(
-                            context: context,
-                            icon: Icons.help_outline_rounded,
-                            iconColor: Colors.blue,
-                            title: 'Help',
-                            onTap: () {},
-                          ),
-                          Divider(
-                            color: isDark ? Colors.white10 : Colors.grey[200],
-                            height: 1,
-                            thickness: 1,
-                          ),
-                          _buildActionTile(
-                            context: context,
-                            icon: Icons.bug_report_outlined,
-                            iconColor: Colors.redAccent,
-                            title: 'Report a Bug',
-                            onTap: () {},
-                          ),
-                          Divider(
-                            color: isDark ? Colors.white10 : Colors.grey[200],
-                            height: 1,
-                            thickness: 1,
-                          ),
-                          _buildActionTile(
-                            context: context,
-                            icon: Icons.info_outline_rounded,
-                            iconColor: Colors.teal,
-                            title: 'About',
-                            onTap: () {},
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // --- Small Logout Button ---
-              Center(
-                child: TextButton(
-                  onPressed: _handleLogout,
-                  child: const Text(
-                    'Sign out?',
-                    style: TextStyle(
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 60,
+                  child: OutlinedButton.icon(
+                    onPressed: _handleLogout,
+                    icon: const Icon(
+                      Icons.logout_rounded,
                       color: Colors.redAccent,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
+                      size: 22,
+                    ),
+                    label: const Text(
+                      'Sign Out',
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: isDark
+                          ? Colors.redAccent.withOpacity(0.08)
+                          : Colors.red.shade50,
+                      side: BorderSide(
+                        color: Colors.redAccent.withOpacity(isDark ? 0.4 : 0.3),
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                   ),
                 ),
@@ -520,38 +400,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  // --- Helper Widget for Settings Actions ---
-  Widget _buildActionTile({
-    required BuildContext context,
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    Widget? trailing,
-    VoidCallback? onTap,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return ListTile(
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      leading: Icon(icon, color: iconColor, size: 26),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
-          color: Theme.of(context).textTheme.bodyLarge?.color,
-        ),
-      ),
-      trailing:
-          trailing ??
-          Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 16,
-            color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-          ),
     );
   }
 }
