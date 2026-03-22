@@ -109,19 +109,20 @@ class _StreakScreenState extends State<StreakScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F8),
+      backgroundColor: isDark ? Theme.of(context).scaffoldBackgroundColor : const Color(0xFFF5F6F8),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF5F6F8),
+        backgroundColor: isDark ? Theme.of(context).scaffoldBackgroundColor : const Color(0xFFF5F6F8),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Your Streak',
           style: TextStyle(
-            color: Colors.black,
+            color: isDark ? Colors.white : Colors.black,
             fontWeight: FontWeight.w800,
             fontSize: 22,
           ),
@@ -155,11 +156,12 @@ class _StreakScreenState extends State<StreakScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Milestone Timeline',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black,
                           ),
                         ),
                         const SizedBox(height: 15),
@@ -179,11 +181,12 @@ class _StreakScreenState extends State<StreakScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Rewards',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black,
                           ),
                         ),
                         const SizedBox(height: 15),
@@ -214,15 +217,16 @@ class _StreakScreenState extends State<StreakScreen>
   }
 
   Widget _buildHeaderCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? Theme.of(context).cardColor : Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -263,20 +267,20 @@ class _StreakScreenState extends State<StreakScreen>
           ),
           const SizedBox(height: 15),
           Text(
-            '\${widget.currentStreak} Weeks Streak!',
-            style: const TextStyle(
+            '${widget.currentStreak} Weeks Streak!',
+            style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w900,
-              color: Color(0xFF1A202C),
+              color: isDark ? Colors.white : const Color(0xFF1A202C),
             ),
           ),
           const SizedBox(height: 10),
           Text(
-            'You\'ve played or booked a court at least once a week for \${widget.currentStreak} consecutive weeks. Keep it up!',
+            'You\'ve played or booked a court at least once a week for ${widget.currentStreak} consecutive weeks. Keep it up!',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: Colors.blueGrey,
+              color: isDark ? Colors.grey[400] : Colors.blueGrey,
               height: 1.5,
             ),
           ),
@@ -286,14 +290,15 @@ class _StreakScreenState extends State<StreakScreen>
   }
 
   Widget _buildTimelineWidget() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? Theme.of(context).cardColor : Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -306,7 +311,7 @@ class _StreakScreenState extends State<StreakScreen>
             'Progress to 12 Weeks',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: Colors.grey.shade800,
+              color: isDark ? Colors.white70 : Colors.grey.shade800,
             ),
           ),
           const SizedBox(height: 20),
@@ -375,12 +380,12 @@ class _StreakScreenState extends State<StreakScreen>
                                     size: 20,
                                   )
                                 : Text(
-                                    '\$weekNum',
+                                    '$weekNum',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: isCurrent
                                           ? Colors.orange
-                                          : Colors.grey.shade500,
+                                          : (isDark ? Colors.grey.shade300 : Colors.grey.shade500),
                                     ),
                                   ),
                           ),
@@ -390,7 +395,7 @@ class _StreakScreenState extends State<StreakScreen>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Wk \$weekNum',
+                    'Wk $weekNum',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: isCurrent
@@ -443,17 +448,18 @@ class _StreakScreenState extends State<StreakScreen>
     required Color color,
     required bool isNext,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? Theme.of(context).cardColor : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: isNext
             ? Border.all(color: color.withOpacity(0.5), width: 2)
             : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -469,19 +475,19 @@ class _StreakScreenState extends State<StreakScreen>
           const SizedBox(height: 12),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: Colors.blueGrey,
+              color: isDark ? Colors.white70 : Colors.blueGrey,
               fontSize: 14,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             reward,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w900,
               fontSize: 16,
-              color: Color(0xFF1A202C),
+              color: isDark ? Colors.white : const Color(0xFF1A202C),
             ),
           ),
         ],
@@ -490,12 +496,13 @@ class _StreakScreenState extends State<StreakScreen>
   }
 
   Widget _buildRulesCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.red.shade50,
+        color: isDark ? Colors.red.shade900.withOpacity(0.2) : Colors.red.shade50,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.red.shade100),
+        border: Border.all(color: isDark ? Colors.red.shade900 : Colors.red.shade100),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -506,11 +513,11 @@ class _StreakScreenState extends State<StreakScreen>
             size: 28,
           ),
           const SizedBox(width: 15),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Don\'t break the streak!',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -518,11 +525,11 @@ class _StreakScreenState extends State<StreakScreen>
                     fontSize: 16,
                   ),
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Text(
                   'If you miss booking a court or matchmaking for an entire week, your streak will reset back to 0. Stay active to unlock rewards!',
                   style: TextStyle(
-                    color: Colors.black87,
+                    color: isDark ? Colors.white70 : Colors.black87,
                     height: 1.5,
                     fontSize: 13,
                   ),
