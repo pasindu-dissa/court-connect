@@ -12,6 +12,9 @@ import '../../../../../core/constants/api_constants.dart';
 import 'featured_challenge_screen.dart';
 import 'new_badge_screen.dart';
 import 'streak_screen.dart';
+import 'ironclad_badge_screen.dart';
+import 'dawn_patrol_badge_screen.dart';
+import 'the_regular_badge_screen.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   final VoidCallback? onLocationTapped;
@@ -26,9 +29,17 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   String _selectedSport = 'all';
   String _selectedCourt = 'all';
 
-  final List<String> _sports = ['all', 'badminton', 'tennis', 'basketball', 'football'];
-  List<Map<String, dynamic>> _courts = [{'id': 'all', 'name': 'ALL COURTS'}];
-  
+  final List<String> _sports = [
+    'all',
+    'badminton',
+    'tennis',
+    'basketball',
+    'football',
+  ];
+  List<Map<String, dynamic>> _courts = [
+    {'id': 'all', 'name': 'ALL COURTS'},
+  ];
+
   Future<Map<String, dynamic>>? _userStatsFuture;
 
   @override
@@ -40,14 +51,21 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   Future<void> _fetchCourts() async {
     try {
-      final response = await http.get(Uri.parse("${ApiConstants.baseUrl}/courts"));
+      final response = await http.get(
+        Uri.parse("${ApiConstants.baseUrl}/courts"),
+      );
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         if (mounted) {
           setState(() {
             _courts = [
               {'id': 'all', 'name': 'ALL COURTS'},
-              ...data.map((c) => {'id': c['_id'].toString(), 'name': c['name'].toString().toUpperCase()})
+              ...data.map(
+                (c) => {
+                  'id': c['_id'].toString(),
+                  'name': c['name'].toString().toUpperCase(),
+                },
+              ),
             ];
           });
         }
@@ -63,8 +81,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       if (user == null) return {'rank': '-', 'score': 0, 'streak': 0};
       final token = await user.getIdToken();
       final response = await http.get(
-        Uri.parse("${ApiConstants.baseUrl}/leaderboard/my-stats?sportType=$_selectedSport&courtId=$_selectedCourt"),
-        headers: { 'Authorization': 'Bearer $token' }
+        Uri.parse(
+          "${ApiConstants.baseUrl}/leaderboard/my-stats?sportType=$_selectedSport&courtId=$_selectedCourt",
+        ),
+        headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -80,7 +100,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     try {
       final response = await http.get(
         // Use the new top-players endpoint supporting dynamic filtering
-        Uri.parse("${ApiConstants.baseUrl}/leaderboard/top-players?sportType=$_selectedSport&courtId=$_selectedCourt"),
+        Uri.parse(
+          "${ApiConstants.baseUrl}/leaderboard/top-players?sportType=$_selectedSport&courtId=$_selectedCourt",
+        ),
       );
       if (response.statusCode == 200) {
         final dynamic data = json.decode(response.body);
@@ -99,9 +121,13 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? Theme.of(context).scaffoldBackgroundColor : const Color(0xFFF5F6F8),
+      backgroundColor: isDark
+          ? Theme.of(context).scaffoldBackgroundColor
+          : const Color(0xFFF5F6F8),
       appBar: AppBar(
-        backgroundColor: isDark ? Theme.of(context).scaffoldBackgroundColor : const Color(0xFFF5F6F8),
+        backgroundColor: isDark
+            ? Theme.of(context).scaffoldBackgroundColor
+            : const Color(0xFFF5F6F8),
         elevation: 0,
         automaticallyImplyLeading:
             false, // Hide back button since it's a bottom nav tab
@@ -151,7 +177,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             FutureBuilder<Map<String, dynamic>>(
               future: _userStatsFuture,
               builder: (context, snapshot) {
-                final stats = snapshot.data ?? {'rank': '-', 'score': 0, 'streak': 0};
+                final stats =
+                    snapshot.data ?? {'rank': '-', 'score': 0, 'streak': 0};
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -187,10 +214,18 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         Navigator.push(
                           context,
                           PageRouteBuilder(
-                            pageBuilder: (context, animation, secondaryAnimation) =>
-                                StreakScreen(currentStreak: stats['streak']),
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) =>
+                                    StreakScreen(
+                                      currentStreak: stats['streak'],
+                                    ),
                             transitionsBuilder:
-                                (context, animation, secondaryAnimation, child) {
+                                (
+                                  context,
+                                  animation,
+                                  secondaryAnimation,
+                                  child,
+                                ) {
                                   var begin = const Offset(0.0, 1.0);
                                   var end = Offset.zero;
                                   var curve = Curves.easeOutCubic;
@@ -212,11 +247,15 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                           vertical: 15,
                         ),
                         decoration: BoxDecoration(
-                          color: isDark ? Theme.of(context).cardColor : Colors.white,
+                          color: isDark
+                              ? Theme.of(context).cardColor
+                              : Colors.white,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                              color: Colors.black.withOpacity(
+                                isDark ? 0.2 : 0.05,
+                              ),
                               blurRadius: 10,
                               offset: const Offset(0, 5),
                             ),
@@ -231,7 +270,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                 Text(
                                   'Current Streak',
                                   style: TextStyle(
-                                    color: isDark ? Colors.white : Colors.blueGrey,
+                                    color: isDark
+                                        ? Colors.white
+                                        : Colors.blueGrey,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -241,7 +282,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w900,
-                                    color: isDark ? Colors.white : const Color(0xFF1A202C),
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF1A202C),
                                   ),
                                 ),
                               ],
@@ -256,7 +299,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                 const SizedBox(width: 5),
                                 Icon(
                                   Icons.arrow_forward_ios,
-                                  color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+                                  color: isDark
+                                      ? Colors.grey.shade600
+                                      : Colors.grey.shade400,
                                   size: 16,
                                 ),
                               ],
@@ -274,7 +319,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             // --- Challenges & Badges Section ---
             Text(
               'Challenges & Badges',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black,
+              ),
             ),
             const SizedBox(height: 15),
             Row(
@@ -331,12 +380,123 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            // Row 2 — Ironclad + Dawn Patrol
+            Row(
+              children: [
+                Expanded(
+                  child: ChallengeCardWidget(
+                    color: const Color(0xFF4FC3F7),
+                    icon: Icons.shield,
+                    title: 'New Badge Unlocked',
+                    subtitle: 'The Ironclad',
+                    isCircleIcon: true,
+                    onViewPressed: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  const IroncladBadgeScreen(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                                var tween = Tween(
+                                  begin: const Offset(0.0, 1.0),
+                                  end: Offset.zero,
+                                ).chain(CurveTween(curve: Curves.easeOutCubic));
+                                return SlideTransition(
+                                  position: animation.drive(tween),
+                                  child: child,
+                                );
+                              },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: ChallengeCardWidget(
+                    color: const Color(0xFFFF7043),
+                    icon: Icons.wb_sunny_rounded,
+                    title: 'New Badge Unlocked',
+                    subtitle: 'Dawn Patrol',
+                    isCircleIcon: true,
+                    onViewPressed: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  const DawnPatrolBadgeScreen(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                                var tween = Tween(
+                                  begin: const Offset(0.0, 1.0),
+                                  end: Offset.zero,
+                                ).chain(CurveTween(curve: Curves.easeOutCubic));
+                                return SlideTransition(
+                                  position: animation.drive(tween),
+                                  child: child,
+                                );
+                              },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Row 3 — The Regular
+            Row(
+              children: [
+                Expanded(
+                  child: ChallengeCardWidget(
+                    color: const Color(0xFF66BB6A),
+                    icon: Icons.repeat_rounded,
+                    title: 'New Badge Unlocked',
+                    subtitle: 'The Regular',
+                    isCircleIcon: true,
+                    onViewPressed: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  const TheRegularBadgeScreen(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                                var tween = Tween(
+                                  begin: const Offset(0.0, 1.0),
+                                  end: Offset.zero,
+                                ).chain(CurveTween(curve: Curves.easeOutCubic));
+                                return SlideTransition(
+                                  position: animation.drive(tween),
+                                  child: child,
+                                );
+                              },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 15),
+                const Expanded(
+                  child: SizedBox(),
+                ), // placeholder to keep layout balanced
+              ],
+            ),
             const SizedBox(height: 25),
 
             // --- Top Players Section ---
             Text(
               'Top Players',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black,
+              ),
             ),
             const SizedBox(height: 15),
             Row(
@@ -345,13 +505,35 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   child: DropdownButtonFormField<String>(
                     value: _selectedSport,
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       filled: true,
-                      fillColor: isDark ? Theme.of(context).cardColor : Colors.white,
+                      fillColor: isDark
+                          ? Theme.of(context).cardColor
+                          : Colors.white,
                     ),
-                    dropdownColor: isDark ? Theme.of(context).cardColor : Colors.white,
-                    items: _sports.map((s) => DropdownMenuItem(value: s, child: Text(s.toUpperCase(), style: TextStyle(fontSize: 12, color: isDark ? Colors.white : Colors.black)))).toList(),
+                    dropdownColor: isDark
+                        ? Theme.of(context).cardColor
+                        : Colors.white,
+                    items: _sports
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s,
+                            child: Text(
+                              s.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark ? Colors.white : Colors.black,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
                     onChanged: (v) {
                       setState(() {
                         _selectedSport = v!;
@@ -365,13 +547,35 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   child: DropdownButtonFormField<String>(
                     value: _selectedCourt,
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       filled: true,
-                      fillColor: isDark ? Theme.of(context).cardColor : Colors.white,
+                      fillColor: isDark
+                          ? Theme.of(context).cardColor
+                          : Colors.white,
                     ),
-                    dropdownColor: isDark ? Theme.of(context).cardColor : Colors.white,
-                    items: _courts.map((c) => DropdownMenuItem(value: c['id'].toString(), child: Text(c['name'].toString(), style: TextStyle(fontSize: 12, color: isDark ? Colors.white : Colors.black)))).toList(),
+                    dropdownColor: isDark
+                        ? Theme.of(context).cardColor
+                        : Colors.white,
+                    items: _courts
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c['id'].toString(),
+                            child: Text(
+                              c['name'].toString(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark ? Colors.white : Colors.black,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
                     onChanged: (v) {
                       setState(() {
                         _selectedCourt = v!;
@@ -391,7 +595,12 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(
-                    child: Text("No players found on the leaderboard.", style: TextStyle(color: isDark ? Colors.white : Colors.black)),
+                    child: Text(
+                      "No players found on the leaderboard.",
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
                   );
                 }
 
@@ -402,7 +611,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   itemCount: topPlayers.length,
                   itemBuilder: (context, index) {
                     final player = topPlayers[index];
-                    final name = player['user']?['name'] ?? player['teamName'] ?? player['name'] ?? 'Unknown';
+                    final name =
+                        player['user']?['name'] ??
+                        player['teamName'] ??
+                        player['name'] ??
+                        'Unknown';
                     final score = player['points'] ?? player['score'] ?? 0;
                     final status = player['status'] ?? 'hot';
 
@@ -533,7 +746,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         ),
         title: Text(
           '$rank. $name',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: isDark ? Colors.white : Colors.black,
+          ),
         ),
         subtitle: Text(
           '$score Points',
@@ -612,7 +829,11 @@ class _ChallengeCardWidgetState extends State<ChallengeCardWidget> {
                         ? CircleAvatar(
                             radius: 35,
                             backgroundColor: Colors.white,
-                            child: Icon(widget.icon, size: 40, color: Colors.grey),
+                            child: Icon(
+                              widget.icon,
+                              size: 40,
+                              color: Colors.grey,
+                            ),
                           )
                         : Icon(widget.icon, size: 70, color: Colors.white),
                   ),
@@ -633,7 +854,10 @@ class _ChallengeCardWidgetState extends State<ChallengeCardWidget> {
                       const SizedBox(height: 5),
                       Text(
                         widget.subtitle,
-                        style: const TextStyle(color: Colors.blueGrey, fontSize: 12),
+                        style: const TextStyle(
+                          color: Colors.blueGrey,
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(height: 15),
                       SizedBox(
@@ -666,23 +890,37 @@ class _ChallengeCardWidgetState extends State<ChallengeCardWidget> {
                 icon: const Icon(Icons.share, color: Colors.white),
                 onPressed: () async {
                   try {
-                    RenderRepaintBoundary boundary = _cardKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+                    RenderRepaintBoundary boundary =
+                        _cardKey.currentContext!.findRenderObject()
+                            as RenderRepaintBoundary;
                     ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-                    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+                    ByteData? byteData = await image.toByteData(
+                      format: ui.ImageByteFormat.png,
+                    );
                     if (byteData != null) {
                       final buffer = byteData.buffer;
                       final tempDir = await getTemporaryDirectory();
-                      final file = await File('${tempDir.path}/challenge_screenshot.png').create();
-                      await file.writeAsBytes(buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-                      
+                      final file = await File(
+                        '${tempDir.path}/challenge_screenshot.png',
+                      ).create();
+                      await file.writeAsBytes(
+                        buffer.asUint8List(
+                          byteData.offsetInBytes,
+                          byteData.lengthInBytes,
+                        ),
+                      );
+
                       await Share.shareXFiles(
-                        [XFile(file.path)], 
-                        text: 'I just earned the \\\'${widget.subtitle}\\\' badge on CourtConnect! Think you can beat my score?'
+                        [XFile(file.path)],
+                        text:
+                            'I just earned the \\\'${widget.subtitle}\\\' badge on CourtConnect! Think you can beat my score?',
                       );
                     }
                   } catch (e) {
                     debugPrint("Screenshot failed: $e");
-                    Share.share('I just earned the \\\'${widget.subtitle}\\\' badge on CourtConnect! Think you can beat my score?');
+                    Share.share(
+                      'I just earned the \\\'${widget.subtitle}\\\' badge on CourtConnect! Think you can beat my score?',
+                    );
                   }
                 },
               ),
