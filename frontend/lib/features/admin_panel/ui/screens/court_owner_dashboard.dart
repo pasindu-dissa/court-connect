@@ -14,6 +14,7 @@ import '../../../../core/constants/avatar_constants.dart';
 import 'my_courts_screen.dart';
 import 'owner_bookings_screen.dart'; // NEW
 import 'owner_revenue_screen.dart'; // NEW
+import 'update_results_screen.dart';
 
 class CourtOwnerDashboard extends StatefulWidget {
   const CourtOwnerDashboard({super.key});
@@ -316,6 +317,22 @@ class _CourtOwnerDashboardState extends State<CourtOwnerDashboard> {
                       context,
                       MaterialPageRoute(
                         builder: (_) => const OwnerBookingsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                _buildManagementTile(
+                  context,
+                  title: "Update Results",
+                  subtitle: "Award points to users for rankings",
+                  icon: Icons.score_rounded,
+                  iconColor: Colors.deepPurple,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const UpdateResultsScreen(),
                       ),
                     );
                   },

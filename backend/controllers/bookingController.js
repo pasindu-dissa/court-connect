@@ -1,5 +1,6 @@
-const Booking = require('../models/booking');
+const Booking = require('../models/Booking');
 const Court = require('../models/court');
+const User = require('../models/User');
 const { pushNotificationToUser } = require('../services/notificationService');
 
 // @desc    Create a new booking
@@ -41,6 +42,32 @@ const createBooking = async (req, res) => {
       );
     }
 
+    // Weekly Streak Logic
+    const bookedUser = await User.findById(userId);
+    if (bookedUser) {
+      const now = new Date();
+      const dayOfWeek = now.getUTCDay(); // 0 is Sunday
+      const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; 
+      const currentWeekStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - diffToMonday));
+
+      if (!bookedUser.weeklyStreak || !bookedUser.weeklyStreak.lastBookingWeekStart) {
+        bookedUser.weeklyStreak = { current: 1, lastBookingWeekStart: currentWeekStart };
+      } else {
+        const lastStart = new Date(bookedUser.weeklyStreak.lastBookingWeekStart);
+        const timeDiff = currentWeekStart.getTime() - lastStart.getTime();
+        const weeksDiff = Math.round(timeDiff / (1000 * 3600 * 24 * 7));
+
+        if (weeksDiff === 1) {
+          bookedUser.weeklyStreak.current += 1;
+          bookedUser.weeklyStreak.lastBookingWeekStart = currentWeekStart;
+        } else if (weeksDiff > 1) {
+          bookedUser.weeklyStreak.current = 1;
+          bookedUser.weeklyStreak.lastBookingWeekStart = currentWeekStart;
+        }
+      }
+      await bookedUser.save();
+    }
+
     res.status(201).json(booking);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -62,4 +89,24 @@ const getCourtBookings = async (req, res) => {
   }
 };
 
-module.exports = { createBooking, getCourtBookings };
+const getUserBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find({
+      userId: req.params.userId,
+      status: 'Confirmed',
+      date: { $gte: new Date().toISOString().split('T')[0] }
+    })
+      .populate('courtId', 'name location images sports')
+      .sort({ date: 1, startTime: 1 });
+
+    res.json({
+      success: true,
+      count: bookings.length,
+      data: bookings
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createBooking, getCourtBookings, getUserBookings };

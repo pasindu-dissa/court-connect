@@ -1,5 +1,5 @@
 const Court = require('../models/court');
-const Booking = require('../models/Booking'); // <-- NEW: Import the Booking model
+const Booking = require('../models/booking'); // <-- FIX: Use lowercase to match filename
 
 
 // @desc    Add a new court
