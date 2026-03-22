@@ -13,9 +13,9 @@
     
    
     <application
-        android:label="frontend"
+        android:label="Court Connect"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true">
         
         <!-- Health Connect View Permission Usage -->
