@@ -161,11 +161,31 @@ const markNotificationRead = async (req, res) => {
   }
 };
 
+// @desc    Search users by name
+// @route   GET /api/users/search
+// @access  Private
+const searchUsers = async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q) {
+      return res.json([]);
+    }
+    const users = await User.find({
+      name: { $regex: q, $options: 'i' }
+    }).select('name email profileImage _id');
+    
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   registerUser,
   updateUserProfile,
   getUserByEmail,
   updateFcmToken,
   getNotifications,
-  markNotificationRead
+  markNotificationRead,
+  searchUsers
 };
