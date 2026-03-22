@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+import 'dart:developer';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import '../constants/api_constants.dart'; // Your API constants file
@@ -31,11 +31,11 @@ class ImageUploadService {
         var jsonData = jsonDecode(response.body);
         return jsonData['imageUrl']; // Returns the Cloudinary URL!
       } else {
-        print("Upload failed");
+        log("Upload failed", name: 'ImageUploadService');
         return null;
       }
     } catch (e) {
-      print("Error uploading image: $e");
+      log("Error uploading image: $e", name: 'ImageUploadService');
       return null;
     }
   }
