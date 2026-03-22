@@ -10,7 +10,7 @@ import '../constants/api_constants.dart';
 // --- Background Message Handler (MUST be a top-level function) ---
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print("Handling a background message: ${message.messageId}");
+  dev.log("Handling a background message: ${message.messageId}");
 }
 
 class PushNotificationService {
@@ -26,7 +26,7 @@ class PushNotificationService {
     );
     
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('User granted notification permissions');
+      dev.log('User granted notification permissions');
     }
 
     // 2. Set up Background Handler
@@ -78,11 +78,10 @@ class PushNotificationService {
   static Future<String?> getDeviceToken() async {
     try {
       String? token = await _fcm.getToken();
-      print("FCM Device Token: $token");
-      // TODO: Send this token to your Node.js backend and save it in the User's MongoDB document!
+      dev.log("FCM Device Token: $token");
       return token;
     } catch (e) {
-      print("Failed to get FCM token: $e");
+      dev.log("Failed to get FCM token: $e");
       return null;
     }
   }
