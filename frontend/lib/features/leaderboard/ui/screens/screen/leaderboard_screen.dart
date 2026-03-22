@@ -228,10 +228,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'Current Streak',
                                   style: TextStyle(
-                                    color: Colors.blueGrey,
+                                    color: isDark ? Colors.white : Colors.blueGrey,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -456,8 +456,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: Colors.blueGrey,
+            style: TextStyle(
+              color: isDark ? Colors.white : Colors.blueGrey,
               fontWeight: FontWeight.bold,
             ),
           ),
