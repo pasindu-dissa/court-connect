@@ -87,7 +87,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
       await _registerUser(uid: credential.user!.uid, email: _emailController.text.trim(), password: "hashed_by_firebase");
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -110,7 +112,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         await _registerUser(uid: credential.user!.uid, email: credential.user!.email!);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Google Sign Up Failed: $e"), backgroundColor: Colors.red));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Google Sign Up Failed: $e"), backgroundColor: Colors.red));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -182,7 +186,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                 decoration: BoxDecoration(
                   color: Theme.of(context).scaffoldBackgroundColor,
                   borderRadius: const BorderRadius.only(topLeft: Radius.circular(32), topRight: Radius.circular(32)),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 30, offset: const Offset(0, -5))],
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 30, offset: const Offset(0, -5))],
                 ),
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -216,7 +220,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                         
                         // Dropdowns
                         DropdownButtonFormField<String>(
-                          value: _selectedDistrict,
+                          initialValue: _selectedDistrict,
                           dropdownColor: Theme.of(context).cardColor,
                           decoration: _dropdownDecoration("District", Icons.map_rounded, isDark),
                           items: SLLocations.districts.map((d) => DropdownMenuItem(value: d, child: Text(d, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)))).toList(),
@@ -225,7 +229,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                         ),
                         const SizedBox(height: 16),
                         DropdownButtonFormField<String>(
-                          value: _selectedCity,
+                          initialValue: _selectedCity,
                           dropdownColor: Theme.of(context).cardColor,
                           decoration: _dropdownDecoration("City / Area", Icons.location_city_rounded, isDark),
                           items: _selectedDistrict == null ? [] : SLLocations.districtCities[_selectedDistrict]!.map((c) => DropdownMenuItem(value: c, child: Text(c, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)))).toList(),
@@ -320,7 +324,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       decoration: InputDecoration(
         labelText: label, labelStyle: TextStyle(color: isDark ? Colors.grey.shade500 : Colors.grey.shade600),
         prefixIcon: Icon(icon, color: AppColors.primary, size: 22),
-        filled: true, fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
+        filled: true, fillColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
@@ -333,7 +337,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     return InputDecoration(
       labelText: label, labelStyle: TextStyle(color: isDark ? Colors.grey.shade500 : Colors.grey.shade600),
       prefixIcon: Icon(icon, color: AppColors.primary, size: 22),
-      filled: true, fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
+      filled: true, fillColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
@@ -377,7 +381,7 @@ class _BouncingPromptState extends State<_BouncingPrompt> with SingleTickerProvi
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
                 child: const Icon(Icons.keyboard_double_arrow_up_rounded, color: Colors.white, size: 28),
               ),
               const SizedBox(height: 8),

@@ -250,11 +250,11 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
               shape: BoxShape.circle,
               gradient: SweepGradient(
                 colors: [
-                  Colors.amber.withOpacity(0.0),
-                  Colors.amber.withOpacity(0.3),
-                  Colors.amber.withOpacity(0.0),
-                  Colors.amber.withOpacity(0.3),
-                  Colors.amber.withOpacity(0.0),
+                  Colors.amber.withValues(alpha: 0.0),
+                  Colors.amber.withValues(alpha: 0.3),
+                  Colors.amber.withValues(alpha: 0.0),
+                  Colors.amber.withValues(alpha: 0.3),
+                  Colors.amber.withValues(alpha: 0.0),
                 ],
                 stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
               ),
@@ -275,7 +275,7 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
                   BoxShadow(
                     color: const Color(
                       0xFFFFD700,
-                    ).withOpacity(0.3 * _pulseController.value),
+                    ).withValues(alpha: 0.3 * _pulseController.value),
                     blurRadius: 40,
                     spreadRadius: 10,
                   ),
@@ -302,17 +302,20 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withValues(alpha: 0.5),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
               BoxShadow(
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withValues(alpha: 0.3),
                 blurRadius: 10,
                 offset: const Offset(-5, -5),
               ),
             ],
-            border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.5),
+              width: 2,
+            ),
           ),
           child: const Center(
             child: Icon(
@@ -333,9 +336,9 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.amber.withOpacity(0.2),
+            color: Colors.amber.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.amber.withOpacity(0.5)),
+            border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
           ),
           child: const Text(
             'NEW BADGE UNLOCKED',
@@ -367,7 +370,7 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
           'You have proven yourself a worthy opponent! This badge is awarded for challenging and defeating a team ranked higher than yours in a competitive match.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             fontSize: 16,
             height: 1.6,
           ),
@@ -386,32 +389,44 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
           child: ElevatedButton(
             onPressed: () async {
               try {
-                RenderRepaintBoundary boundary = _badgeKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+                RenderRepaintBoundary boundary =
+                    _badgeKey.currentContext!.findRenderObject()
+                        as RenderRepaintBoundary;
                 ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-                ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-                
+                ByteData? byteData = await image.toByteData(
+                  format: ui.ImageByteFormat.png,
+                );
+
                 if (byteData != null) {
                   final buffer = byteData.buffer;
                   final tempDir = await getTemporaryDirectory();
                   final file = await File('${tempDir.path}/badge.png').create();
-                  await file.writeAsBytes(buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-                  
+                  await file.writeAsBytes(
+                    buffer.asUint8List(
+                      byteData.offsetInBytes,
+                      byteData.lengthInBytes,
+                    ),
+                  );
+
                   await Share.shareXFiles(
-                    [XFile(file.path)], 
-                    text: 'I just earned \\\'The Rival\\\' badge on CourtConnect! Think you can beat my score?'
+                    [XFile(file.path)],
+                    text:
+                        'I just earned \\\'The Rival\\\' badge on CourtConnect! Think you can beat my score?',
                   );
                 }
               } catch (e) {
                 debugPrint("Error capturing badge screenshot: $e");
                 // Fallback to text
-                Share.share('I just earned \\\'The Rival\\\' badge on CourtConnect! Think you can beat my score?');
+                Share.share(
+                  'I just earned \\\'The Rival\\\' badge on CourtConnect! Think you can beat my score?',
+                );
               }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFFD700), // Gold
               foregroundColor: Colors.black, // Dark text
               elevation: 8,
-              shadowColor: Colors.amber.withOpacity(0.4),
+              shadowColor: Colors.amber.withValues(alpha: 0.4),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(28),
               ),
@@ -466,17 +481,20 @@ class _ConfettiPainter extends CustomPainter {
       double s = random.nextDouble() * 6 + 2;
       int colorChoice = random.nextInt(4);
 
-      if (colorChoice == 0)
+      if (colorChoice == 0) {
         paint.color = Colors.amber;
-      else if (colorChoice == 1)
+      } else if (colorChoice == 1) {
         paint.color = Colors.white;
-      else if (colorChoice == 2)
+      } else if (colorChoice == 2) {
         paint.color = Colors.pinkAccent;
-      else
+      } else {
         paint.color = Colors.blueAccent;
+      }
 
       // Fade out towards the end
-      paint.color = paint.color.withOpacity(1.0 - (controller.value * 0.8));
+      paint.color = paint.color.withValues(
+        alpha: 1.0 - (controller.value * 0.8),
+      );
 
       // Draw rotated squares for confetti look
       canvas.save();

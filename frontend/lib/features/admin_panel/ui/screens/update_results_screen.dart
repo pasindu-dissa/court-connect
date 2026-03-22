@@ -1,9 +1,8 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 import '../../../../core/constants/api_constants.dart';
-import '../../../../core/services/user_provider.dart';
 import '../../../../core/constants/avatar_constants.dart';
 
 class UpdateResultsScreen extends StatefulWidget {
@@ -29,8 +28,7 @@ class _UpdateResultsScreenState extends State<UpdateResultsScreen> {
     }
     setState(() => _isLoading = true);
     try {
-      final user = Provider.of<UserProvider>(context, listen: false).user;
-      final token = user?['token'] ?? '';
+      final token = await FirebaseAuth.instance.currentUser?.getIdToken() ?? '';
       
       final response = await http.get(
         Uri.parse('${ApiConstants.baseUrl}/users/search?q=$query'),
@@ -43,6 +41,8 @@ class _UpdateResultsScreenState extends State<UpdateResultsScreen> {
         setState(() {
           _searchResults = jsonDecode(response.body);
         });
+      } else {
+        debugPrint('Search failed (${response.statusCode}): ${response.body}');
       }
     } catch (e) {
       debugPrint('Search error: $e');
@@ -59,8 +59,7 @@ class _UpdateResultsScreenState extends State<UpdateResultsScreen> {
     );
 
     try {
-      final user = Provider.of<UserProvider>(context, listen: false).user;
-      final token = user?['token'] ?? '';
+      final token = await FirebaseAuth.instance.currentUser?.getIdToken() ?? '';
 
       // Hardcode default courtId or get somehow (requires court selector implementation)
       // We will assume "60c72b2f9b1e8a001c8e4a9e" as dummy, or prompt owner to select
@@ -80,11 +79,12 @@ class _UpdateResultsScreenState extends State<UpdateResultsScreen> {
         }),
       );
 
+      if (!mounted) return;
       Navigator.pop(context); // close loader
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Point awarded successfully!')),
+          const SnackBar(content: Text('Point awarded successfully!'), backgroundColor: Colors.green),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -92,11 +92,13 @@ class _UpdateResultsScreenState extends State<UpdateResultsScreen> {
         );
       }
     } catch (e) {
-      Navigator.pop(context);
+      if (mounted) Navigator.pop(context);
       debugPrint('Award point error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Network error adding point.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Network error adding point.')),
+        );
+      }
     }
   }
 

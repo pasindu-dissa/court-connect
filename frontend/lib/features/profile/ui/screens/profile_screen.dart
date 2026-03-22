@@ -14,6 +14,7 @@ import 'edit_profile_screen.dart';
 import '../widgets/profile_health_section.dart';
 import '../../../../features/health/ui/widgets/health_analysis_screen.dart';
 import '../../../../features/health/data/health_notifier.dart';
+import '../../../auth/ui/screens/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -66,7 +67,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _handleUnauthorized() {
     FirebaseAuth.instance.signOut();
-    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
   }
 
   Future<void> _handleLogout() async {
@@ -120,9 +124,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (confirm == true) {
       await FirebaseAuth.instance.signOut();
       if (mounted) {
-        Navigator.of(
-          context,
-        ).pushNamedAndRemoveUntil('/login', (route) => false);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
       }
     }
   }
@@ -247,7 +252,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.4),
+                        color: AppColors.primary.withValues(alpha: 0.4),
                         blurRadius: 15,
                         offset: const Offset(0, 8),
                       ),
@@ -382,10 +387,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     style: OutlinedButton.styleFrom(
                       backgroundColor: isDark
-                          ? Colors.redAccent.withOpacity(0.08)
+                          ? Colors.redAccent.withValues(alpha: 0.08)
                           : Colors.red.shade50,
                       side: BorderSide(
-                        color: Colors.redAccent.withOpacity(isDark ? 0.4 : 0.3),
+                        color: Colors.redAccent.withValues(alpha: isDark ? 0.4 : 0.3),
                         width: 1.5,
                       ),
                       shape: RoundedRectangleBorder(
