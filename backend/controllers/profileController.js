@@ -73,6 +73,10 @@ const updateProfile = async (req, res) => {
         role: updatedUser.role,
         district: updatedUser.district,
         city: updatedUser.city,
+        location: updatedUser.location,
+        skills: updatedUser.skills,
+        stats: updatedUser.stats,
+        createdAt: updatedUser.createdAt,
       }
     });
   } catch (error) {
