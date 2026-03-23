@@ -7,14 +7,14 @@ import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
-class NewBadgeScreen extends StatefulWidget {
-  const NewBadgeScreen({super.key});
+class IroncladBadgeScreen extends StatefulWidget {
+  const IroncladBadgeScreen({super.key});
 
   @override
-  State<NewBadgeScreen> createState() => _NewBadgeScreenState();
+  State<IroncladBadgeScreen> createState() => _IroncladBadgeScreenState();
 }
 
-class _NewBadgeScreenState extends State<NewBadgeScreen>
+class _IroncladBadgeScreenState extends State<IroncladBadgeScreen>
     with TickerProviderStateMixin {
   late AnimationController _entranceController;
   late AnimationController _pulseController;
@@ -30,7 +30,6 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
   void initState() {
     super.initState();
 
-    // 1. Entrance Animation (Slide, Fade, Scale)
     _entranceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -58,19 +57,16 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
       ),
     );
 
-    // 2. Continuous Pulse Animation for the Badge
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
 
-    // 3. Sparkle Rotation Animation
     _sparkleController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 8000),
     )..repeat();
 
-    // Start entrance animation
     _entranceController.forward();
   }
 
@@ -85,7 +81,7 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212), // Sleek dark theme
+      backgroundColor: const Color(0xFF0D1B2A), // Deep steel blue-black
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -97,13 +93,13 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Background subtle gradient
+          // Background gradient — steel/iron tone
           Container(
             decoration: const BoxDecoration(
               gradient: RadialGradient(
                 colors: [
-                  Color(0xFF2C1B4D), // Deep purple glow
-                  Color(0xFF121212), // Dark background
+                  Color(0xFF1C3A5E), // Deep steel blue
+                  Color(0xFF0D1B2A), // Dark background
                 ],
                 center: Alignment.center,
                 radius: 1.2,
@@ -111,7 +107,6 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
             ),
           ),
 
-          // Main Content
           SafeArea(
             child: Center(
               child: Padding(
@@ -119,7 +114,6 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Animated Badge Area
                     AnimatedBuilder(
                       animation: _entranceController,
                       builder: (context, child) {
@@ -142,7 +136,6 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
 
                     const SizedBox(height: 48),
 
-                    // Text Content with delayed entrance
                     AnimatedBuilder(
                       animation: _entranceController,
                       builder: (context, child) {
@@ -150,28 +143,19 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
                           opacity: Tween<double>(begin: 0, end: 1).animate(
                             CurvedAnimation(
                               parent: _entranceController,
-                              curve: const Interval(
-                                0.5,
-                                1.0,
-                                curve: Curves.easeIn,
-                              ),
+                              curve: const Interval(0.5, 1.0, curve: Curves.easeIn),
                             ),
                           ),
                           child: SlideTransition(
-                            position:
-                                Tween<Offset>(
-                                  begin: const Offset(0, 0.2),
-                                  end: Offset.zero,
-                                ).animate(
-                                  CurvedAnimation(
-                                    parent: _entranceController,
-                                    curve: const Interval(
-                                      0.5,
-                                      1.0,
-                                      curve: Curves.easeOutCubic,
-                                    ),
-                                  ),
-                                ),
+                            position: Tween<Offset>(
+                              begin: const Offset(0, 0.2),
+                              end: Offset.zero,
+                            ).animate(
+                              CurvedAnimation(
+                                parent: _entranceController,
+                                curve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
+                              ),
+                            ),
                             child: child,
                           ),
                         );
@@ -184,19 +168,21 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
             ),
           ),
 
-          // Confetti overlay effect (Visual polish)
           Positioned.fill(
             child: IgnorePointer(
               child: AnimatedBuilder(
                 animation: _entranceController,
                 builder: (context, child) {
                   return Opacity(
-                    opacity: _fadeAnimation.value * 0.5, // Subtle overlay
+                    opacity: _fadeAnimation.value * 0.5,
                     child: child,
                   );
                 },
                 child: CustomPaint(
-                  painter: _ConfettiPainter(controller: _entranceController),
+                  painter: _ConfettiPainter(
+                    controller: _entranceController,
+                    colors: const [Color(0xFF4FC3F7), Colors.white, Color(0xFF78909C), Colors.blueGrey],
+                  ),
                 ),
               ),
             ),
@@ -204,7 +190,6 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
         ],
       ),
 
-      // Interactive Bottom Action
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -213,12 +198,7 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
             builder: (context, child) {
               return Opacity(
                 opacity: Tween<double>(begin: 0, end: 1)
-                    .animate(
-                      CurvedAnimation(
-                        parent: _entranceController,
-                        curve: const Interval(0.7, 1.0),
-                      ),
-                    )
+                    .animate(CurvedAnimation(parent: _entranceController, curve: const Interval(0.7, 1.0)))
                     .value,
                 child: child,
               );
@@ -234,7 +214,7 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Rotating background sparkles/rays
+        // Rotating sparkle ring — steel blue tones
         AnimatedBuilder(
           animation: _sparkleController,
           builder: (context, child) {
@@ -250,11 +230,11 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
               shape: BoxShape.circle,
               gradient: SweepGradient(
                 colors: [
-                  Colors.amber.withValues(alpha: 0.0),
-                  Colors.amber.withValues(alpha: 0.3),
-                  Colors.amber.withValues(alpha: 0.0),
-                  Colors.amber.withValues(alpha: 0.3),
-                  Colors.amber.withValues(alpha: 0.0),
+                  const Color(0xFF4FC3F7).withValues(alpha: 0.0),
+                  const Color(0xFF4FC3F7).withValues(alpha: 0.3),
+                  const Color(0xFF4FC3F7).withValues(alpha: 0.0),
+                  const Color(0xFF4FC3F7).withValues(alpha: 0.3),
+                  const Color(0xFF4FC3F7).withValues(alpha: 0.0),
                 ],
                 stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
               ),
@@ -262,7 +242,7 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
           ),
         ),
 
-        // Pulsing glow behind the badge
+        // Pulsing glow
         AnimatedBuilder(
           animation: _pulseController,
           builder: (context, child) {
@@ -273,9 +253,7 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(
-                      0xFFFFD700,
-                    ).withValues(alpha: 0.3 * _pulseController.value),
+                    color: const Color(0xFF4FC3F7).withValues(alpha: 0.3 * _pulseController.value),
                     blurRadius: 40,
                     spreadRadius: 10,
                   ),
@@ -285,7 +263,7 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
           },
         ),
 
-        // The central Badge Container
+        // Badge — steel gradient
         Container(
           width: 150,
           height: 150,
@@ -295,9 +273,9 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFFFFDF00), // Bright gold
-                Color(0xFFD4AF37), // Metallic gold
-                Color(0xFF996515), // Dark gold
+                Color(0xFF78909C), // Light steel
+                Color(0xFF455A64), // Mid steel
+                Color(0xFF263238), // Dark steel
               ],
             ),
             boxShadow: [
@@ -312,14 +290,11 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
                 offset: const Offset(-5, -5),
               ),
             ],
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.5),
-              width: 2,
-            ),
+            border: Border.all(color: const Color(0xFF4FC3F7).withValues(alpha: 0.6), width: 2),
           ),
           child: const Center(
             child: Icon(
-              Icons.wine_bar, // The Rival badge icon
+              Icons.shield, // 🛡️ The Ironclad
               size: 70,
               color: Colors.white,
             ),
@@ -332,18 +307,17 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
   Widget _buildTextContent() {
     return Column(
       children: [
-        // "NEW BADGE UNLOCKED" Label
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.amber.withValues(alpha: 0.2),
+            color: const Color(0xFF4FC3F7).withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
+            border: Border.all(color: const Color(0xFF4FC3F7).withValues(alpha: 0.5)),
           ),
           child: const Text(
             'NEW BADGE UNLOCKED',
             style: TextStyle(
-              color: Colors.amber,
+              color: Color(0xFF4FC3F7),
               fontWeight: FontWeight.bold,
               letterSpacing: 1.5,
               fontSize: 12,
@@ -351,10 +325,8 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
           ),
         ),
         const SizedBox(height: 24),
-
-        // Badge Title
         const Text(
-          'The Rival',
+          'The Ironclad',
           style: TextStyle(
             color: Colors.white,
             fontSize: 40,
@@ -362,12 +334,9 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
             letterSpacing: 1.0,
           ),
         ),
-
         const SizedBox(height: 16),
-
-        // Description
         Text(
-          'You have proven yourself a worthy opponent! This badge is awarded for challenging and defeating a team ranked higher than yours in a competitive match.',
+          'Unbreakable dedication! This badge is awarded for maintaining a 4-week active booking or matchmaking streak without missing a single week.',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.7),
@@ -390,46 +359,34 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
             onPressed: () async {
               try {
                 RenderRepaintBoundary boundary =
-                    _badgeKey.currentContext!.findRenderObject()
-                        as RenderRepaintBoundary;
+                    _badgeKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
                 ui.Image image = await boundary.toImage(pixelRatio: 3.0);
                 ByteData? byteData = await image.toByteData(
                   format: ui.ImageByteFormat.png,
                 );
-
                 if (byteData != null) {
                   final buffer = byteData.buffer;
                   final tempDir = await getTemporaryDirectory();
                   final file = await File('${tempDir.path}/badge.png').create();
                   await file.writeAsBytes(
-                    buffer.asUint8List(
-                      byteData.offsetInBytes,
-                      byteData.lengthInBytes,
-                    ),
+                    buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
                   );
-
                   await Share.shareXFiles(
                     [XFile(file.path)],
-                    text:
-                        'I just earned \\\'The Rival\\\' badge on CourtConnect! Think you can beat my score?',
+                    text: "I just earned 'The Ironclad' badge on CourtConnect! 4-week streak unlocked!",
                   );
                 }
               } catch (e) {
-                debugPrint("Error capturing badge screenshot: $e");
-                // Fallback to text
-                Share.share(
-                  'I just earned \\\'The Rival\\\' badge on CourtConnect! Think you can beat my score?',
-                );
+                debugPrint('Error sharing badge: $e');
+                Share.share("I just earned 'The Ironclad' badge on CourtConnect! 4-week streak unlocked!");
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFFD700), // Gold
-              foregroundColor: Colors.black, // Dark text
+              backgroundColor: const Color(0xFF4FC3F7),
+              foregroundColor: Colors.black,
               elevation: 8,
-              shadowColor: Colors.amber.withValues(alpha: 0.4),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(28),
-              ),
+              shadowColor: const Color(0xFF4FC3F7).withValues(alpha: 0.4),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
             ),
             child: const Text(
               'Share Achievement',
@@ -442,11 +399,7 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
           onPressed: () => Navigator.pop(context),
           child: const Text(
             'Keep Playing',
-            style: TextStyle(
-              color: Colors.white54,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(color: Colors.white54, fontSize: 16, fontWeight: FontWeight.w600),
           ),
         ),
       ],
@@ -454,56 +407,29 @@ class _NewBadgeScreenState extends State<NewBadgeScreen>
   }
 }
 
-// Simple custom painter for a celebratory confetti effect during entrance
 class _ConfettiPainter extends CustomPainter {
   final Animation<double> controller;
+  final List<Color> colors;
 
-  _ConfettiPainter({required this.controller}) : super(repaint: controller);
+  _ConfettiPainter({required this.controller, required this.colors}) : super(repaint: controller);
 
   @override
   void paint(Canvas canvas, Size size) {
     if (controller.value == 0) return;
-
     final paint = Paint()..style = PaintingStyle.fill;
-    final random = math.Random(42); // Seeded for consistent particles
-
+    final random = math.Random(42);
     for (int i = 0; i < 50; i++) {
-      // Distribute confetti
       double x = random.nextDouble() * size.width;
-      // Fall downwards based on animation
       double startY = random.nextDouble() * size.height / 2;
       double y = startY + (controller.value * size.height * 0.5);
-
-      // Add some horizontal drift
       x += math.sin(controller.value * 2 * math.pi + i) * 20;
-
-      // Vary sizes and colors
       double s = random.nextDouble() * 6 + 2;
-      int colorChoice = random.nextInt(4);
-
-      if (colorChoice == 0) {
-        paint.color = Colors.amber;
-      } else if (colorChoice == 1) {
-        paint.color = Colors.white;
-      } else if (colorChoice == 2) {
-        paint.color = Colors.pinkAccent;
-      } else {
-        paint.color = Colors.blueAccent;
-      }
-
-      // Fade out towards the end
-      paint.color = paint.color.withValues(
-        alpha: 1.0 - (controller.value * 0.8),
-      );
-
-      // Draw rotated squares for confetti look
+      final color = colors[random.nextInt(colors.length)];
+      paint.color = color.withValues(alpha: 1.0 - (controller.value * 0.8));
       canvas.save();
       canvas.translate(x, y);
       canvas.rotate(controller.value * 4 * math.pi * random.nextDouble());
-      canvas.drawRect(
-        Rect.fromCenter(center: Offset.zero, width: s, height: s),
-        paint,
-      );
+      canvas.drawRect(Rect.fromCenter(center: Offset.zero, width: s, height: s), paint);
       canvas.restore();
     }
   }

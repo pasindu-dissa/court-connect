@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -14,6 +13,7 @@ import '../../../../core/constants/avatar_constants.dart';
 import 'my_courts_screen.dart';
 import 'owner_bookings_screen.dart'; // NEW
 import 'owner_revenue_screen.dart'; // NEW
+import 'update_results_screen.dart';
 
 class CourtOwnerDashboard extends StatefulWidget {
   const CourtOwnerDashboard({super.key});
@@ -103,6 +103,7 @@ class _CourtOwnerDashboardState extends State<CourtOwnerDashboard> {
     );
 
     if (confirm == true) {
+      if (!mounted) return;
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       await AuthService().signOut();
       userProvider.clearUser();
@@ -197,7 +198,7 @@ class _CourtOwnerDashboardState extends State<CourtOwnerDashboard> {
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: isDark
-                              ? Colors.white.withOpacity(0.05)
+                              ? Colors.white.withValues(alpha: 0.05)
                               : Colors.white,
                           shape: BoxShape.circle,
                           border: Border.all(
@@ -227,7 +228,7 @@ class _CourtOwnerDashboardState extends State<CourtOwnerDashboard> {
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: isDark
-                              ? Colors.white.withOpacity(0.05)
+                              ? Colors.white.withValues(alpha: 0.05)
                               : Colors.white,
                           shape: BoxShape.circle,
                           border: Border.all(
@@ -323,6 +324,22 @@ class _CourtOwnerDashboardState extends State<CourtOwnerDashboard> {
                 const SizedBox(height: 12),
                 _buildManagementTile(
                   context,
+                  title: "Update Results",
+                  subtitle: "Award points to users for rankings",
+                  icon: Icons.score_rounded,
+                  iconColor: Colors.deepPurple,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const UpdateResultsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                _buildManagementTile(
+                  context,
                   title: "Revenue Analytics",
                   subtitle: "Detailed breakdown of your earnings",
                   icon: Icons.bar_chart_rounded,
@@ -353,18 +370,18 @@ class _CourtOwnerDashboardState extends State<CourtOwnerDashboard> {
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? Colors.white.withOpacity(0.03)
+                        ? Colors.white.withValues(alpha: 0.03)
                         : Colors.white,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
                       color: isDark
-                          ? Colors.white.withOpacity(0.08)
-                          : Colors.black.withOpacity(0.05),
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : Colors.black.withValues(alpha: 0.05),
                       width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -384,7 +401,7 @@ class _CourtOwnerDashboardState extends State<CourtOwnerDashboard> {
                           onChanged: (val) => themeNotifier.value = val
                               ? ThemeMode.dark
                               : ThemeMode.light,
-                          activeColor: AppColors.primary,
+                          activeThumbColor: AppColors.primary,
                         ),
                         onTap: () => themeNotifier.value = !isDark
                             ? ThemeMode.dark
@@ -401,6 +418,7 @@ class _CourtOwnerDashboardState extends State<CourtOwnerDashboard> {
                         iconColor: Colors.orangeAccent,
                         title: 'Notifications',
                         onTap: () {
+                          if (!context.mounted) return;
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -484,7 +502,7 @@ class _CourtOwnerDashboardState extends State<CourtOwnerDashboard> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: gradientColors.first.withOpacity(0.4),
+            color: gradientColors.first.withValues(alpha: 0.4),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -493,12 +511,12 @@ class _CourtOwnerDashboardState extends State<CourtOwnerDashboard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.white.withOpacity(0.8), size: 28),
+          Icon(icon, color: Colors.white.withValues(alpha: 0.8), size: 28),
           const SizedBox(height: 16),
           Text(
             title,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               fontSize: 13,
               fontWeight: FontWeight.w600,
             ),
@@ -533,12 +551,12 @@ class _CourtOwnerDashboardState extends State<CourtOwnerDashboard> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withOpacity(0.03) : Colors.white,
+          color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isDark
-                ? Colors.white.withOpacity(0.08)
-                : Colors.black.withOpacity(0.05),
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.05),
           ),
         ),
         child: Row(
@@ -546,7 +564,7 @@ class _CourtOwnerDashboardState extends State<CourtOwnerDashboard> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
+                color: iconColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(icon, color: iconColor, size: 26),

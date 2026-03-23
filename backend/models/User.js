@@ -43,6 +43,10 @@ const userSchema = mongoose.Schema(
       matchesPlayed: { type: Number, default: 0 },
       wins: { type: Number, default: 0 },
       points: { type: Number, default: 0 }
+    },
+    weeklyStreak: {
+      current: { type: Number, default: 0 },
+      lastBookingWeekStart: { type: Date }
     }
   },
   { timestamps: true }

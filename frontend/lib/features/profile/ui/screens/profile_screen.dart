@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../data/models/profile_model.dart';
+import '../../data/models/booking_model.dart';
 import '../../data/services/profile_service.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_stat_section.dart';
@@ -14,7 +15,7 @@ import 'edit_profile_screen.dart';
 import '../widgets/profile_health_section.dart';
 import '../../../../features/health/ui/widgets/health_analysis_screen.dart';
 import '../../../../features/health/data/health_notifier.dart';
-import '../../../home/ui/screens/notifications_screen.dart'; // NEW: Imported Notifications Screen
+import '../../../../features/home/ui/screens/notifications_screen.dart';
 
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/services/user_provider.dart';
@@ -30,6 +31,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final ProfileService _profileService = ProfileService();
   ProfileModel? _profile;
+  List<BookingModel> _bookings = [];
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -37,7 +39,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _loadProfile();
-    // Load health data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<HealthNotifier>().loadAll();
     });
@@ -49,9 +50,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _errorMessage = null;
     });
     try {
+      // Fetch the profile — if this fails we show the error screen
       final profile = await _profileService.fetchProfile();
+
+      // Fetch bookings separately so a bookings error doesn't block the profile
+      List<BookingModel> bookings = [];
+      try {
+        bookings = await _profileService.fetchUserBookings(profile.id);
+      } catch (bookingError) {
+        // Silently ignore — profile still loads with an empty bookings list
+        debugPrint('Bookings fetch error (non-fatal): $bookingError');
+      }
+
       setState(() {
         _profile = profile;
+        _bookings = bookings;
         _isLoading = false;
       });
     } catch (e) {
@@ -74,7 +87,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _handleLogout() async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -122,6 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (confirm == true) {
+      if (!mounted) return;
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       await AuthService().signOut();
       userProvider.clearUser();
@@ -215,10 +228,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildProfileContent(BuildContext context) {
     if (_profile == null) return const SizedBox();
-
-    final userProvider = Provider.of<UserProvider>(context);
-    final user = userProvider.user;
-
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return RefreshIndicator(
@@ -244,7 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const ProfileHealthSection(),
               const SizedBox(height: 20),
 
-              // --- View Health Analysis Beautiful Button ---
+              // --- View Health Analysis Button ---
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 48),
                 child: Container(
@@ -253,10 +262,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(100),
                     gradient: const LinearGradient(
-                      colors: [
-                        AppColors.primary,
-                        Color(0xFF00E676),
-                      ], // Teal to Vivid Green
+                      colors: [AppColors.primary, Color(0xFF00E676)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -324,7 +330,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-
                     ProfileInfoTile(
                       icon: Icons.phone_rounded,
                       label: 'Phone',
@@ -371,7 +376,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 32),
 
               // --- Bookings Section ---
-              ProfileBookingSection(bookings: const []),
+              ProfileBookingSection(bookings: _bookings),
               const SizedBox(height: 40),
 
               // --- NEW: Settings & More Section ---
@@ -555,3 +560,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
+

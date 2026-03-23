@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:ui' as ui;
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/rendering.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../../core/constants/api_constants.dart';
 import 'featured_challenge_screen.dart';
 import 'new_badge_screen.dart';
 import 'streak_screen.dart';
+import 'ironclad_badge_screen.dart';
+import 'dawn_patrol_badge_screen.dart';
+import 'the_regular_badge_screen.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   final VoidCallback? onLocationTapped;
@@ -18,90 +26,84 @@ class LeaderboardScreen extends StatefulWidget {
 }
 
 class _LeaderboardScreenState extends State<LeaderboardScreen> {
-  // The local dummy data list was removed from here.
-  String _currentLocation = "Fetching Location...";
+  String _selectedSport = 'all';
+  String _selectedCourt = 'all';
+
+  final List<String> _sports = [
+    'all',
+    'badminton',
+    'tennis',
+    'basketball',
+    'football',
+  ];
+  List<Map<String, dynamic>> _courts = [
+    {'id': 'all', 'name': 'ALL COURTS'},
+  ];
+
+  Future<Map<String, dynamic>>? _userStatsFuture;
 
   @override
   void initState() {
     super.initState();
-    _fetchCurrentLocation();
+    _fetchCourts();
+    _userStatsFuture = _fetchUserStats();
   }
 
-  Future<void> _fetchCurrentLocation() async {
+  Future<void> _fetchCourts() async {
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        if (mounted) {
-          setState(() {
-            _currentLocation = "Location Disabled";
-          });
-        }
-        return;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          if (mounted) {
-            setState(() {
-              _currentLocation = "Permission Denied";
-            });
-          }
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        if (mounted) {
-          setState(() {
-            _currentLocation = "Permission Denied";
-          });
-        }
-        return;
-      }
-
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+      final response = await http.get(
+        Uri.parse("${ApiConstants.baseUrl}/courts"),
       );
-
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      if (placemarks.isNotEmpty) {
-        Placemark place = placemarks[0];
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
         if (mounted) {
           setState(() {
-            // Use locality (city) or subLocality (neighborhood)
-            _currentLocation = place.subLocality?.isNotEmpty == true
-                ? place.subLocality!
-                : (place.locality?.isNotEmpty == true
-                      ? place.locality!
-                      : "Unknown Location");
-          });
-        }
-      } else {
-        if (mounted) {
-          setState(() {
-            _currentLocation = "Unknown Location";
+            _courts = [
+              {'id': 'all', 'name': 'ALL COURTS'},
+              ...data.map(
+                (c) => {
+                  'id': c['_id'].toString(),
+                  'name': c['name'].toString().toUpperCase(),
+                },
+              ),
+            ];
           });
         }
       }
     } catch (e) {
-      debugPrint("Error fetching location: \$e");
-      if (mounted) {
-        setState(() {
-          _currentLocation = "Location Error";
-        });
-      }
+      debugPrint("Error fetching courts: $e");
     }
+  }
+
+  Future<Map<String, dynamic>> _fetchUserStats() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return {'rank': '-', 'score': 0, 'streak': 0};
+      final token = await user.getIdToken();
+      final response = await http.get(
+        Uri.parse(
+          "${ApiConstants.baseUrl}/leaderboard/my-stats?sportType=$_selectedSport&courtId=$_selectedCourt",
+        ),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['data'];
+      }
+    } catch (e) {
+      debugPrint("Error fetching user stats: $e");
+    }
+    return {'rank': '-', 'score': 0, 'streak': 0};
   }
 
   Future<List<dynamic>> _fetchLeaderboard() async {
     try {
-      final response = await http.get(Uri.parse("${ApiConstants.baseUrl}/leaderboard"));
+      final response = await http.get(
+        // Use the new top-players endpoint supporting dynamic filtering
+        Uri.parse(
+          "${ApiConstants.baseUrl}/leaderboard/top-players?sportType=$_selectedSport&courtId=$_selectedCourt",
+        ),
+      );
       if (response.statusCode == 200) {
         final dynamic data = json.decode(response.body);
         return data is List
@@ -116,49 +118,54 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFF5F6F8,
-      ), // Light grey background from Figma
+      backgroundColor: isDark
+          ? Theme.of(context).scaffoldBackgroundColor
+          : const Color(0xFFF5F6F8),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF5F6F8),
+        backgroundColor: isDark
+            ? Theme.of(context).scaffoldBackgroundColor
+            : const Color(0xFFF5F6F8),
         elevation: 0,
         automaticallyImplyLeading:
             false, // Hide back button since it's a bottom nav tab
-        title: const Text(
+        title: Text(
           'Leaderboard',
           style: TextStyle(
-            color: Colors.black,
+            color: isDark ? Colors.white : Colors.black,
             fontWeight: FontWeight.w800,
             fontSize: 22,
           ),
         ),
         centerTitle: true,
         actions: [
-          TextButton(
-            onPressed:
-                widget.onLocationTapped ??
-                () {
-                  setState(() {
-                    _currentLocation = "Fetching Location...";
-                  });
-                  _fetchCurrentLocation();
-                },
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.location_on, color: Colors.teal, size: 18),
-                const SizedBox(width: 4),
-                Text(
-                  _currentLocation,
-                  style: const TextStyle(
-                    color: Colors.teal,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+          FutureBuilder<Map<String, dynamic>>(
+            future: _userStatsFuture,
+            builder: (context, snapshot) {
+              final streak = snapshot.data?['streak'] ?? 0;
+              return Padding(
+                padding: const EdgeInsets.only(right: 20.0),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '$streak',
+                        style: const TextStyle(
+                          color: Colors.deepOrange,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Text('🔥', style: TextStyle(fontSize: 22)),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ],
       ),
@@ -167,128 +174,162 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- Top Stats Row ---
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    'Your Rank in the team',
-                    '#3',
-                    Icons.trending_up,
-                    '+1',
-                    Colors.green,
-                  ),
-                ),
-                const SizedBox(width: 15),
-                Expanded(
-                  child: _buildStatCard(
-                    'Your Rating',
-                    '1580',
-                    null,
-                    'Points',
-                    Colors.grey,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 15),
-
-            // --- Current Streak Card ---
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        const StreakScreen(currentStreak: 5),
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
-                          var begin = const Offset(0.0, 1.0);
-                          var end = Offset.zero;
-                          var curve = Curves.easeOutCubic;
-                          var tween = Tween(
-                            begin: begin,
-                            end: end,
-                          ).chain(CurveTween(curve: curve));
-                          return SlideTransition(
-                            position: animation.drive(tween),
-                            child: child,
-                          );
-                        },
-                  ),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 15,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            FutureBuilder<Map<String, dynamic>>(
+              future: _userStatsFuture,
+              builder: (context, snapshot) {
+                final stats =
+                    snapshot.data ?? {'rank': '-', 'score': 0, 'streak': 0};
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Current Streak',
-                          style: TextStyle(
-                            color: Colors.blueGrey,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 5),
-                        Text(
-                          '5 Weeks',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFF1A202C),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // --- Top Stats Row ---
                     Row(
                       children: [
-                        const Icon(
-                          Icons.local_fire_department,
-                          color: Colors.deepOrange,
-                          size: 40,
+                        Expanded(
+                          child: _buildStatCard(
+                            'Your Rank',
+                            stats['rank'].toString(),
+                            Icons.trending_up,
+                            'Overall',
+                            Colors.green,
+                          ),
                         ),
-                        const SizedBox(width: 5),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          color: Colors.grey.shade400,
-                          size: 16,
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: _buildStatCard(
+                            'Your Rating',
+                            stats['score'].toString(),
+                            null,
+                            'Points',
+                            Colors.grey,
+                          ),
                         ),
                       ],
                     ),
+                    const SizedBox(height: 15),
+
+                    // --- Current Streak Card ---
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) =>
+                                    StreakScreen(
+                                      currentStreak: stats['streak'],
+                                    ),
+                            transitionsBuilder:
+                                (
+                                  context,
+                                  animation,
+                                  secondaryAnimation,
+                                  child,
+                                ) {
+                                  var begin = const Offset(0.0, 1.0);
+                                  var end = Offset.zero;
+                                  var curve = Curves.easeOutCubic;
+                                  var tween = Tween(
+                                    begin: begin,
+                                    end: end,
+                                  ).chain(CurveTween(curve: curve));
+                                  return SlideTransition(
+                                    position: animation.drive(tween),
+                                    child: child,
+                                  );
+                                },
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 15,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Theme.of(context).cardColor
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(
+                                isDark ? 0.2 : 0.05,
+                              ),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Current Streak',
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? Colors.white
+                                        : Colors.blueGrey,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  '${stats['streak']} Weeks',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w900,
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF1A202C),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.local_fire_department,
+                                  color: Colors.deepOrange,
+                                  size: 40,
+                                ),
+                                const SizedBox(width: 5),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: isDark
+                                      ? Colors.grey.shade600
+                                      : Colors.grey.shade400,
+                                  size: 16,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
-                ),
-              ),
+                );
+              },
             ),
             const SizedBox(height: 25),
 
             // --- Challenges & Badges Section ---
-            const Text(
+            Text(
               'Challenges & Badges',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black,
+              ),
             ),
             const SizedBox(height: 15),
             Row(
               children: [
                 Expanded(
-                  child: _buildChallengeCard(
+                  child: ChallengeCardWidget(
                     color: Colors.orange,
                     icon: Icons.emoji_events,
                     title: 'Featured Challenge',
@@ -305,7 +346,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 ),
                 const SizedBox(width: 15),
                 Expanded(
-                  child: _buildChallengeCard(
+                  child: ChallengeCardWidget(
                     color: const Color(0xFF74A5FF),
                     icon: Icons.wine_bar,
                     title: 'New Badge Unlocked',
@@ -339,12 +380,211 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            // Row 2 — Ironclad + Dawn Patrol
+            Row(
+              children: [
+                Expanded(
+                  child: ChallengeCardWidget(
+                    color: const Color(0xFF4FC3F7),
+                    icon: Icons.shield,
+                    title: 'New Badge Unlocked',
+                    subtitle: 'The Ironclad',
+                    isCircleIcon: true,
+                    onViewPressed: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  const IroncladBadgeScreen(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                                var tween = Tween(
+                                  begin: const Offset(0.0, 1.0),
+                                  end: Offset.zero,
+                                ).chain(CurveTween(curve: Curves.easeOutCubic));
+                                return SlideTransition(
+                                  position: animation.drive(tween),
+                                  child: child,
+                                );
+                              },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: ChallengeCardWidget(
+                    color: const Color(0xFFFF7043),
+                    icon: Icons.wb_sunny_rounded,
+                    title: 'New Badge Unlocked',
+                    subtitle: 'Dawn Patrol',
+                    isCircleIcon: true,
+                    onViewPressed: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  const DawnPatrolBadgeScreen(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                                var tween = Tween(
+                                  begin: const Offset(0.0, 1.0),
+                                  end: Offset.zero,
+                                ).chain(CurveTween(curve: Curves.easeOutCubic));
+                                return SlideTransition(
+                                  position: animation.drive(tween),
+                                  child: child,
+                                );
+                              },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Row 3 — The Regular
+            Row(
+              children: [
+                Expanded(
+                  child: ChallengeCardWidget(
+                    color: const Color(0xFF66BB6A),
+                    icon: Icons.repeat_rounded,
+                    title: 'New Badge Unlocked',
+                    subtitle: 'The Regular',
+                    isCircleIcon: true,
+                    onViewPressed: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  const TheRegularBadgeScreen(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                                var tween = Tween(
+                                  begin: const Offset(0.0, 1.0),
+                                  end: Offset.zero,
+                                ).chain(CurveTween(curve: Curves.easeOutCubic));
+                                return SlideTransition(
+                                  position: animation.drive(tween),
+                                  child: child,
+                                );
+                              },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 15),
+                const Expanded(
+                  child: SizedBox(),
+                ), // placeholder to keep layout balanced
+              ],
+            ),
             const SizedBox(height: 25),
 
             // --- Top Players Section ---
-            const Text(
+            Text(
               'Top Players',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black,
+              ),
+            ),
+            const SizedBox(height: 15),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedSport,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: isDark
+                          ? Theme.of(context).cardColor
+                          : Colors.white,
+                    ),
+                    dropdownColor: isDark
+                        ? Theme.of(context).cardColor
+                        : Colors.white,
+                    items: _sports
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s,
+                            child: Text(
+                              s.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark ? Colors.white : Colors.black,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      setState(() {
+                        _selectedSport = v!;
+                        _userStatsFuture = _fetchUserStats();
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedCourt,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: isDark
+                          ? Theme.of(context).cardColor
+                          : Colors.white,
+                    ),
+                    dropdownColor: isDark
+                        ? Theme.of(context).cardColor
+                        : Colors.white,
+                    items: _courts
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c['id'].toString(),
+                            child: Text(
+                              c['name'].toString(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark ? Colors.white : Colors.black,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      setState(() {
+                        _selectedCourt = v!;
+                        _userStatsFuture = _fetchUserStats();
+                      });
+                    },
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 15),
             FutureBuilder<List<dynamic>>(
@@ -354,8 +594,13 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
-                    child: Text("No players found on the leaderboard."),
+                  return Center(
+                    child: Text(
+                      "No players found on the leaderboard.",
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
                   );
                 }
 
@@ -367,7 +612,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   itemBuilder: (context, index) {
                     final player = topPlayers[index];
                     final name =
-                        player['teamName'] ?? player['name'] ?? 'Unknown';
+                        player['user']?['name'] ??
+                        player['teamName'] ??
+                        player['name'] ??
+                        'Unknown';
                     final score = player['points'] ?? player['score'] ?? 0;
                     final status = player['status'] ?? 'hot';
 
@@ -402,14 +650,15 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     String bottomText,
     Color bottomTextColor,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? Theme.of(context).cardColor : Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -420,18 +669,18 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: Colors.blueGrey,
+            style: TextStyle(
+              color: isDark ? Colors.white : Colors.blueGrey,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 10),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w900,
-              color: Color(0xFF1A202C),
+              color: isDark ? Colors.white : const Color(0xFF1A202C),
             ),
           ),
           const SizedBox(height: 5),
@@ -455,93 +704,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 
   // --- Helper Widget: Challenge Cards ---
-  Widget _buildChallengeCard({
-    required Color color,
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    bool isCircleIcon = false,
-    VoidCallback? onViewPressed,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 120,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(20),
-              ),
-            ),
-            child: Center(
-              child: isCircleIcon
-                  ? CircleAvatar(
-                      radius: 35,
-                      backgroundColor: Colors.white,
-                      child: Icon(icon, size: 40, color: Colors.grey),
-                    )
-                  : Icon(icon, size: 70, color: Colors.white),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  subtitle,
-                  style: const TextStyle(color: Colors.blueGrey, fontSize: 12),
-                ),
-                const SizedBox(height: 15),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(
-                        0xFF145348,
-                      ), // Dark green button
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    onPressed: onViewPressed ?? () {},
-                    child: const Text(
-                      'View',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // --- Helper Widget: Player List Items ---
   Widget _buildPlayerCard(int rank, String name, int score, String status) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     IconData trailingIcon;
     Color trailingColor;
 
@@ -559,11 +724,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? Theme.of(context).cardColor : Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -573,7 +738,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
         leading: CircleAvatar(
           radius: 25,
-          backgroundColor: Colors.grey[300],
+          backgroundColor: isDark ? Colors.grey[700] : Colors.grey[300],
           child: const Icon(
             Icons.person,
             color: Colors.white,
@@ -581,7 +746,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         ),
         title: Text(
           '$rank. $name',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: isDark ? Colors.white : Colors.black,
+          ),
         ),
         subtitle: Text(
           '$score Points',
@@ -595,6 +764,169 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         onTap: () {
           // Add interaction when a user is tapped
         },
+      ),
+    );
+  }
+}
+
+class ChallengeCardWidget extends StatefulWidget {
+  final Color color;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool isCircleIcon;
+  final VoidCallback? onViewPressed;
+
+  const ChallengeCardWidget({
+    Key? key,
+    required this.color,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.isCircleIcon = false,
+    this.onViewPressed,
+  }) : super(key: key);
+
+  @override
+  State<ChallengeCardWidget> createState() => _ChallengeCardWidgetState();
+}
+
+class _ChallengeCardWidgetState extends State<ChallengeCardWidget> {
+  final GlobalKey _cardKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return RepaintBoundary(
+      key: _cardKey,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? Theme.of(context).cardColor : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: widget.color,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                  ),
+                  child: Center(
+                    child: widget.isCircleIcon
+                        ? CircleAvatar(
+                            radius: 35,
+                            backgroundColor: Colors.white,
+                            child: Icon(
+                              widget.icon,
+                              size: 40,
+                              color: Colors.grey,
+                            ),
+                          )
+                        : Icon(widget.icon, size: 70, color: Colors.white),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        widget.subtitle,
+                        style: const TextStyle(
+                          color: Colors.blueGrey,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(
+                              0xFF145348,
+                            ), // Dark green button
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          onPressed: widget.onViewPressed ?? () {},
+                          child: const Text(
+                            'View',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                icon: const Icon(Icons.share, color: Colors.white),
+                onPressed: () async {
+                  try {
+                    RenderRepaintBoundary boundary =
+                        _cardKey.currentContext!.findRenderObject()
+                            as RenderRepaintBoundary;
+                    ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+                    ByteData? byteData = await image.toByteData(
+                      format: ui.ImageByteFormat.png,
+                    );
+                    if (byteData != null) {
+                      final buffer = byteData.buffer;
+                      final tempDir = await getTemporaryDirectory();
+                      final file = await File(
+                        '${tempDir.path}/challenge_screenshot.png',
+                      ).create();
+                      await file.writeAsBytes(
+                        buffer.asUint8List(
+                          byteData.offsetInBytes,
+                          byteData.lengthInBytes,
+                        ),
+                      );
+
+                      await Share.shareXFiles(
+                        [XFile(file.path)],
+                        text:
+                            'I just earned the \\\'${widget.subtitle}\\\' badge on CourtConnect! Think you can beat my score?',
+                      );
+                    }
+                  } catch (e) {
+                    debugPrint("Screenshot failed: $e");
+                    Share.share(
+                      'I just earned the \\\'${widget.subtitle}\\\' badge on CourtConnect! Think you can beat my score?',
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
