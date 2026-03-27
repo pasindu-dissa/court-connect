@@ -32,7 +32,7 @@ class ProfileModel {
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
     final data = json['data'] ?? json;
     return ProfileModel(
-      id: data['id'] ?? '',
+      id: (data['id']?.toString() ?? '').trim(),
       name: data['name'] ?? '',
       email: data['email'] ?? '',
       phone: data['phone'] ?? '',

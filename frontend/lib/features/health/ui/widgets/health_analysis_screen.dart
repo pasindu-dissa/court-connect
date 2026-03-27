@@ -238,9 +238,7 @@ class HealthAnalysisScreen extends StatelessWidget {
                   ),
                   elevation: 0,
                 ),
-                onPressed: () {
-                  // TODO: navigate to full history screen
-                },
+                onPressed: () {},
                 child: const Text(
                   'View Full History',
                   style: TextStyle(
@@ -373,7 +371,6 @@ class _HeartRatePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       decoration: BoxDecoration(
@@ -395,11 +392,11 @@ class _HeartRatePanel extends StatelessWidget {
                   gridData: FlGridData(
                     show: true,
                     getDrawingHorizontalLine: (_) => FlLine(
-                      color: Colors.white.withOpacity(0.08),
+                      color: Colors.white.withValues(alpha: 0.08),
                       strokeWidth: 1,
                     ),
                     getDrawingVerticalLine: (_) => FlLine(
-                      color: Colors.white.withOpacity(0.08),
+                      color: Colors.white.withValues(alpha: 0.08),
                       strokeWidth: 1,
                     ),
                   ),
@@ -416,7 +413,7 @@ class _HeartRatePanel extends StatelessWidget {
                       dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: const Color(0xFFEF5350).withOpacity(0.1),
+                        color: const Color(0xFFEF5350).withValues(alpha: 0.1),
                       ),
                     ),
                   ],

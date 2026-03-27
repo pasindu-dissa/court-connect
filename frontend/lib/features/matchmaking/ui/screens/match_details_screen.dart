@@ -65,14 +65,16 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
           actions: [
             TextButton(
               onPressed: _isProcessing ? null : () async {
+                final messenger = ScaffoldMessenger.of(context);
+                final nav = Navigator.of(context);
                 setDialogState(() => _isProcessing = true);
                 bool success = await _matchmakingService.updateMatch(_localMatchData['_id'], {"status": "Completed"});
                 if (mounted) setDialogState(() => _isProcessing = false);
                 
                 if (success && mounted) {
-                  Navigator.pop(ctx); 
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Match Unpublished.")));
-                  Navigator.pop(context, true); 
+                  Navigator.pop(ctx);
+                  messenger.showSnackBar(const SnackBar(content: Text("Match Unpublished.")));
+                  nav.pop(true);
                 }
               }, 
               child: const Text("Unpublish", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold))
@@ -84,7 +86,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
                   onPressed: _isProcessing ? null : () async {
-                    
+                    final messenger = ScaffoldMessenger.of(context);
                     // NEW: Recalculate Fee Logic
                     int oldMax = _localMatchData['maxPlayers'] ?? 1;
                     double oldFee = (_localMatchData['fee'] as num?)?.toDouble() ?? 0.0;
@@ -116,7 +118,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                       widget.matchData['fee'] = newFee;
 
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Match Updated successfully."), backgroundColor: Colors.green));
+                      messenger.showSnackBar(const SnackBar(content: Text("Match Updated successfully."), backgroundColor: Colors.green));
                     }
                   }, 
                   child: const Text("Save")
@@ -180,9 +182,9 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.orange.withOpacity(0.1) : Colors.orange.shade50, 
+                  color: isDark ? Colors.orange.withValues(alpha: 0.1) : Colors.orange.shade50, 
                   borderRadius: BorderRadius.circular(10), 
-                  border: Border.all(color: isDark ? Colors.orange.withOpacity(0.3) : Colors.orange.shade200)
+                  border: Border.all(color: isDark ? Colors.orange.withValues(alpha: 0.3) : Colors.orange.shade200)
                 ),
                 child: Row(
                   children: [
@@ -205,6 +207,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
               onPressed: _isProcessing ? null : () async {
+                final messenger = ScaffoldMessenger.of(context);
                 setDialogState(() => _isProcessing = true);
                 final success = await _matchmakingService.requestJoinMatch(_localMatchData['_id'], currentUser['_id']);
                 if (mounted) setDialogState(() => _isProcessing = false);
@@ -215,10 +218,10 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                     _wasModified = true; // Trigger refresh
                   });
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Request sent to host!"), backgroundColor: Colors.green));
+                  messenger.showSnackBar(const SnackBar(content: Text("Request sent to host!"), backgroundColor: Colors.green));
                 } else if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Failed to request. Match might be full.")));
                   Navigator.pop(ctx);
+                  messenger.showSnackBar(const SnackBar(content: Text("Failed to request. Match might be full.")));
                 }
               },
               child: const Text("Send Request"),
@@ -270,7 +273,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
     // NEW: Wrap the entire Scaffold in a PopScope to catch back-button presses
     return PopScope(
       canPop: false,
-      onPopInvoked: (bool didPop) {
+      onPopInvokedWithResult: (bool didPop, _) {
         if (didPop) return;
         // When popping, send the `_wasModified` flag back to the parent so it knows to refresh!
         Navigator.pop(context, _wasModified);
@@ -303,7 +306,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                             return Image.network(images[index].toString(), fit: BoxFit.cover);
                           },
                         ),
-                        Container(color: Colors.black.withOpacity(0.4)),
+                        Container(color: Colors.black.withValues(alpha: 0.4)),
                         if (images.length > 1)
                           Positioned(
                             bottom: 16, left: 0, right: 0,
@@ -312,7 +315,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                               children: List.generate(images.length, (index) => Container(
                                 margin: const EdgeInsets.symmetric(horizontal: 4),
                                 width: 8, height: 8,
-                                decoration: BoxDecoration(color: Colors.white.withOpacity(0.8), shape: BoxShape.circle),
+                                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.8), shape: BoxShape.circle),
                               )),
                             ),
                           )
@@ -351,7 +354,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DirectionsMapScreen(court: _localMatchData))),
                             icon: Container(
                               padding: const EdgeInsets.all(8), 
-                              decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), shape: BoxShape.circle), 
+                              decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), shape: BoxShape.circle), 
                               child: const Icon(Icons.directions, color: Colors.blue, size: 20)
                             ),
                           )
@@ -382,9 +385,9 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                               margin: const EdgeInsets.only(bottom: 10),
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: isDark ? Colors.orange.withOpacity(0.1) : Colors.orange.shade50, 
+                                color: isDark ? Colors.orange.withValues(alpha: 0.1) : Colors.orange.shade50, 
                                 borderRadius: BorderRadius.circular(12), 
-                                border: Border.all(color: isDark ? Colors.orange.withOpacity(0.3) : Colors.orange.shade200)
+                                border: Border.all(color: isDark ? Colors.orange.withValues(alpha: 0.3) : Colors.orange.shade200)
                               ),
                               child: Row(
                                 children: [
@@ -482,7 +485,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor, 
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.05), blurRadius: 20, offset: const Offset(0, -5))]
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05), blurRadius: 20, offset: const Offset(0, -5))]
                 ),
                 child: isHost
                   ? ElevatedButton.icon(
@@ -518,7 +521,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
       children: [
         Container(
           padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(color: (color ?? Colors.grey).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+          decoration: BoxDecoration(color: (color ?? Colors.grey).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
           child: Icon(icon, color: color ?? (isDark ? Colors.grey.shade400 : Colors.grey.shade700), size: 20),
         ),
         const SizedBox(width: 16),
@@ -540,7 +543,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
   Widget _buildBadge(String text, Color color, bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(20), border: Border.all(color: color.withOpacity(isDark ? 0.4 : 0.3))),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20), border: Border.all(color: color.withValues(alpha: isDark ? 0.4 : 0.3))),
       child: Text(text, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12)),
     );
   }

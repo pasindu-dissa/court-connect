@@ -163,7 +163,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
+                    color: AppColors.primary.withValues(alpha: 0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -174,7 +174,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.smart_toy_rounded, color: Colors.white, size: 28),
@@ -191,7 +191,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                         const SizedBox(height: 4),
                         Text(
                           'Ask me anything about sports, venues, or rules!',
-                          style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 13, fontWeight: FontWeight.w500),
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 13, fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
@@ -224,7 +224,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
                     blurRadius: 20,
                     offset: const Offset(0, -5),
                   ),
@@ -255,7 +255,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
                         itemCount: _preparedQuestions.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 10),
+                        separatorBuilder: (_, _) => const SizedBox(width: 10),
                         itemBuilder: (context, index) {
                           final quickReply = _preparedQuestions[index];
                           return GestureDetector(
@@ -264,10 +264,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                               padding: const EdgeInsets.symmetric(horizontal: 16),
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+                                color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: AppColors.primary.withOpacity(isDark ? 0.4 : 0.2),
+                                  color: AppColors.primary.withValues(alpha: isDark ? 0.4 : 0.2),
                                   width: 1.5,
                                 ),
                               ),
@@ -305,7 +305,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                               hintText: _isSending ? 'Thinking...' : 'Message Court Coach...',
                               hintStyle: TextStyle(color: isDark ? Colors.grey.shade500 : Colors.grey.shade400),
                               filled: true,
-                              fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
+                              fillColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(24),
                                 borderSide: BorderSide.none,
@@ -335,7 +335,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                               borderRadius: BorderRadius.circular(18),
                               boxShadow: _isSending ? [] : [
                                 BoxShadow(
-                                  color: AppColors.primary.withOpacity(0.3),
+                                  color: AppColors.primary.withValues(alpha: 0.3),
                                   blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 ),
@@ -392,7 +392,7 @@ class _ChatBubble extends StatelessWidget {
     final bubbleColor = message.isUser
         ? AppColors.primary
         : message.isError
-            ? AppColors.error.withOpacity(isDark ? 0.2 : 0.1)
+            ? AppColors.error.withValues(alpha: isDark ? 0.2 : 0.1)
             : (isDark ? theme.cardColor : Colors.white);
             
     final textColor = message.isUser 
@@ -400,7 +400,7 @@ class _ChatBubble extends StatelessWidget {
         : (isDark ? Colors.white : Colors.black87);
         
     final labelColor = message.isUser
-        ? Colors.white.withOpacity(0.8)
+        ? Colors.white.withValues(alpha: 0.8)
         : message.isError
             ? AppColors.error
             : AppColors.primary;
@@ -423,7 +423,7 @@ class _ChatBubble extends StatelessWidget {
             boxShadow: [
               if (!message.isUser && !isDark)
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -527,7 +527,7 @@ class _TypingIndicatorBubbleState extends State<_TypingIndicatorBubble> with Sin
           boxShadow: [
             if (!isDark)
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: Colors.black.withValues(alpha: 0.04),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -551,7 +551,7 @@ class _TypingIndicatorBubbleState extends State<_TypingIndicatorBubble> with Sin
                       height: 6,
                       margin: EdgeInsets.only(right: index == 2 ? 0 : 4),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(opacity),
+                        color: AppColors.primary.withValues(alpha: opacity),
                         shape: BoxShape.circle,
                       ),
                     );

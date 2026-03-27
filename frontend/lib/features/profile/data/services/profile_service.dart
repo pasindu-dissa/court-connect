@@ -96,11 +96,12 @@ class ProfileService {
   // GET /api/bookings/user/:userId
   Future<List<BookingModel>> fetchUserBookings(String userId) async {
     try {
+      final cleanId = userId.trim();
+      if (cleanId.isEmpty) throw Exception('User ID is empty');
+
       final headers = await _authHeaders();
-      final response = await http.get(
-        Uri.parse('${ApiConstants.baseUrl}/bookings/user/$userId'),
-        headers: headers,
-      );
+      final uri = Uri.parse('${ApiConstants.baseUrl}/bookings/user/$cleanId');
+      final response = await http.get(uri, headers: headers);
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
         final List<dynamic> data = json['data'];

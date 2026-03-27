@@ -397,7 +397,13 @@ exports.awardPoint = async (req, res) => {
     //  return res.status(403).json({ success: false, message: 'Not authorized' });
     // }
 
-    let entry = await LeaderboardEntry.findOne({ user: userId, courtId, sportType });
+    // Convert courtId string to ObjectId since LeaderboardEntry stores it as ObjectId
+    let queryCourtId = courtId;
+    if (mongoose.Types.ObjectId.isValid(courtId)) {
+      queryCourtId = new mongoose.Types.ObjectId(courtId);
+    }
+
+    let entry = await LeaderboardEntry.findOne({ user: userId, courtId: queryCourtId, sportType });
 
     if (!entry) {
       entry = new LeaderboardEntry({

@@ -35,8 +35,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoadingCourts = true;
 
   final List<String> _bannerImages = [
-    'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800',
-    'https://images.unsplash.com/photo-1626224583764-847890e058f5?q=80&w=800',
+    'https://images.unsplash.com/photo-1760174012435-630a17a434ed?q=80&w=800',
+    'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?q=80&w=800',
     'https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=800',
   ];
 
@@ -145,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
+                                    color: Colors.black.withValues(alpha: 0.1),
                                     blurRadius: 8,
                                   ),
                                 ],
@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: CircleAvatar(
                                 radius: 26,
                                 backgroundImage: NetworkImage(userImage),
-                                onBackgroundImageError: (_, __) =>
+                                onBackgroundImageError: (_, _) =>
                                     const Icon(Icons.person),
                               ),
                             ),
@@ -200,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 borderRadius: BorderRadius.circular(14),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
+                                    color: Colors.black.withValues(alpha: 0.05),
                                     blurRadius: 10,
                                   ),
                                 ],
@@ -227,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 borderRadius: BorderRadius.circular(14),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
+                                    color: Colors.black.withValues(alpha: 0.05),
                                     blurRadius: 10,
                                   ),
                                 ],
@@ -289,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               end: Alignment.bottomCenter,
                               colors: [
                                 Colors.transparent,
-                                Colors.black.withOpacity(0.7),
+                                Colors.black.withValues(alpha: 0.7),
                               ],
                             ),
                           ),
@@ -511,14 +511,14 @@ class _AnimatedChatbotButtonState extends State<_AnimatedChatbotButton> with Sin
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(0.5),
+                color: AppColors.primary.withValues(alpha: 0.5),
                 blurRadius: 20,
                 spreadRadius: 2,
                 offset: const Offset(0, 8),
               ),
             ],
             border: Border.all(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               width: 1.5,
             ),
           ),
@@ -575,15 +575,15 @@ class _SportCard extends StatelessWidget {
       onTap: onTap, 
       child: Container(
         decoration: BoxDecoration(
-          color: isDark ? color.withOpacity(0.1) : Colors.white,
+          color: isDark ? color.withValues(alpha: 0.1) : Colors.white,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: color.withOpacity(isDark ? 0.3 : 0.15),
+            color: color.withValues(alpha: isDark ? 0.3 : 0.15),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(isDark ? 0.1 : 0.12),
+              color: color.withValues(alpha: isDark ? 0.1 : 0.12),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -599,7 +599,7 @@ class _SportCard extends StatelessWidget {
                 child: Icon(
                   icon,
                   size: 85,
-                  color: color.withOpacity(isDark ? 0.15 : 0.08),
+                  color: color.withValues(alpha: isDark ? 0.15 : 0.08),
                 ),
               ),
               Padding(
@@ -611,7 +611,7 @@ class _SportCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.15),
+                        color: color.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Icon(icon, color: color, size: 24),
@@ -659,7 +659,7 @@ class _CreativeCourtCard extends StatelessWidget {
           image: DecorationImage(image: NetworkImage(image), fit: BoxFit.cover),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -673,7 +673,7 @@ class _CreativeCourtCard extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.85)],
+                  colors: [Colors.transparent, Colors.black.withValues(alpha: 0.85)],
                   stops: const [0.5, 1.0],
                 ),
               ),
@@ -684,7 +684,7 @@ class _CreativeCourtCard extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: const Row(
@@ -728,7 +728,7 @@ class _CreativeCourtCard extends StatelessWidget {
                         Text(
                           'LKR $price / hour',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                             fontSize: 14,
                           ),
                         ),
