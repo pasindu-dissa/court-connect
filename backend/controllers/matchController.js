@@ -5,9 +5,16 @@ const { pushNotificationToUser } = require('../services/notificationService');
 
 const createMatch = async (req, res) => {
   try {
-    const { hostId } = req.body;
+    const { hostId, sport, date, time, maxPlayers, location, description, courtId } = req.body;
     const matchData = {
-      ...req.body,
+      hostId,
+      sport,
+      date,
+      time,
+      maxPlayers,
+      location,
+      description,
+      courtId,
       joinedPlayers: [hostId],
       currentPlayers: 1
     };

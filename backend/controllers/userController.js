@@ -170,8 +170,11 @@ const searchUsers = async (req, res) => {
     if (!q) {
       return res.json([]);
     }
+    // q is already escaped by the validateSearchUser sanitizer in validate.js,
+    // but we defensively escape again here to keep the controller safe standalone.
+    const safeQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const users = await User.find({
-      name: { $regex: q, $options: 'i' }
+      name: { $regex: safeQ, $options: 'i' }
     }).select('name email profileImage _id');
     
     res.json(users);
