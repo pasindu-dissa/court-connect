@@ -1,6 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const path = require('path');
 
 const connectDB = require('./config/db');
 const sanitize = require('./middleware/sanitize');
@@ -23,7 +24,9 @@ app.use('/api/courts', require('./routes/courtRoutes'));
 app.use('/api/bookings', require('./routes/bookingRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
 app.use('/api/leaderboard', require('./routes/leaderboardRoutes'));
+app.use('/api/admin', require('./routes/superAdminRoutes'));
 
+app.use('/superadmin', express.static(path.join(__dirname, 'public/super-admin')));
 app.get('/', (_req, res) => {
   res.send('CourtConnect API is running...');
 });
