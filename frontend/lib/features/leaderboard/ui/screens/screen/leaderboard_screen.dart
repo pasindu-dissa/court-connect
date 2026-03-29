@@ -16,6 +16,10 @@ import 'ironclad_badge_screen.dart';
 import 'dawn_patrol_badge_screen.dart';
 import 'the_regular_badge_screen.dart';
 
+// --- LEADERBOARD SCREEN ---
+// This screen acts as the primary hub for player gamification.
+// Main features include viewing personal rank/streak, interacting with unlocking badges,
+// and filtering a global leaderboard by sport or specific court.
 class LeaderboardScreen extends StatefulWidget {
   final VoidCallback? onLocationTapped;
 
@@ -49,6 +53,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     _userStatsFuture = _fetchUserStats();
   }
 
+  // FEATURE: Fetch Courts for Filtering
+  // Retrieves the list of courts from the backend to populate the court filter dropdown.
+  // Helps users see the top players specific to a local court.
   Future<void> _fetchCourts() async {
     try {
       final response = await http.get(
@@ -75,6 +82,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     }
   }
 
+  // FEATURE: Fetch Personal User Stats
+  // Authenticates the current Firebase user to securely fetch their specific
+  // rank, score, and active week streak based on the currently selected filters.
   Future<Map<String, dynamic>> _fetchUserStats() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -96,6 +106,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     return {'rank': '-', 'score': 0, 'streak': 0};
   }
 
+  // FEATURE: Fetch Dynamic Leaderboard
+  // Retrieves the global or filtered leaderboard from the backend API.
+  // The results dynamically update when the user changes the sport or court dropdowns.
   Future<List<dynamic>> _fetchLeaderboard() async {
     try {
       final response = await http.get(
@@ -208,6 +221,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     ),
                     const SizedBox(height: 15),
 
+                    // FEATURE: Current Activity Streak
+                    // Summarizes the player's consecutive active weeks. Tapping navigates to
+                    // a detailed `StreakScreen` to view history.
                     // --- Current Streak Card ---
                     GestureDetector(
                       onTap: () {
@@ -316,6 +332,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             ),
             const SizedBox(height: 25),
 
+            // FEATURE: Gamification & Badges Showcase
+            // Displays various interactive challenges (e.g., Featured Challenge, 
+            // The Rival, The Ironclad, Dawn Patrol, The Regular). 
+            // Tapping a card opens a detailed screen for that specific badge.
             // --- Challenges & Badges Section ---
             Text(
               'Challenges & Badges',
@@ -489,6 +509,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             ),
             const SizedBox(height: 25),
 
+            // FEATURE: Top Players Leaderboard List
+            // A dynamic list showing the highest ranked players based on points.
+            // Includes dynamic filter dropdowns to sort by Sport or specific Court.
             // --- Top Players Section ---
             Text(
               'Top Players',
@@ -501,6 +524,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             const SizedBox(height: 15),
             Row(
               children: [
+                // FEATURE: Filter by Sport Dropdown
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: _selectedSport,
@@ -543,6 +567,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
+                // FEATURE: Filter by Court Dropdown
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: _selectedCourt,
@@ -769,6 +794,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 }
 
+// FEATURE: Badge/Challenge Card UI Component
+// A reusable component for rendering gamification badges.
+// Captures a snapshot of the widget dynamically (using RepaintBoundary) 
+// to allow players to natively share their achievements to other apps via share_plus.
 class ChallengeCardWidget extends StatefulWidget {
   final Color color;
   final IconData icon;
@@ -883,6 +912,9 @@ class _ChallengeCardWidgetState extends State<ChallengeCardWidget> {
                 ),
               ],
             ),
+            // FEATURE: Native Social Sharing Integration
+            // Renders the badge to an image buffer and uses the device's native sharing 
+            // sheet to let users flex their accomplishments.
             Positioned(
               top: 8,
               right: 8,
