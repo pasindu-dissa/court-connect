@@ -235,8 +235,19 @@ async function updateTeamStats(groupId, teamName, teamScore, opponentScore, upda
 exports.updateTeamStats = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = { ...req.body };
-    
+    const {
+      matchesPlayed, matchesWon, matchesLost, matchesDraw,
+      points, goalsFor, goalsAgainst
+    } = req.body;
+
+    const updateData = {};
+    if (matchesPlayed !== undefined) updateData.matchesPlayed = matchesPlayed;
+    if (matchesWon     !== undefined) updateData.matchesWon   = matchesWon;
+    if (matchesLost    !== undefined) updateData.matchesLost  = matchesLost;
+    if (matchesDraw    !== undefined) updateData.matchesDraw  = matchesDraw;
+    if (points         !== undefined) updateData.points       = points;
+    if (goalsFor       !== undefined) updateData.goalsFor     = goalsFor;
+    if (goalsAgainst   !== undefined) updateData.goalsAgainst = goalsAgainst;
     updateData.updatedBy = req.user.id;
 
     const leaderboard = await Leaderboard.findByIdAndUpdate(

@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-// <-- NEW: Update the imports to include the 3 new functions
 const { 
   addCourt, 
   getOwnerCourts, 
@@ -9,13 +8,13 @@ const {
   getDashboardStats,
   getOwnerBookings,
   getOwnerRevenue
-} = require('../controllers/courtController'); 
+} = require('../controllers/courtController');
+const { validateAddCourt, handleValidationErrors } = require('../middleware/validate');
 
-router.post('/', addCourt);
+router.post('/', validateAddCourt, handleValidationErrors, addCourt);
 router.get('/', getAllCourts);
 router.get('/owner/:ownerId', getOwnerCourts);
 
-// <-- NEW: Add the 3 new routes below
 router.get('/owner/:ownerId/stats', getDashboardStats);
 router.get('/owner/:ownerId/bookings', getOwnerBookings);
 router.get('/owner/:ownerId/revenue', getOwnerRevenue);
