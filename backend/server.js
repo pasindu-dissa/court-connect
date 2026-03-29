@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 
 const connectDB = require('./config/db');
+const sanitize = require('./middleware/sanitize');
 
 dotenv.config();
 connectDB();
@@ -11,6 +12,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(sanitize); // Global input sanitization (trim, XSS, NoSQL injection guard)
 
 app.use('/api/users/profile', require('./routes/profileRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));

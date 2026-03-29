@@ -9,14 +9,20 @@ const {
   markNotificationRead,
   searchUsers
 } = require('../controllers/userController');
-const { protect } = require('../middleware/authMiddleware'); // Your auth middleware
+const { protect } = require('../middleware/authMiddleware');
+const {
+  validateRegisterUser,
+  validateUpdateFcmToken,
+  validateSearchUser,
+  handleValidationErrors
+} = require('../middleware/validate');
 
 // Define the endpoints
-router.post('/', registerUser); // POST http://localhost:5000/api/users (Create User)
-router.put('/profile', updateUserProfile); // PUT http://localhost:5000/api/users/profile (Update Skills)
-router.get('/search', protect, searchUsers);
+router.post('/', validateRegisterUser, handleValidationErrors, registerUser);
+router.put('/profile', updateUserProfile);
+router.get('/search', protect, validateSearchUser, handleValidationErrors, searchUsers);
 router.get('/me', getUserByEmail);
-router.put('/update-fcm-token', protect, updateFcmToken);
+router.put('/update-fcm-token', protect, validateUpdateFcmToken, handleValidationErrors, updateFcmToken);
 router.get('/notifications', protect, getNotifications);
 router.put('/notifications/:id/read', protect, markNotificationRead);
 

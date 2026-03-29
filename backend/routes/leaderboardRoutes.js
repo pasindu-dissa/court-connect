@@ -15,6 +15,13 @@ const {
 } = require('../controllers/leaderboardController');
 
 const { protect } = require('../middleware/authMiddleware');
+const {
+  validateInitLeaderboard,
+  validateRecordMatchResult,
+  validateAwardPoint,
+  validateUpdateTeamStats,
+  handleValidationErrors
+} = require('../middleware/validate');
 
 // Public routes
 router.get('/', getAllLeaderboards);
@@ -27,11 +34,10 @@ router.get('/stats/:groupId', getGroupStats);
 router.get('/my-stats', protect, getUserStats);
 
 // Private routes (Court Manager only)
-// Note: Add role check middleware if you have it in your project
-router.post('/initialize', protect, initializeLeaderboard);
-router.post('/match-result', protect, recordMatchResult);
-router.post('/award-point', protect, awardPoint);
-router.put('/:id', protect, updateTeamStats);
+router.post('/initialize', protect, validateInitLeaderboard, handleValidationErrors, initializeLeaderboard);
+router.post('/match-result', protect, validateRecordMatchResult, handleValidationErrors, recordMatchResult);
+router.post('/award-point', protect, validateAwardPoint, handleValidationErrors, awardPoint);
+router.put('/:id', protect, validateUpdateTeamStats, handleValidationErrors, updateTeamStats);
 router.delete('/:id', protect, deleteTeam);
 
 module.exports = router;
