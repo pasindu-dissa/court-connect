@@ -27,7 +27,7 @@ function sanitizeStrings(obj) {
       // 1. Trim whitespace
       let clean = val.trim();
       // 3. Basic XSS guard — encode angle brackets
-      clean = clean.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      clean = clean.replace(/</g, '&lt;').replace(/>/g, '&gt; ');
       obj[key] = clean;
     } else if (Array.isArray(val)) {
       val.forEach((item, i) => {
